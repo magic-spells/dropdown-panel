@@ -1,0 +1,77 @@
+dropdown-component {
+	position: relative;
+	display: inline-block;
+
+	&:focus {
+		background: green;
+	}
+}
+
+dropdown-component:hover::before,
+dropdown-trigger[aria-expanded="true"]::before {
+	content: "";
+	background: transparent;
+	position: absolute;
+	left: 0px;
+	top: 80%;
+	width: 110%;
+	height: 30px;
+	transform-origin: top center;
+	transform: perspective(50px) rotateX(50deg);
+	z-index: 10;
+}
+
+dropdown-component:hover dropdown-panel,
+dropdown-panel[aria-hidden="false"] {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+	filter: blur(0px);
+	pointer-events: all;
+	visibility: visible;
+}
+
+dropdown-trigger {
+	display: inline-flex;
+	align-items: center;
+	cursor: pointer;
+	user-select: none;
+}
+
+dropdown-panel {
+	position: absolute;
+	top: 100%;
+	left: 0px;
+	z-index: 20;
+	min-width: 180px;
+	background-color: var(--panel-bg-color, #ffffff);
+	box-shadow: var(--panel-shadow, 0 2px 8px rgba(0, 0, 0, 0.15));
+	border-radius: var(--panel-border-radius, 4px);
+	padding: var(--panel-padding, 0.5rem 0);
+	margin-top: var(--panel-margin-top, 0.25rem);
+	opacity: 0;
+	filter: blur(4px);
+	transform: translateY(5px) scale(0.98);
+	pointer-events: none;
+	will-change: opacity, transform, filter;
+	transition:
+		opacity var(--transition-duration, 200ms) var(--transition-timing, ease-out),
+		transform var(--transition-duration, 200ms)
+			var(--transition-timing, ease-out);
+	pointer-events: none;
+}
+
+// Dropdown menu items styling
+.dropdown-item {
+	display: block;
+	padding: var(--item-padding, 0.5rem 1rem);
+	color: var(--item-color, inherit);
+	text-decoration: none;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+
+	&:hover,
+	&:focus {
+		background-color: var(--item-hover-bg, #f8f9fa);
+	}
+}
