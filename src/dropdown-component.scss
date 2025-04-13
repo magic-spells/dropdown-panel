@@ -8,8 +8,8 @@ dropdown-component {
 }
 
 dropdown-component:hover::before,
-dropdown-trigger[aria-expanded="true"]::before {
-	content: "";
+dropdown-trigger[aria-expanded='true']::before {
+	content: '';
 	background: transparent;
 	position: absolute;
 	left: 0px;
@@ -22,7 +22,7 @@ dropdown-trigger[aria-expanded="true"]::before {
 }
 
 dropdown-component:hover dropdown-panel,
-dropdown-panel[aria-hidden="false"] {
+dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
 	transform: translateY(0) scale(1);
 	pointer-events: auto;
@@ -55,10 +55,12 @@ dropdown-panel {
 	pointer-events: none;
 	will-change: opacity, transform, filter;
 	transition:
-		opacity var(--transition-duration, 200ms) var(--transition-timing, ease-out),
+		opacity var(--transition-duration, 200ms)
+			var(--transition-timing, ease-out),
 		transform var(--transition-duration, 200ms)
 			var(--transition-timing, ease-out);
 	pointer-events: none;
+	// visibility: hidden;
 }
 
 // Dropdown menu items styling

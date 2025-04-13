@@ -13,16 +13,16 @@ class DropdownComponent extends HTMLElement {
     const _ = this;
 
     // make component focusable for keyboard navigation
-    _.setAttribute("tabindex", "-1");
+    _.setAttribute('tabindex', '-1');
 
     // get trigger and panel elements
-    _.trigger = _.querySelector("dropdown-trigger");
-    _.panel = _.querySelector("dropdown-panel");
+    _.trigger = _.querySelector('dropdown-trigger');
+    _.panel = _.querySelector('dropdown-panel');
 
     // validate existence
     if (!_.trigger || !_.panel) {
       console.warn(
-        "dropdown-component requires <dropdown-trigger> and <dropdown-panel>",
+        'dropdown-component requires <dropdown-trigger> and <dropdown-panel>'
       );
       return;
     }
@@ -37,67 +37,69 @@ class DropdownComponent extends HTMLElement {
     }
 
     // initialize aria attributes
-    _.trigger.setAttribute("aria-controls", panelId);
-    _.trigger.setAttribute("aria-expanded", "false");
-    _.panel.setAttribute("aria-hidden", "true");
-    _.panel.setAttribute("role", "menu");
-    _.panel.setAttribute("aria-labelledby", _.trigger.id);
-
-    // helper methods
-    _.open = () => {
-      _.panel.setAttribute("aria-hidden", "false");
-      _.panel.removeAttribute("inert");
-      _.trigger.setAttribute("aria-expanded", "true");
-    };
-
-    _.close = () => {
-      _.panel.setAttribute("aria-hidden", "true");
-      _.panel.setAttribute("inert", "");
-      _.trigger.setAttribute("aria-expanded", "false");
-    };
-
-    _.toggle = () => {
-      if (_.panel.getAttribute("aria-hidden") === "true") {
-        _.open();
-      } else {
-        _.close();
-      }
-    };
+    _.trigger.setAttribute('aria-controls', panelId);
+    _.trigger.setAttribute('aria-expanded', 'false');
+    _.panel.setAttribute('aria-hidden', 'true');
+    _.panel.setAttribute('role', 'menu');
+    _.panel.setAttribute('aria-labelledby', _.trigger.id);
 
     // initial state
-    _.close();
+    _.hide();
 
     // mouse enter and leave events on main dropdown-component element
-    _.addEventListener("mouseenter", () => _.open());
-    _.addEventListener("mouseleave", () => _.close());
+    _.addEventListener('mouseenter', () => _.show());
+    _.addEventListener('mouseleave', () => _.hide());
 
-    // open or close with enter
-    _.trigger.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
+    // show or hide with enter
+    _.trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         _.toggle();
       }
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         event.preventDefault();
-        _.close();
+        _.hide();
         _.trigger.focus();
       }
     });
 
-    // close panel when escape
-    _.panel.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
+    // hide panel when escape
+    _.panel.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
         event.preventDefault();
-        _.close();
+        _.hide();
         _.trigger.focus();
       }
     });
   }
+
+  toggle() {
+    const _ = this;
+    if (_.panel.getAttribute('aria-hidden') === 'true') {
+      _.show();
+    } else {
+      _.hide();
+    }
+  }
+
+  show() {
+    const _ = this;
+    _.panel.setAttribute('aria-hidden', 'false');
+    _.panel.removeAttribute('inert');
+    _.trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  hide() {
+    const _ = this;
+    _.panel.setAttribute('aria-hidden', 'true');
+    _.panel.setAttribute('inert', '');
+    _.trigger.setAttribute('aria-expanded', 'false');
+  }
 }
 
 // define the element
-if (!customElements.get("dropdown-component")) {
-  customElements.define("dropdown-component", DropdownComponent);
+if (!customElements.get('dropdown-component')) {
+  customElements.define('dropdown-component', DropdownComponent);
 }
 
 /**

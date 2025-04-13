@@ -2,6 +2,8 @@
 
 A lightweight, accessible dropdown panel web component designed for modern web applications.
 
+🔍 **[Live Demo](https://magic-spells.github.io/dropdown-panel/demo/)** - See it in action!
+
 ## Features
 
 - 🪶 Lightweight and dependency-free
@@ -9,7 +11,6 @@ A lightweight, accessible dropdown panel web component designed for modern web a
 - ⌨️ Keyboard accessible
 - ♿ WAI-ARIA compliant
 - 📱 Mobile-friendly
-- 🖱️ Hover or click activation
 
 ## Installation
 
@@ -56,15 +57,15 @@ The component uses CSS custom properties (variables) for easy customization:
   --panel-border-radius: 4px;
   --panel-padding: 0.5rem 0;
   --panel-margin-top: 0.25rem;
-  
+
   /* Item styling */
   --item-padding: 0.5rem 1rem;
   --item-color: inherit;
   --item-hover-bg: #f0f5ff;
-  
+
   /* Divider styling */
   --divider-color: #e9ecef;
-  
+
   /* Animation */
   --transition-duration: 0.2s;
   --transition-timing: ease;
@@ -85,11 +86,11 @@ The component uses CSS custom properties (variables) for easy customization:
 // Get reference to the component
 const dropdown = document.querySelector('dropdown-component');
 
-// Open the dropdown
-dropdown.open();
+// Show the dropdown
+dropdown.show();
 
-// Close the dropdown
-dropdown.close();
+// Hide the dropdown
+dropdown.hide();
 ```
 
 ### Events
