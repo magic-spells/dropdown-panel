@@ -238,4 +238,3 @@ if (!customElements.get('dropdown-menu')) {
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };
-//# sourceMappingURL=dropdown-panel.esm.js.map
