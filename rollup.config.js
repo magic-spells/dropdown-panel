@@ -32,12 +32,7 @@ export default [
       }),
       copy({
         targets: [
-          { src: "src/styles/*", dest: "dist/scss" },
-          {
-            src: "src/index.scss",
-            dest: "dist",
-            rename: "dropdown-select.scss",
-          },
+          { src: "src/dropdown-component.scss", dest: "dist", rename: "dropdown-panel.scss" }
         ],
       }),
       !production &&
@@ -71,7 +66,7 @@ export default [
     output: {
       file: `dist/${name}.js`,
       format: "umd",
-      name: "DropdownSelect",
+      name: "DropdownPanel",
       sourcemap: !production,
     },
     plugins: [
@@ -88,7 +83,7 @@ export default [
     output: {
       file: `dist/${name}.min.js`,
       format: "umd",
-      name: "DropdownSelect",
+      name: "DropdownPanel",
       sourcemap: !production,
     },
     plugins: [
@@ -106,11 +101,17 @@ export default [
       copy({
         targets: [
           {
-            src: "dist/dropdown-select.min.js",
+            src: "dist/dropdown-panel.esm.js",
             dest: "demo",
-            rename: "dropdown-select.js",
           },
-          { src: "dist/dropdown-select.css", dest: "demo" },
+          { 
+            src: "dist/dropdown-panel.esm.js.map", 
+            dest: "demo" 
+          },
+          { 
+            src: "dist/dropdown-panel.min.css", 
+            dest: "demo" 
+          }
         ],
         hook: "writeBundle", // Run this after all output files are written
       }),
