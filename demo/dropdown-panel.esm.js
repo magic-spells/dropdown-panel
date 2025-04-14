@@ -15,16 +15,27 @@ class DropdownComponent extends HTMLElement {
     // make component focusable for keyboard navigation
     _.setAttribute('tabindex', '-1');
 
-    // get trigger and panel elements
-    _.trigger = _.querySelector('dropdown-trigger');
-    _.panel = _.querySelector('dropdown-panel');
+    // get trigger element - use > to select only direct children
+    _.trigger = _.querySelector(':scope > dropdown-trigger');
+
+    // get content element (either panel or menu) - use > to select only direct children
+    _.panel =
+      _.querySelector(':scope > dropdown-panel') ||
+      _.querySelector(':scope > dropdown-menu');
 
     // validate existence
     if (!_.trigger || !_.panel) {
       console.warn(
-        'dropdown-component requires <dropdown-trigger> and <dropdown-panel>'
+        'dropdown-component requires <dropdown-trigger> and either <dropdown-panel> or <dropdown-menu> as direct children'
       );
       return;
+    }
+
+    // if it's a dropdown-panel, set position relative on the dropdown component
+    if (_.panel.tagName.toLowerCase() === 'dropdown-panel') {
+      _.style.position = 'relative';
+    } else {
+      _.style.position = 'static';
     }
 
     // assign unique id to panel if needed
@@ -169,6 +180,40 @@ class DropdownPanel extends HTMLElement {
 }
 
 /**
+ * dropdown menu component
+ * container for mega menu style dropdown content
+ * @class DropdownMenu
+ * @extends HTMLElement
+ */
+class DropdownMenu extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  /**
+   * when element is connected to the dom
+   */
+  connectedCallback() {
+    const _ = this;
+
+    // ensure aria-hidden is set initially
+    if (!_.hasAttribute('aria-hidden')) {
+      _.setAttribute('aria-hidden', 'true');
+    }
+
+    // ensure role is menubar for mega menu
+    if (!_.hasAttribute('role')) {
+      _.setAttribute('role', 'menubar');
+    }
+  }
+}
+
+// define the element
+if (!customElements.get('dropdown-menu')) {
+  customElements.define('dropdown-menu', DropdownMenu);
+}
+
+/**
  * @file Main entry point for dropdown-panel web component
  * @author Cory Schulz
  * @version 0.1.0
@@ -176,16 +221,20 @@ class DropdownPanel extends HTMLElement {
 
 
 // define custom elements if not already defined
-if (!customElements.get("dropdown-component")) {
-  customElements.define("dropdown-component", DropdownComponent);
+if (!customElements.get('dropdown-component')) {
+  customElements.define('dropdown-component', DropdownComponent);
 }
 
-if (!customElements.get("dropdown-trigger")) {
-  customElements.define("dropdown-trigger", DropdownTrigger);
+if (!customElements.get('dropdown-trigger')) {
+  customElements.define('dropdown-trigger', DropdownTrigger);
 }
 
-if (!customElements.get("dropdown-panel")) {
-  customElements.define("dropdown-panel", DropdownPanel);
+if (!customElements.get('dropdown-panel')) {
+  customElements.define('dropdown-panel', DropdownPanel);
+}
+
+if (!customElements.get('dropdown-menu')) {
+  customElements.define('dropdown-menu', DropdownMenu);
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };

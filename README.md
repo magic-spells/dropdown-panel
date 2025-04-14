@@ -37,13 +37,51 @@ Then use it in your HTML:
 <dropdown-component>
   <dropdown-trigger>Menu</dropdown-trigger>
   <dropdown-panel>
-    <a href="#" class="dropdown-item">Option 1</a>
-    <a href="#" class="dropdown-item">Option 2</a>
+    <a href="#" class="dropdown-item" role="menuitem">Option 1</a>
+    <a href="#" class="dropdown-item" role="menuitem">Option 2</a>
     <div class="dropdown-divider"></div>
-    <a href="#" class="dropdown-item">Option 3</a>
+    <a href="#" class="dropdown-item" role="menuitem">Option 3</a>
   </dropdown-panel>
 </dropdown-component>
 ```
+
+For a larger "mega menu" style layout, use `<dropdown-menu>` instead of `<dropdown-panel>`:
+
+```html
+<dropdown-component>
+  <dropdown-trigger>Products</dropdown-trigger>
+  <dropdown-menu>
+    <div>
+      <a href="#" class="dropdown-item" role="menuitem">Software</a>
+      <a href="#" class="dropdown-item" role="menuitem">Hardware</a>
+      <a href="#" class="dropdown-item" role="menuitem">Services</a>
+    </div>
+    <div>
+      <a href="#" class="dropdown-item" role="menuitem">Support</a>
+      <a href="#" class="dropdown-item" role="menuitem">Community</a>
+      <a href="#" class="dropdown-item" role="menuitem">Partners</a>
+    </div>
+  </dropdown-menu>
+</dropdown-component>
+```
+
+## Component Types
+
+This library provides two types of dropdown containers:
+
+### `<dropdown-panel>`
+
+- 🧩 **Popover-style panel**, great for short or simple option lists.
+- Appears as a smaller, compact dropdown.
+- Use when you need a small group of links or actions.
+
+### `<dropdown-menu>`
+
+- 🧩 **Mega menu style**, designed for larger, full-width menus.
+- Supports multiple columns inside the menu for richer layouts.
+- Use when you have multiple categories or larger navigation needs.
+
+Both types are accessible, keyboard-friendly, and customizable!
 
 ## Styling
 
@@ -76,9 +114,10 @@ The component uses CSS custom properties (variables) for easy customization:
 
 ### Components
 
-- `<dropdown-component>`: The main container
-- `<dropdown-trigger>`: The element that toggles the dropdown
-- `<dropdown-panel>`: The panel containing dropdown options
+- `<dropdown-component>`: The main container that coordinates everything
+- `<dropdown-trigger>`: The element that toggles the dropdown open/close
+- `<dropdown-panel>`: A compact popover dropdown for smaller lists
+- `<dropdown-menu>`: A full-width, mega menu–style dropdown for large layouts
 
 ### Methods
 
@@ -110,8 +149,9 @@ dropdown.addEventListener('mouseleave', () => {
 This component follows WAI-ARIA practices for dropdown menus:
 
 - Proper ARIA roles, states, and properties
-- Keyboard navigation (Tab, Space, Enter, Escape, arrow keys)
+- Keyboard navigation (Tab, Space, Enter, Escape)
 - Focus management
+- `role="menuitem"` added for screen readers
 
 ## Browser Support
 

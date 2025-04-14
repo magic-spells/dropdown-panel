@@ -15,16 +15,27 @@ export class DropdownComponent extends HTMLElement {
     // make component focusable for keyboard navigation
     _.setAttribute('tabindex', '-1');
 
-    // get trigger and panel elements
-    _.trigger = _.querySelector('dropdown-trigger');
-    _.panel = _.querySelector('dropdown-panel');
+    // get trigger element - use > to select only direct children
+    _.trigger = _.querySelector(':scope > dropdown-trigger');
+
+    // get content element (either panel or menu) - use > to select only direct children
+    _.panel =
+      _.querySelector(':scope > dropdown-panel') ||
+      _.querySelector(':scope > dropdown-menu');
 
     // validate existence
     if (!_.trigger || !_.panel) {
       console.warn(
-        'dropdown-component requires <dropdown-trigger> and <dropdown-panel>'
+        'dropdown-component requires <dropdown-trigger> and either <dropdown-panel> or <dropdown-menu> as direct children'
       );
       return;
+    }
+
+    // if it's a dropdown-panel, set position relative on the dropdown component
+    if (_.panel.tagName.toLowerCase() === 'dropdown-panel') {
+      _.style.position = 'relative';
+    } else {
+      _.style.position = 'static';
     }
 
     // assign unique id to panel if needed
