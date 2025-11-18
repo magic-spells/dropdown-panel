@@ -1,45 +1,16 @@
-// SCSS Variables - users can override these in their projects
-$dropdown-component-focus-bg: green !default;
-$dropdown-trigger-display: inline-flex !default;
-$dropdown-trigger-align-items: center !default;
-$dropdown-trigger-cursor: pointer !default;
-$dropdown-panel-bg: #ffffff !default;
-$dropdown-panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !default;
-$dropdown-panel-border-radius: 4px !default;
-$dropdown-panel-padding: 0.5rem 0 !default;
-$dropdown-panel-margin-top: -5px !default;
-$dropdown-menu-margin-top: 0px !default;
-$dropdown-panel-min-width: 180px !default;
-$dropdown-panel-z-index: 20 !default;
-$transition-duration: 200ms !default;
-$transition-timing: ease-out !default;
-
-// CSS variables mapping to SCSS variables
-:root {
-	--dp-panel-bg-color: #{$dropdown-panel-bg};
-	--dp-panel-shadow: #{$dropdown-panel-shadow};
-	--dp-panel-border-radius: #{$dropdown-panel-border-radius};
-	--dp-panel-padding: #{$dropdown-panel-padding};
-	--dp-panel-margin-top: #{$dropdown-panel-margin-top};
-	--dp-menu-margin-top: #{$dropdown-menu-margin-top};
-	--dp-transition-duration: #{$transition-duration};
-	--dp-transition-timing: #{$transition-timing};
-	--dp-panel-z-index: #{$dropdown-panel-z-index};
-}
+// Dropdown Panel Web Component - Minimal Functional Styles
+// This file contains ONLY the styles required for functionality.
+// All visual styling (colors, shadows, animations) should be added by the user.
 
 dropdown-component {
 	display: inline-block;
-	&:focus {
-		background: $dropdown-component-focus-bg;
-	}
 }
 
-// hover help that helps bridge the dropdown-component
-// with the dropdown panel
+// Hover bridge - creates invisible area between trigger and panel
+// This prevents the dropdown from closing when mouse moves between them
 dropdown-component:hover > dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']::before {
 	content: '';
-	background: transparent;
 	position: absolute;
 	left: -10px;
 	top: 50%;
@@ -48,71 +19,32 @@ dropdown-trigger[aria-expanded='true']::before {
 	transform-origin: top center;
 	transform: perspective(50px) rotateX(50deg);
 	z-index: 10;
-	// background: orange;
 }
 
 dropdown-trigger {
-	display: #{$dropdown-trigger-display};
-	align-items: #{$dropdown-trigger-align-items};
-	cursor: #{$dropdown-trigger-cursor};
-	user-select: none;
 	position: relative;
+	cursor: pointer;
+	user-select: none;
 }
 
-// Base styles for dropdown-panel (popover style by default)
+// Default panel positioning (popover style)
 dropdown-panel {
 	position: absolute;
 	top: 100%;
-	left: 0px;
-	z-index: var(--dp-panel-z-index, #{$dropdown-panel-z-index});
-	background-color: var(--dp-panel-bg-color, #{$dropdown-panel-bg});
-	box-shadow: var(--dp-panel-shadow, #{$dropdown-panel-shadow});
-	padding: var(--dp-panel-padding, #{$dropdown-panel-padding});
-	min-width: #{$dropdown-panel-min-width};
-
+	left: 0;
 	opacity: 0;
 	pointer-events: none;
-	overflow: hidden;
-	filter: blur(4px);
-	transform: translateY(5px) scale(0.98);
-	border-radius: var(
-		--dp-panel-border-radius,
-		#{$dropdown-panel-border-radius}
-	);
-	margin-top: var(
-		--dp-panel-margin-top,
-		#{$dropdown-panel-margin-top}
-	);
-	will-change: opacity, transform, filter;
-	transition:
-		opacity var(--dp-transition-duration, #{$transition-duration})
-			var(--dp-transition-timing, #{$transition-timing}),
-		transform var(--dp-transition-duration, #{$transition-duration})
-			var(--dp-transition-timing, #{$transition-timing});
 }
 
-// Wide panel styles (full-width mega menu style)
+// Wide panel variant (full-width mega menu style)
 dropdown-panel[wide] {
 	width: 100%;
-	margin-top: var(--dp-menu-margin-top, #{$dropdown-menu-margin-top});
-	filter: none;
-	transform: none;
-	border-radius: 0;
 }
 
-// Visible state styles for dropdown-panel (popover style)
+// Visible states - show panel on hover or when aria-hidden="false"
 dropdown-component:hover > dropdown-panel,
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
-	transform: translateY(0) scale(1);
 	pointer-events: auto;
-	filter: blur(0px);
 	visibility: visible;
-}
-
-// Visible state styles for wide panels (no transform/filter animations)
-dropdown-component:hover > dropdown-panel[wide],
-dropdown-panel[wide][aria-hidden='false'] {
-	transform: none;
-	filter: none;
 }

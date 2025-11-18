@@ -1,79 +1,79 @@
 {
-  "name": "@magic-spells/dropdown-panel",
-  "version": "0.2.2",
-  "description": "Accessible custom dropdown panel web component.",
-  "author": "Cory Schulz",
-  "license": "MIT",
-  "type": "module",
-  "main": "dist/dropdown-panel.cjs.js",
-  "module": "dist/dropdown-panel.esm.js",
-  "unpkg": "dist/dropdown-panel.min.js",
-  "style": "dist/dropdown-panel.min.css",
-  "sass": "dist/dropdown-panel.scss",
-  "exports": {
-    ".": {
-      "import": "./dist/dropdown-panel.esm.js",
-      "require": "./dist/dropdown-panel.cjs.js",
-      "default": "./dist/dropdown-panel.esm.js"
-    },
-    "./css": "./dist/dropdown-panel.css",
-    "./css/min": "./dist/dropdown-panel.min.css",
-    "./scss": "./dist/dropdown-panel.scss",
-    "./scss/*": "./dist/scss/*"
-  },
-  "sideEffects": true,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/magic-spells/dropdown-panel"
-  },
-  "homepage": "https://github.com/magic-spells/dropdown-panel#readme",
-  "bugs": {
-    "url": "https://github.com/magic-spells/dropdown-panel/issues"
-  },
-  "keywords": [
-    "dropdown",
-    "select",
-    "combobox",
-    "listbox",
-    "web-components",
-    "accessibility",
-    "a11y",
-    "keyboard-navigation",
-    "custom-elements",
-    "form-elements"
-  ],
-  "files": [
-    "dist/",
-    "src/"
-  ],
-  "scripts": {
-    "build": "rollup -c",
-    "lint": "eslint src/ rollup.config.js",
-    "format": "prettier --write .",
-    "prepublishOnly": "npm run build",
-    "serve": "rollup -c --watch",
-    "dev": "rollup -c --watch"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
-  "browserslist": [
-    "last 2 versions",
-    "not dead",
-    "not ie <= 11"
-  ],
-  "devDependencies": {
-    "@eslint/js": "^9.38.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "eslint": "^9.38.0",
-    "globals": "^15.15.0",
-    "prettier": "^3.3.3",
-    "rollup": "^3.0.0",
-    "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-serve": "^1.1.1",
-    "sass": "^1.86.3"
-  }
+	"name": "@magic-spells/dropdown-panel",
+	"version": "0.2.2",
+	"description": "Accessible custom dropdown panel web component.",
+	"author": "Cory Schulz",
+	"license": "MIT",
+	"type": "module",
+	"main": "dist/dropdown-panel.cjs.js",
+	"module": "dist/dropdown-panel.esm.js",
+	"unpkg": "dist/dropdown-panel.min.js",
+	"style": "dist/dropdown-panel.min.css",
+	"sass": "dist/dropdown-panel.scss",
+	"exports": {
+		".": {
+			"import": "./dist/dropdown-panel.esm.js",
+			"require": "./dist/dropdown-panel.cjs.js",
+			"default": "./dist/dropdown-panel.esm.js"
+		},
+		"./css": "./dist/dropdown-panel.css",
+		"./css/min": "./dist/dropdown-panel.min.css",
+		"./scss": "./dist/dropdown-panel.scss",
+		"./scss/*": "./dist/scss/*"
+	},
+	"sideEffects": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/magic-spells/dropdown-panel"
+	},
+	"homepage": "https://github.com/magic-spells/dropdown-panel#readme",
+	"bugs": {
+		"url": "https://github.com/magic-spells/dropdown-panel/issues"
+	},
+	"keywords": [
+		"dropdown",
+		"select",
+		"combobox",
+		"listbox",
+		"web-components",
+		"accessibility",
+		"a11y",
+		"keyboard-navigation",
+		"custom-elements",
+		"form-elements"
+	],
+	"files": [
+		"dist/",
+		"src/"
+	],
+	"scripts": {
+		"build": "rollup -c",
+		"lint": "eslint src/ rollup.config.js",
+		"format": "prettier --write .",
+		"prepublishOnly": "npm run build",
+		"serve": "rollup -c --watch",
+		"dev": "rollup -c --watch"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	},
+	"browserslist": [
+		"last 2 versions",
+		"not dead",
+		"not ie <= 11"
+	],
+	"devDependencies": {
+		"@eslint/js": "^9.38.0",
+		"@rollup/plugin-node-resolve": "^15.2.3",
+		"@rollup/plugin-terser": "^0.4.4",
+		"eslint": "^9.38.0",
+		"globals": "^15.15.0",
+		"prettier": "^3.3.3",
+		"rollup": "^3.0.0",
+		"rollup-plugin-copy": "^3.5.0",
+		"rollup-plugin-postcss": "^4.0.2",
+		"rollup-plugin-serve": "^1.1.1",
+		"sass": "^1.86.3"
+	}
 }

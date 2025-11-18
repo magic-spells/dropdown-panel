@@ -35,13 +35,13 @@ Then use it in your HTML:
 
 ```html
 <dropdown-component>
-  <dropdown-trigger>Menu</dropdown-trigger>
-  <dropdown-panel>
-    <a href="#" class="dropdown-item">Option 1</a>
-    <a href="#" class="dropdown-item">Option 2</a>
-    <div class="dropdown-divider"></div>
-    <a href="#" class="dropdown-item">Option 3</a>
-  </dropdown-panel>
+	<dropdown-trigger>Menu</dropdown-trigger>
+	<dropdown-panel>
+		<a href="#" class="dropdown-item">Option 1</a>
+		<a href="#" class="dropdown-item">Option 2</a>
+		<div class="dropdown-divider"></div>
+		<a href="#" class="dropdown-item">Option 3</a>
+	</dropdown-panel>
 </dropdown-component>
 ```
 
@@ -49,19 +49,19 @@ For a larger "mega menu" style layout, add the `wide` attribute to `<dropdown-pa
 
 ```html
 <dropdown-component>
-  <dropdown-trigger>Products</dropdown-trigger>
-  <dropdown-panel wide>
-    <div>
-      <a href="#" class="dropdown-item">Software</a>
-      <a href="#" class="dropdown-item">Hardware</a>
-      <a href="#" class="dropdown-item">Services</a>
-    </div>
-    <div>
-      <a href="#" class="dropdown-item">Support</a>
-      <a href="#" class="dropdown-item">Community</a>
-      <a href="#" class="dropdown-item">Partners</a>
-    </div>
-  </dropdown-panel>
+	<dropdown-trigger>Products</dropdown-trigger>
+	<dropdown-panel wide>
+		<div>
+			<a href="#" class="dropdown-item">Software</a>
+			<a href="#" class="dropdown-item">Hardware</a>
+			<a href="#" class="dropdown-item">Services</a>
+		</div>
+		<div>
+			<a href="#" class="dropdown-item">Support</a>
+			<a href="#" class="dropdown-item">Community</a>
+			<a href="#" class="dropdown-item">Partners</a>
+		</div>
+	</dropdown-panel>
 </dropdown-component>
 ```
 
@@ -87,30 +87,71 @@ Both styles are accessible, keyboard-friendly, and customizable!
 
 ## Styling
 
-The component uses CSS custom properties (variables) for easy customization:
+**The component includes minimal styling by default.** This makes it easy to integrate into any project, whether you're using CSS, Tailwind, CSS-in-JS, or another approach.
+
+The component includes only essential functional styles:
+
+- Positioning logic (absolute/relative based on `wide` attribute)
+- Show/hide visibility states
+- Hover bridge for better UX
+
+### Example: Custom CSS
 
 ```css
-:root {
-  /* Panel appearance */
-  --panel-bg-color: #ffffff;
-  --panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --panel-border-radius: 4px;
-  --panel-padding: 0.5rem 0;
-  --panel-margin-top: 0.25rem;
+dropdown-panel {
+	background-color: #ffffff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	padding: 0.5rem 0;
+	min-width: 200px;
+	border-radius: 4px;
+	z-index: 1000;
+}
 
-  /* Item styling */
-  --item-padding: 0.5rem 1rem;
-  --item-color: inherit;
-  --item-hover-bg: #f0f5ff;
+/* Add animations for popover panels */
+dropdown-panel:not([wide]) {
+	transform: translateY(5px) scale(0.98);
+	transition: all 200ms ease-out;
+}
 
-  /* Divider styling */
-  --divider-color: #e9ecef;
+dropdown-component:hover > dropdown-panel:not([wide]),
+dropdown-panel:not([wide])[aria-hidden='false'] {
+	transform: translateY(0) scale(1);
+}
 
-  /* Animation */
-  --transition-duration: 0.2s;
-  --transition-timing: ease;
+/* Style dropdown items */
+.dropdown-item {
+	display: block;
+	padding: 0.5rem 1rem;
+	color: #333;
+	text-decoration: none;
+}
+
+.dropdown-item:hover {
+	background-color: #f0f5ff;
 }
 ```
+
+### Example: Tailwind CSS
+
+```html
+<dropdown-component>
+	<dropdown-trigger
+		class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+		Menu
+	</dropdown-trigger>
+	<dropdown-panel
+		class="bg-white rounded-lg shadow-lg p-2 min-w-[200px] z-50">
+		<a href="#" class="block px-4 py-2 hover:bg-gray-100 rounded"
+			>Option 1</a
+		>
+		<a href="#" class="block px-4 py-2 hover:bg-gray-100 rounded"
+			>Option 2</a
+		>
+	</dropdown-panel>
+</dropdown-component>
+```
+
+See the [demo/index.html](demo/index.html) file for complete styling examples.
 
 ## API
 
@@ -141,7 +182,7 @@ The dropdown component is fully compatible with standard event listeners:
 const dropdown = document.querySelector('dropdown-component');
 
 dropdown.addEventListener('mouseleave', () => {
-  // Do something when mouse leaves dropdown
+	// Do something when mouse leaves dropdown
 });
 ```
 

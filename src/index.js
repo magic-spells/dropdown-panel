@@ -17,13 +17,13 @@ export { DropdownComponent, DropdownTrigger, DropdownPanel };
 
 // define custom elements if not already defined
 if (!customElements.get('dropdown-component')) {
-  customElements.define('dropdown-component', DropdownComponent);
+	customElements.define('dropdown-component', DropdownComponent);
 }
 
 if (!customElements.get('dropdown-trigger')) {
-  customElements.define('dropdown-trigger', DropdownTrigger);
+	customElements.define('dropdown-trigger', DropdownTrigger);
 }
 
 if (!customElements.get('dropdown-panel')) {
-  customElements.define('dropdown-panel', DropdownPanel);
+	customElements.define('dropdown-panel', DropdownPanel);
 }

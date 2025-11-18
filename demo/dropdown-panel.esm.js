@@ -5,109 +5,109 @@
  * @extends HTMLElement
  */
 class DropdownComponent extends HTMLElement {
-  constructor() {
-    super();
-  }
+	constructor() {
+		super();
+	}
 
-  connectedCallback() {
-    const _ = this;
+	connectedCallback() {
+		const _ = this;
 
-    // make component focusable for keyboard navigation
-    _.setAttribute('tabindex', '-1');
+		// make component focusable for keyboard navigation
+		_.setAttribute('tabindex', '-1');
 
-    // get trigger element - use > to select only direct children
-    _.trigger = _.querySelector(':scope > dropdown-trigger');
+		// get trigger element - use > to select only direct children
+		_.trigger = _.querySelector(':scope > dropdown-trigger');
 
-    // get panel element - use > to select only direct children
-    _.panel = _.querySelector(':scope > dropdown-panel');
+		// get panel element - use > to select only direct children
+		_.panel = _.querySelector(':scope > dropdown-panel');
 
-    // validate existence
-    if (!_.trigger || !_.panel) {
-      console.warn(
-        'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children'
-      );
-      return;
-    }
+		// validate existence
+		if (!_.trigger || !_.panel) {
+			console.warn(
+				'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children'
+			);
+			return;
+		}
 
-    // check if panel has 'wide' attribute for full-width layout
-    if (_.panel.hasAttribute('wide')) {
-      _.style.position = 'static';
-    } else {
-      _.style.position = 'relative';
-    }
+		// check if panel has 'wide' attribute for full-width layout
+		if (_.panel.hasAttribute('wide')) {
+			_.style.position = 'static';
+		} else {
+			_.style.position = 'relative';
+		}
 
-    // assign unique id to panel if needed
-    const panelId = _.panel.id || `dropdown-panel-${Date.now()}`;
-    _.panel.id = panelId;
+		// assign unique id to panel if needed
+		const panelId = _.panel.id || `dropdown-panel-${Date.now()}`;
+		_.panel.id = panelId;
 
-    // assign unique id to trigger if needed (for aria-labelledby)
-    if (!_.trigger.id) {
-      _.trigger.id = `dropdown-trigger-${Date.now()}`;
-    }
+		// assign unique id to trigger if needed (for aria-labelledby)
+		if (!_.trigger.id) {
+			_.trigger.id = `dropdown-trigger-${Date.now()}`;
+		}
 
-    // initialize aria attributes
-    _.trigger.setAttribute('aria-controls', panelId);
-    _.trigger.setAttribute('aria-expanded', 'false');
-    _.panel.setAttribute('aria-hidden', 'true');
-    _.panel.setAttribute('aria-labelledby', _.trigger.id);
+		// initialize aria attributes
+		_.trigger.setAttribute('aria-controls', panelId);
+		_.trigger.setAttribute('aria-expanded', 'false');
+		_.panel.setAttribute('aria-hidden', 'true');
+		_.panel.setAttribute('aria-labelledby', _.trigger.id);
 
-    // initial state
-    _.hide();
+		// initial state
+		_.hide();
 
-    // mouse enter and leave events on main dropdown-component element
-    _.addEventListener('mouseenter', () => _.show());
-    _.addEventListener('mouseleave', () => _.hide());
+		// mouse enter and leave events on main dropdown-component element
+		_.addEventListener('mouseenter', () => _.show());
+		_.addEventListener('mouseleave', () => _.hide());
 
-    // show or hide with enter
-    _.trigger.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        _.toggle();
-      }
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        _.hide();
-        _.trigger.focus();
-      }
-    });
+		// show or hide with enter
+		_.trigger.addEventListener('keydown', (event) => {
+			if (event.key === 'Enter' || event.key === ' ') {
+				event.preventDefault();
+				_.toggle();
+			}
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				_.hide();
+				_.trigger.focus();
+			}
+		});
 
-    // hide panel when escape
-    _.panel.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        _.hide();
-        _.trigger.focus();
-      }
-    });
-  }
+		// hide panel when escape
+		_.panel.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape') {
+				event.preventDefault();
+				_.hide();
+				_.trigger.focus();
+			}
+		});
+	}
 
-  toggle() {
-    const _ = this;
-    if (_.panel.getAttribute('aria-hidden') === 'true') {
-      _.show();
-    } else {
-      _.hide();
-    }
-  }
+	toggle() {
+		const _ = this;
+		if (_.panel.getAttribute('aria-hidden') === 'true') {
+			_.show();
+		} else {
+			_.hide();
+		}
+	}
 
-  show() {
-    const _ = this;
-    _.panel.setAttribute('aria-hidden', 'false');
-    _.panel.removeAttribute('inert');
-    _.trigger.setAttribute('aria-expanded', 'true');
-  }
+	show() {
+		const _ = this;
+		_.panel.setAttribute('aria-hidden', 'false');
+		_.panel.removeAttribute('inert');
+		_.trigger.setAttribute('aria-expanded', 'true');
+	}
 
-  hide() {
-    const _ = this;
-    _.panel.setAttribute('aria-hidden', 'true');
-    _.panel.setAttribute('inert', '');
-    _.trigger.setAttribute('aria-expanded', 'false');
-  }
+	hide() {
+		const _ = this;
+		_.panel.setAttribute('aria-hidden', 'true');
+		_.panel.setAttribute('inert', '');
+		_.trigger.setAttribute('aria-expanded', 'false');
+	}
 }
 
 // define the element
 if (!customElements.get('dropdown-component')) {
-  customElements.define('dropdown-component', DropdownComponent);
+	customElements.define('dropdown-component', DropdownComponent);
 }
 
 /**
@@ -117,34 +117,34 @@ if (!customElements.get('dropdown-component')) {
  * @extends HTMLElement
  */
 class DropdownTrigger extends HTMLElement {
-  constructor() {
-    super();
-  }
+	constructor() {
+		super();
+	}
 
-  /**
-   * when element is connected to the dom
-   */
-  connectedCallback() {
-    const _ = this;
-    
-    // ensure trigger has an ID for ARIA relationships
-    if (!_.id) {
-      _.id = `dropdown-trigger-${Date.now()}`;
-    }
+	/**
+	 * when element is connected to the dom
+	 */
+	connectedCallback() {
+		const _ = this;
 
-    // ensure trigger is focusable
-    if (!_.hasAttribute('tabindex')) {
-      _.setAttribute('tabindex', '0');
-    }
+		// ensure trigger has an ID for ARIA relationships
+		if (!_.id) {
+			_.id = `dropdown-trigger-${Date.now()}`;
+		}
 
-    // set role for accessibility
-    if (!_.hasAttribute('role')) {
-      _.setAttribute('role', 'button');
-    }
+		// ensure trigger is focusable
+		if (!_.hasAttribute('tabindex')) {
+			_.setAttribute('tabindex', '0');
+		}
 
-    // prevent text selection on trigger
-    _.style.userSelect = 'none';
-  }
+		// set role for accessibility
+		if (!_.hasAttribute('role')) {
+			_.setAttribute('role', 'button');
+		}
+
+		// prevent text selection on trigger
+		_.style.userSelect = 'none';
+	}
 }
 
 /**
@@ -154,21 +154,21 @@ class DropdownTrigger extends HTMLElement {
  * @extends HTMLElement
  */
 class DropdownPanel extends HTMLElement {
-  constructor() {
-    super();
-  }
+	constructor() {
+		super();
+	}
 
-  /**
-   * when element is connected to the dom
-   */
-  connectedCallback() {
-    const _ = this;
+	/**
+	 * when element is connected to the dom
+	 */
+	connectedCallback() {
+		const _ = this;
 
-    // ensure aria-hidden is set initially
-    if (!_.hasAttribute('aria-hidden')) {
-      _.setAttribute('aria-hidden', 'true');
-    }
-  }
+		// ensure aria-hidden is set initially
+		if (!_.hasAttribute('aria-hidden')) {
+			_.setAttribute('aria-hidden', 'true');
+		}
+	}
 }
 
 /**
@@ -177,18 +177,17 @@ class DropdownPanel extends HTMLElement {
  * @version 0.1.0
  */
 
-
 // define custom elements if not already defined
 if (!customElements.get('dropdown-component')) {
-  customElements.define('dropdown-component', DropdownComponent);
+	customElements.define('dropdown-component', DropdownComponent);
 }
 
 if (!customElements.get('dropdown-trigger')) {
-  customElements.define('dropdown-trigger', DropdownTrigger);
+	customElements.define('dropdown-trigger', DropdownTrigger);
 }
 
 if (!customElements.get('dropdown-panel')) {
-  customElements.define('dropdown-panel', DropdownPanel);
+	customElements.define('dropdown-panel', DropdownPanel);
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };
