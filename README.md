@@ -37,51 +37,53 @@ Then use it in your HTML:
 <dropdown-component>
   <dropdown-trigger>Menu</dropdown-trigger>
   <dropdown-panel>
-    <a href="#" class="dropdown-item" role="menuitem">Option 1</a>
-    <a href="#" class="dropdown-item" role="menuitem">Option 2</a>
+    <a href="#" class="dropdown-item">Option 1</a>
+    <a href="#" class="dropdown-item">Option 2</a>
     <div class="dropdown-divider"></div>
-    <a href="#" class="dropdown-item" role="menuitem">Option 3</a>
+    <a href="#" class="dropdown-item">Option 3</a>
   </dropdown-panel>
 </dropdown-component>
 ```
 
-For a larger "mega menu" style layout, use `<dropdown-menu>` instead of `<dropdown-panel>`:
+For a larger "mega menu" style layout, add the `wide` attribute to `<dropdown-panel>`:
 
 ```html
 <dropdown-component>
   <dropdown-trigger>Products</dropdown-trigger>
-  <dropdown-menu>
+  <dropdown-panel wide>
     <div>
-      <a href="#" class="dropdown-item" role="menuitem">Software</a>
-      <a href="#" class="dropdown-item" role="menuitem">Hardware</a>
-      <a href="#" class="dropdown-item" role="menuitem">Services</a>
+      <a href="#" class="dropdown-item">Software</a>
+      <a href="#" class="dropdown-item">Hardware</a>
+      <a href="#" class="dropdown-item">Services</a>
     </div>
     <div>
-      <a href="#" class="dropdown-item" role="menuitem">Support</a>
-      <a href="#" class="dropdown-item" role="menuitem">Community</a>
-      <a href="#" class="dropdown-item" role="menuitem">Partners</a>
+      <a href="#" class="dropdown-item">Support</a>
+      <a href="#" class="dropdown-item">Community</a>
+      <a href="#" class="dropdown-item">Partners</a>
     </div>
-  </dropdown-menu>
+  </dropdown-panel>
 </dropdown-component>
 ```
 
-## Component Types
+## Panel Styles
 
-This library provides two types of dropdown containers:
+The `<dropdown-panel>` component supports two layout styles via the `wide` attribute:
 
-### `<dropdown-panel>`
+### Default (Popover Style)
 
-- 🧩 **Popover-style panel**, great for short or simple option lists.
-- Appears as a smaller, compact dropdown.
-- Use when you need a small group of links or actions.
+- 🧩 **Compact popover panel**, positioned relative to the trigger button
+- Great for short or simple option lists
+- Includes smooth animation effects (blur, scale, transform)
+- Use when you need a small group of links or actions
 
-### `<dropdown-menu>`
+### Wide (Mega Menu Style)
 
-- 🧩 **Mega menu style**, designed for larger, full-width menus.
-- Supports multiple columns inside the menu for richer layouts.
-- Use when you have multiple categories or larger navigation needs.
+- 🧩 **Full-width panel**, designed for larger navigation menus
+- Add the `wide` attribute: `<dropdown-panel wide>`
+- Supports multiple columns for richer layouts
+- Use when you have multiple categories or larger navigation needs
 
-Both types are accessible, keyboard-friendly, and customizable!
+Both styles are accessible, keyboard-friendly, and customizable!
 
 ## Styling
 
@@ -116,8 +118,7 @@ The component uses CSS custom properties (variables) for easy customization:
 
 - `<dropdown-component>`: The main container that coordinates everything
 - `<dropdown-trigger>`: The element that toggles the dropdown open/close
-- `<dropdown-panel>`: A compact popover dropdown for smaller lists
-- `<dropdown-menu>`: A full-width, mega menu–style dropdown for large layouts
+- `<dropdown-panel>`: The dropdown content container (supports `wide` attribute for full-width mega menus)
 
 ### Methods
 
@@ -146,12 +147,15 @@ dropdown.addEventListener('mouseleave', () => {
 
 ## Accessibility
 
-This component follows WAI-ARIA practices for dropdown menus:
+This component follows web accessibility best practices:
 
-- Proper ARIA roles, states, and properties
-- Keyboard navigation (Tab, Space, Enter, Escape)
+- Semantic HTML structure without unnecessary ARIA menu roles
+- ARIA states and properties (`aria-expanded`, `aria-controls`, `aria-hidden`, `aria-labelledby`)
+- Keyboard navigation support (Tab, Space, Enter, Escape)
 - Focus management
-- `role="menuitem"` added for screen readers
+- `role="button"` on trigger for proper semantic meaning
+
+Note: This component intentionally does not use ARIA `menu` or `menubar` roles, following [best practices for site navigation](https://adrianroselli.com/2017/10/dont-use-aria-menu-roles-for-site-nav.html). These roles are designed for application menus (like File/Edit menus in desktop software), not website navigation dropdowns.
 
 ## Browser Support
 

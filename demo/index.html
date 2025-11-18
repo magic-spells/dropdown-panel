@@ -138,7 +138,7 @@
         margin: 1rem 0;
       }
 
-      dropdown-menu {
+      dropdown-panel[wide] {
         --dp-menu-margin-top: 5px;
         border-radius: 5px;
         display: grid;
@@ -159,65 +159,35 @@
             <li>
               <dropdown-component>
                 <dropdown-trigger>Products</dropdown-trigger>
-                <dropdown-menu>
+                <dropdown-panel wide>
                   <div>
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Software</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Hardware</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Services</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Special Offers</a
-                    >
+                    <a href="#" class="dropdown-item">Software</a>
+                    <a href="#" class="dropdown-item">Hardware</a>
+                    <a href="#" class="dropdown-item">Services</a>
+                    <a href="#" class="dropdown-item">Special Offers</a>
                   </div>
                   <div>
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Software</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Hardware</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Services</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Special Offers</a
-                    >
+                    <a href="#" class="dropdown-item">Software</a>
+                    <a href="#" class="dropdown-item">Hardware</a>
+                    <a href="#" class="dropdown-item">Services</a>
+                    <a href="#" class="dropdown-item">Special Offers</a>
                   </div>
                   <div>
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Software</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Hardware</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Services</a
-                    >
-                    <a href="#" class="dropdown-item" role="menuitem"
-                      >Special Offers</a
-                    >
+                    <a href="#" class="dropdown-item">Software</a>
+                    <a href="#" class="dropdown-item">Hardware</a>
+                    <a href="#" class="dropdown-item">Services</a>
+                    <a href="#" class="dropdown-item">Special Offers</a>
                   </div>
-                </dropdown-menu>
+                </dropdown-panel>
               </dropdown-component>
             </li>
             <li>
               <dropdown-component>
                 <dropdown-trigger>Solutions</dropdown-trigger>
                 <dropdown-panel>
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >For Individuals</a
-                  >
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >For Small Business</a
-                  >
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >For Enterprise</a
-                  >
+                  <a href="#" class="dropdown-item">For Individuals</a>
+                  <a href="#" class="dropdown-item">For Small Business</a>
+                  <a href="#" class="dropdown-item">For Enterprise</a>
                 </dropdown-panel>
               </dropdown-component>
             </li>
@@ -225,18 +195,10 @@
               <dropdown-component>
                 <dropdown-trigger>Resources</dropdown-trigger>
                 <dropdown-panel>
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >Documentation</a
-                  >
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >Tutorials</a
-                  >
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >Blog</a
-                  >
-                  <a href="#" class="dropdown-item" role="menuitem"
-                    >Support</a
-                  >
+                  <a href="#" class="dropdown-item">Documentation</a>
+                  <a href="#" class="dropdown-item">Tutorials</a>
+                  <a href="#" class="dropdown-item">Blog</a>
+                  <a href="#" class="dropdown-item">Support</a>
                 </dropdown-panel>
               </dropdown-component>
             </li>
@@ -268,11 +230,11 @@
           <li>Lightweight and customizable</li>
           <li>Hover or click activation</li>
           <li>
-            Use either dropdown-panel or dropdown-menu elements for
-            different styles.
+            Supports both compact popover and full-width mega menu styles
+            using the <code>wide</code> attribute
           </li>
           <li>Keyboard accessible</li>
-          <li>WAI-ARIA compliant</li>
+          <li>Follows accessibility best practices</li>
           <li>No dependencies</li>
         </ul>
       </section>
@@ -295,20 +257,20 @@
         </div>
 
         <p>
-          Use a dropdown-menu instead of a dropdown-panel to get a
-          larger "mega-menu" style of dropdown.
+          Add the <code>wide</code> attribute to get a full-width
+          "mega-menu" style dropdown.
         </p>
 
         <div class="code-example">
           <pre>
 &lt;dropdown-component&gt;
   &lt;dropdown-trigger&gt;Menu Label&lt;/dropdown-trigger&gt;
-  &lt;dropdown-menu&gt;
+  &lt;dropdown-panel wide&gt;
     &lt;a href="#" class="dropdown-item"&gt;Option 1&lt;/a&gt;
     &lt;a href="#" class="dropdown-item"&gt;Option 2&lt;/a&gt;
     &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
     &lt;a href="#" class="dropdown-item"&gt;Option 3&lt;/a&gt;
-  &lt;/dropdown-menu&gt;
+  &lt;/dropdown-panel&gt;
 &lt;/dropdown-component&gt;
 </pre
           >

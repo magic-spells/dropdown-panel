@@ -35,8 +35,8 @@ dropdown-component {
 }
 
 // hover help that helps bridge the dropdown-component
-// with the dropdown panel / menu
-dropdown-component:hover dropdown-trigger::before,
+// with the dropdown panel
+dropdown-component:hover > dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']::before {
 	content: '';
 	background: transparent;
@@ -59,29 +59,20 @@ dropdown-trigger {
 	position: relative;
 }
 
-// Common styles for dropdown-panel and dropdown-menu
-dropdown-panel,
-dropdown-menu {
+// Base styles for dropdown-panel (popover style by default)
+dropdown-panel {
 	position: absolute;
 	top: 100%;
 	left: 0px;
 	z-index: var(--dp-panel-z-index, #{$dropdown-panel-z-index});
 	background-color: var(--dp-panel-bg-color, #{$dropdown-panel-bg});
 	box-shadow: var(--dp-panel-shadow, #{$dropdown-panel-shadow});
-
 	padding: var(--dp-panel-padding, #{$dropdown-panel-padding});
+	min-width: #{$dropdown-panel-min-width};
 
 	opacity: 0;
 	pointer-events: none;
 	overflow: hidden;
-	transition: opacity
-		var(--dp-transition-duration, #{$transition-duration})
-		var(--dp-transition-timing, #{$transition-timing});
-}
-
-// Specific styles for dropdown-panel
-dropdown-panel {
-	min-width: #{$dropdown-panel-min-width};
 	filter: blur(4px);
 	transform: translateY(5px) scale(0.98);
 	border-radius: var(
@@ -100,14 +91,17 @@ dropdown-panel {
 			var(--dp-transition-timing, #{$transition-timing});
 }
 
-// Specific styles for dropdown-menu
-dropdown-menu {
+// Wide panel styles (full-width mega menu style)
+dropdown-panel[wide] {
 	width: 100%;
 	margin-top: var(--dp-menu-margin-top, #{$dropdown-menu-margin-top});
+	filter: none;
+	transform: none;
+	border-radius: 0;
 }
 
-// Visible state styles for dropdown-panel
-dropdown-component:hover dropdown-panel,
+// Visible state styles for dropdown-panel (popover style)
+dropdown-component:hover > dropdown-panel,
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
 	transform: translateY(0) scale(1);
@@ -116,10 +110,9 @@ dropdown-panel[aria-hidden='false'] {
 	visibility: visible;
 }
 
-// Visible state styles for dropdown-menu
-dropdown-component:hover dropdown-menu,
-dropdown-menu[aria-hidden='false'] {
-	opacity: 1;
-	pointer-events: auto;
-	visibility: visible;
+// Visible state styles for wide panels (no transform/filter animations)
+dropdown-component:hover > dropdown-panel[wide],
+dropdown-panel[wide][aria-hidden='false'] {
+	transform: none;
+	filter: none;
 }

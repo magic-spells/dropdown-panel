@@ -27,7 +27,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ":root{--dp-panel-bg-color:#fff;--dp-panel-shadow:0 2px 8px rgba(0,0,0,.15);--dp-panel-border-radius:4px;--dp-panel-padding:0.5rem 0;--dp-panel-margin-top:-5px;--dp-menu-margin-top:0px;--dp-transition-duration:200ms;--dp-transition-timing:ease-out;--dp-panel-z-index:20}dropdown-component{display:inline-block}dropdown-component:focus{background:green}dropdown-component:hover dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:before{background:transparent;content:\"\";height:30px;left:-10px;position:absolute;top:50%;transform:perspective(50px) rotateX(50deg);transform-origin:top center;width:calc(100% + 20px);z-index:10}dropdown-trigger{align-items:center;cursor:pointer;display:inline-flex;position:relative;user-select:none}dropdown-menu,dropdown-panel{background-color:var(--dp-panel-bg-color,#fff);box-shadow:var(--dp-panel-shadow,0 2px 8px rgba(0,0,0,.15));left:0;opacity:0;overflow:hidden;padding:var(--dp-panel-padding,.5rem 0);pointer-events:none;position:absolute;top:100%;transition:opacity var(--dp-transition-duration,.2s) var(--dp-transition-timing,ease-out);z-index:var(--dp-panel-z-index,20)}dropdown-panel{border-radius:var(--dp-panel-border-radius,4px);filter:blur(4px);margin-top:var(--dp-panel-margin-top,-5px);min-width:180px;transform:translateY(5px) scale(.98);transition:opacity var(--dp-transition-duration,.2s) var(--dp-transition-timing,ease-out),transform var(--dp-transition-duration,.2s) var(--dp-transition-timing,ease-out);will-change:opacity,transform,filter}dropdown-menu{margin-top:var(--dp-menu-margin-top,0);width:100%}dropdown-component:hover dropdown-panel,dropdown-panel[aria-hidden=false]{filter:blur(0);opacity:1;pointer-events:auto;transform:translateY(0) scale(1);visibility:visible}dropdown-component:hover dropdown-menu,dropdown-menu[aria-hidden=false]{opacity:1;pointer-events:auto;visibility:visible}";
+var css_248z = ":root {\n  --dp-panel-bg-color: #ffffff;\n  --dp-panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);\n  --dp-panel-border-radius: 4px;\n  --dp-panel-padding: 0.5rem 0;\n  --dp-panel-margin-top: -5px;\n  --dp-menu-margin-top: 0px;\n  --dp-transition-duration: 200ms;\n  --dp-transition-timing: ease-out;\n  --dp-panel-z-index: 20;\n}\n\ndropdown-component {\n  display: inline-block;\n}\ndropdown-component:focus {\n  background: green;\n}\n\ndropdown-component:hover > dropdown-trigger::before,\ndropdown-trigger[aria-expanded=true]::before {\n  content: \"\";\n  background: transparent;\n  position: absolute;\n  left: -10px;\n  top: 50%;\n  width: calc(100% + 20px);\n  height: 30px;\n  transform-origin: top center;\n  transform: perspective(50px) rotateX(50deg);\n  z-index: 10;\n}\n\ndropdown-trigger {\n  display: inline-flex;\n  align-items: center;\n  cursor: pointer;\n  user-select: none;\n  position: relative;\n}\n\ndropdown-panel {\n  position: absolute;\n  top: 100%;\n  left: 0px;\n  z-index: var(--dp-panel-z-index, 20);\n  background-color: var(--dp-panel-bg-color, #ffffff);\n  box-shadow: var(--dp-panel-shadow, 0 2px 8px rgba(0, 0, 0, 0.15));\n  padding: var(--dp-panel-padding, 0.5rem 0);\n  min-width: 180px;\n  opacity: 0;\n  pointer-events: none;\n  overflow: hidden;\n  filter: blur(4px);\n  transform: translateY(5px) scale(0.98);\n  border-radius: var(--dp-panel-border-radius, 4px);\n  margin-top: var(--dp-panel-margin-top, -5px);\n  will-change: opacity, transform, filter;\n  transition: opacity var(--dp-transition-duration, 200ms) var(--dp-transition-timing, ease-out), transform var(--dp-transition-duration, 200ms) var(--dp-transition-timing, ease-out);\n}\n\ndropdown-panel[wide] {\n  width: 100%;\n  margin-top: var(--dp-menu-margin-top, 0px);\n  filter: none;\n  transform: none;\n  border-radius: 0;\n}\n\ndropdown-component:hover > dropdown-panel,\ndropdown-panel[aria-hidden=false] {\n  opacity: 1;\n  transform: translateY(0) scale(1);\n  pointer-events: auto;\n  filter: blur(0px);\n  visibility: visible;\n}\n\ndropdown-component:hover > dropdown-panel[wide],\ndropdown-panel[wide][aria-hidden=false] {\n  transform: none;\n  filter: none;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRyb3Bkb3duLWNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UsNEJBQTRCO0VBQzVCLGdEQUFnRDtFQUNoRCw2QkFBNkI7RUFDN0IsNEJBQTRCO0VBQzVCLDJCQUEyQjtFQUMzQix5QkFBeUI7RUFDekIsK0JBQStCO0VBQy9CLGdDQUFnQztFQUNoQyxzQkFBc0I7QUFDeEI7O0FBRUE7RUFDRSxxQkFBcUI7QUFDdkI7QUFDQTtFQUNFLGlCQUFpQjtBQUNuQjs7QUFFQTs7RUFFRSxXQUFXO0VBQ1gsdUJBQXVCO0VBQ3ZCLGtCQUFrQjtFQUNsQixXQUFXO0VBQ1gsUUFBUTtFQUNSLHdCQUF3QjtFQUN4QixZQUFZO0VBQ1osNEJBQTRCO0VBQzVCLDJDQUEyQztFQUMzQyxXQUFXO0FBQ2I7O0FBRUE7RUFDRSxvQkFBb0I7RUFDcEIsbUJBQW1CO0VBQ25CLGVBQWU7RUFDZixpQkFBaUI7RUFDakIsa0JBQWtCO0FBQ3BCOztBQUVBO0VBQ0Usa0JBQWtCO0VBQ2xCLFNBQVM7RUFDVCxTQUFTO0VBQ1Qsb0NBQW9DO0VBQ3BDLG1EQUFtRDtFQUNuRCxpRUFBaUU7RUFDakUsMENBQTBDO0VBQzFDLGdCQUFnQjtFQUNoQixVQUFVO0VBQ1Ysb0JBQW9CO0VBQ3BCLGdCQUFnQjtFQUNoQixpQkFBaUI7RUFDakIsc0NBQXNDO0VBQ3RDLGlEQUFpRDtFQUNqRCw0Q0FBNEM7RUFDNUMsdUNBQXVDO0VBQ3ZDLG9MQUFvTDtBQUN0TDs7QUFFQTtFQUNFLFdBQVc7RUFDWCwwQ0FBMEM7RUFDMUMsWUFBWTtFQUNaLGVBQWU7RUFDZixnQkFBZ0I7QUFDbEI7O0FBRUE7O0VBRUUsVUFBVTtFQUNWLGlDQUFpQztFQUNqQyxvQkFBb0I7RUFDcEIsaUJBQWlCO0VBQ2pCLG1CQUFtQjtBQUNyQjs7QUFFQTs7RUFFRSxlQUFlO0VBQ2YsWUFBWTtBQUNkIiwiZmlsZSI6ImRyb3Bkb3duLWNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiOnJvb3Qge1xuICAtLWRwLXBhbmVsLWJnLWNvbG9yOiAjZmZmZmZmO1xuICAtLWRwLXBhbmVsLXNoYWRvdzogMCAycHggOHB4IHJnYmEoMCwgMCwgMCwgMC4xNSk7XG4gIC0tZHAtcGFuZWwtYm9yZGVyLXJhZGl1czogNHB4O1xuICAtLWRwLXBhbmVsLXBhZGRpbmc6IDAuNXJlbSAwO1xuICAtLWRwLXBhbmVsLW1hcmdpbi10b3A6IC01cHg7XG4gIC0tZHAtbWVudS1tYXJnaW4tdG9wOiAwcHg7XG4gIC0tZHAtdHJhbnNpdGlvbi1kdXJhdGlvbjogMjAwbXM7XG4gIC0tZHAtdHJhbnNpdGlvbi10aW1pbmc6IGVhc2Utb3V0O1xuICAtLWRwLXBhbmVsLXotaW5kZXg6IDIwO1xufVxuXG5kcm9wZG93bi1jb21wb25lbnQge1xuICBkaXNwbGF5OiBpbmxpbmUtYmxvY2s7XG59XG5kcm9wZG93bi1jb21wb25lbnQ6Zm9jdXMge1xuICBiYWNrZ3JvdW5kOiBncmVlbjtcbn1cblxuZHJvcGRvd24tY29tcG9uZW50OmhvdmVyID4gZHJvcGRvd24tdHJpZ2dlcjo6YmVmb3JlLFxuZHJvcGRvd24tdHJpZ2dlclthcmlhLWV4cGFuZGVkPXRydWVdOjpiZWZvcmUge1xuICBjb250ZW50OiBcIlwiO1xuICBiYWNrZ3JvdW5kOiB0cmFuc3BhcmVudDtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICBsZWZ0OiAtMTBweDtcbiAgdG9wOiA1MCU7XG4gIHdpZHRoOiBjYWxjKDEwMCUgKyAyMHB4KTtcbiAgaGVpZ2h0OiAzMHB4O1xuICB0cmFuc2Zvcm0tb3JpZ2luOiB0b3AgY2VudGVyO1xuICB0cmFuc2Zvcm06IHBlcnNwZWN0aXZlKDUwcHgpIHJvdGF0ZVgoNTBkZWcpO1xuICB6LWluZGV4OiAxMDtcbn1cblxuZHJvcGRvd24tdHJpZ2dlciB7XG4gIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICBhbGlnbi1pdGVtczogY2VudGVyO1xuICBjdXJzb3I6IHBvaW50ZXI7XG4gIHVzZXItc2VsZWN0OiBub25lO1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG59XG5cbmRyb3Bkb3duLXBhbmVsIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDEwMCU7XG4gIGxlZnQ6IDBweDtcbiAgei1pbmRleDogdmFyKC0tZHAtcGFuZWwtei1pbmRleCwgMjApO1xuICBiYWNrZ3JvdW5kLWNvbG9yOiB2YXIoLS1kcC1wYW5lbC1iZy1jb2xvciwgI2ZmZmZmZik7XG4gIGJveC1zaGFkb3c6IHZhcigtLWRwLXBhbmVsLXNoYWRvdywgMCAycHggOHB4IHJnYmEoMCwgMCwgMCwgMC4xNSkpO1xuICBwYWRkaW5nOiB2YXIoLS1kcC1wYW5lbC1wYWRkaW5nLCAwLjVyZW0gMCk7XG4gIG1pbi13aWR0aDogMTgwcHg7XG4gIG9wYWNpdHk6IDA7XG4gIHBvaW50ZXItZXZlbnRzOiBub25lO1xuICBvdmVyZmxvdzogaGlkZGVuO1xuICBmaWx0ZXI6IGJsdXIoNHB4KTtcbiAgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKDVweCkgc2NhbGUoMC45OCk7XG4gIGJvcmRlci1yYWRpdXM6IHZhcigtLWRwLXBhbmVsLWJvcmRlci1yYWRpdXMsIDRweCk7XG4gIG1hcmdpbi10b3A6IHZhcigtLWRwLXBhbmVsLW1hcmdpbi10b3AsIC01cHgpO1xuICB3aWxsLWNoYW5nZTogb3BhY2l0eSwgdHJhbnNmb3JtLCBmaWx0ZXI7XG4gIHRyYW5zaXRpb246IG9wYWNpdHkgdmFyKC0tZHAtdHJhbnNpdGlvbi1kdXJhdGlvbiwgMjAwbXMpIHZhcigtLWRwLXRyYW5zaXRpb24tdGltaW5nLCBlYXNlLW91dCksIHRyYW5zZm9ybSB2YXIoLS1kcC10cmFuc2l0aW9uLWR1cmF0aW9uLCAyMDBtcykgdmFyKC0tZHAtdHJhbnNpdGlvbi10aW1pbmcsIGVhc2Utb3V0KTtcbn1cblxuZHJvcGRvd24tcGFuZWxbd2lkZV0ge1xuICB3aWR0aDogMTAwJTtcbiAgbWFyZ2luLXRvcDogdmFyKC0tZHAtbWVudS1tYXJnaW4tdG9wLCAwcHgpO1xuICBmaWx0ZXI6IG5vbmU7XG4gIHRyYW5zZm9ybTogbm9uZTtcbiAgYm9yZGVyLXJhZGl1czogMDtcbn1cblxuZHJvcGRvd24tY29tcG9uZW50OmhvdmVyID4gZHJvcGRvd24tcGFuZWwsXG5kcm9wZG93bi1wYW5lbFthcmlhLWhpZGRlbj1mYWxzZV0ge1xuICBvcGFjaXR5OiAxO1xuICB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoMCkgc2NhbGUoMSk7XG4gIHBvaW50ZXItZXZlbnRzOiBhdXRvO1xuICBmaWx0ZXI6IGJsdXIoMHB4KTtcbiAgdmlzaWJpbGl0eTogdmlzaWJsZTtcbn1cblxuZHJvcGRvd24tY29tcG9uZW50OmhvdmVyID4gZHJvcGRvd24tcGFuZWxbd2lkZV0sXG5kcm9wZG93bi1wYW5lbFt3aWRlXVthcmlhLWhpZGRlbj1mYWxzZV0ge1xuICB0cmFuc2Zvcm06IG5vbmU7XG4gIGZpbHRlcjogbm9uZTtcbn0iXX0= */";
 styleInject(css_248z);
 
 /**
@@ -50,24 +50,22 @@ class DropdownComponent extends HTMLElement {
     // get trigger element - use > to select only direct children
     _.trigger = _.querySelector(':scope > dropdown-trigger');
 
-    // get content element (either panel or menu) - use > to select only direct children
-    _.panel =
-      _.querySelector(':scope > dropdown-panel') ||
-      _.querySelector(':scope > dropdown-menu');
+    // get panel element - use > to select only direct children
+    _.panel = _.querySelector(':scope > dropdown-panel');
 
     // validate existence
     if (!_.trigger || !_.panel) {
       console.warn(
-        'dropdown-component requires <dropdown-trigger> and either <dropdown-panel> or <dropdown-menu> as direct children'
+        'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children'
       );
       return;
     }
 
-    // if it's a dropdown-panel, set position relative on the dropdown component
-    if (_.panel.tagName.toLowerCase() === 'dropdown-panel') {
-      _.style.position = 'relative';
-    } else {
+    // check if panel has 'wide' attribute for full-width layout
+    if (_.panel.hasAttribute('wide')) {
       _.style.position = 'static';
+    } else {
+      _.style.position = 'relative';
     }
 
     // assign unique id to panel if needed
@@ -83,7 +81,6 @@ class DropdownComponent extends HTMLElement {
     _.trigger.setAttribute('aria-controls', panelId);
     _.trigger.setAttribute('aria-expanded', 'false');
     _.panel.setAttribute('aria-hidden', 'true');
-    _.panel.setAttribute('role', 'menu');
     _.panel.setAttribute('aria-labelledby', _.trigger.id);
 
     // initial state
@@ -198,51 +195,12 @@ class DropdownPanel extends HTMLElement {
    */
   connectedCallback() {
     const _ = this;
-    
-    // ensure aria-hidden is set initially
-    if (!_.hasAttribute('aria-hidden')) {
-      _.setAttribute('aria-hidden', 'true');
-    }
-    
-    // ensure role is menu by default
-    if (!_.hasAttribute('role')) {
-      _.setAttribute('role', 'menu');
-    }
-  }
-}
-
-/**
- * dropdown menu component
- * container for mega menu style dropdown content
- * @class DropdownMenu
- * @extends HTMLElement
- */
-class DropdownMenu extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  /**
-   * when element is connected to the dom
-   */
-  connectedCallback() {
-    const _ = this;
 
     // ensure aria-hidden is set initially
     if (!_.hasAttribute('aria-hidden')) {
       _.setAttribute('aria-hidden', 'true');
     }
-
-    // ensure role is menubar for mega menu
-    if (!_.hasAttribute('role')) {
-      _.setAttribute('role', 'menubar');
-    }
   }
-}
-
-// define the element
-if (!customElements.get('dropdown-menu')) {
-  customElements.define('dropdown-menu', DropdownMenu);
 }
 
 /**
@@ -265,10 +223,7 @@ if (!customElements.get('dropdown-panel')) {
   customElements.define('dropdown-panel', DropdownPanel);
 }
 
-if (!customElements.get('dropdown-menu')) {
-  customElements.define('dropdown-menu', DropdownMenu);
-}
-
 exports.DropdownComponent = DropdownComponent;
 exports.DropdownPanel = DropdownPanel;
 exports.DropdownTrigger = DropdownTrigger;
+//# sourceMappingURL=dropdown-panel.cjs.js.map

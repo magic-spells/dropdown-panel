@@ -14,15 +14,10 @@ export class DropdownPanel extends HTMLElement {
    */
   connectedCallback() {
     const _ = this;
-    
+
     // ensure aria-hidden is set initially
     if (!_.hasAttribute('aria-hidden')) {
       _.setAttribute('aria-hidden', 'true');
-    }
-    
-    // ensure role is menu by default
-    if (!_.hasAttribute('role')) {
-      _.setAttribute('role', 'menu');
     }
   }
 }

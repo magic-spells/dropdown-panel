@@ -18,24 +18,22 @@ export class DropdownComponent extends HTMLElement {
     // get trigger element - use > to select only direct children
     _.trigger = _.querySelector(':scope > dropdown-trigger');
 
-    // get content element (either panel or menu) - use > to select only direct children
-    _.panel =
-      _.querySelector(':scope > dropdown-panel') ||
-      _.querySelector(':scope > dropdown-menu');
+    // get panel element - use > to select only direct children
+    _.panel = _.querySelector(':scope > dropdown-panel');
 
     // validate existence
     if (!_.trigger || !_.panel) {
       console.warn(
-        'dropdown-component requires <dropdown-trigger> and either <dropdown-panel> or <dropdown-menu> as direct children'
+        'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children'
       );
       return;
     }
 
-    // if it's a dropdown-panel, set position relative on the dropdown component
-    if (_.panel.tagName.toLowerCase() === 'dropdown-panel') {
-      _.style.position = 'relative';
-    } else {
+    // check if panel has 'wide' attribute for full-width layout
+    if (_.panel.hasAttribute('wide')) {
       _.style.position = 'static';
+    } else {
+      _.style.position = 'relative';
     }
 
     // assign unique id to panel if needed
@@ -51,7 +49,6 @@ export class DropdownComponent extends HTMLElement {
     _.trigger.setAttribute('aria-controls', panelId);
     _.trigger.setAttribute('aria-expanded', 'false');
     _.panel.setAttribute('aria-hidden', 'true');
-    _.panel.setAttribute('role', 'menu');
     _.panel.setAttribute('aria-labelledby', _.trigger.id);
 
     // initial state
