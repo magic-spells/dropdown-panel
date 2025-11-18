@@ -4,9 +4,6 @@
  * @version 0.1.0
  */
 
-// import styles
-import './dropdown-component.scss';
-
 // import components
 import { DropdownComponent } from './components/dropdown-component.js';
 import { DropdownTrigger } from './components/dropdown-trigger.js';

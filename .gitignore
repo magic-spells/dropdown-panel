@@ -22,3 +22,6 @@ Thumbs.db
 
 # Package files
 *.tgz
+
+# Temporary build files
+*.tmp.js

@@ -16,7 +16,7 @@ const cssConfig = {
 
 // rollup configuration
 export default [
-	// esm version
+	// esm version (JavaScript only)
 	{
 		input: 'src/index.js',
 		output: {
@@ -26,10 +26,6 @@ export default [
 		},
 		plugins: [
 			resolve(),
-			postcss({
-				...cssConfig,
-				extract: `${name}.css`,
-			}),
 			copy({
 				targets: [
 					{
@@ -48,6 +44,20 @@ export default [
 				}),
 		],
 	},
+	// css build (unminified)
+	{
+		input: 'src/styles.js',
+		output: {
+			file: `dist/${name}.css.tmp.js`, // Temporary JS file (will be deleted)
+			format: 'es',
+		},
+		plugins: [
+			postcss({
+				...cssConfig,
+				extract: `${name}.css`,
+			}),
+		],
+	},
 	// cjs version
 	{
 		input: 'src/index.js',
@@ -56,13 +66,7 @@ export default [
 			format: 'cjs',
 			sourcemap: !production,
 		},
-		plugins: [
-			resolve(),
-			postcss({
-				...cssConfig,
-				extract: false,
-			}),
-		],
+		plugins: [resolve()],
 	},
 	// umd version (for direct browser usage and more compatibility)
 	{
@@ -73,15 +77,9 @@ export default [
 			name: 'DropdownPanel',
 			sourcemap: !production,
 		},
-		plugins: [
-			resolve(),
-			postcss({
-				...cssConfig,
-				extract: false,
-			}),
-		],
+		plugins: [resolve()],
 	},
-	// minified umd version
+	// minified umd version (JavaScript only)
 	{
 		input: 'src/index.js',
 		output: {
@@ -92,14 +90,25 @@ export default [
 		},
 		plugins: [
 			resolve(),
-			postcss({
-				...cssConfig,
-				extract: `${name}.min.css`,
-			}),
 			terser({
 				format: {
 					comments: false,
 				},
+			}),
+		],
+	},
+	// css build (minified)
+	{
+		input: 'src/styles.js',
+		output: {
+			file: `dist/${name}.min.css.tmp.js`, // Temporary JS file (will be deleted)
+			format: 'es',
+		},
+		plugins: [
+			postcss({
+				...cssConfig,
+				extract: `${name}.min.css`,
+				minimize: true,
 			}),
 			// Additional copy plugin at the end to copy files for GitHub Pages demo
 			copy({
