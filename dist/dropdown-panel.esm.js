@@ -65,10 +65,14 @@ class DropdownComponent extends HTMLElement {
 				_.toggle();
 			}
 			if (event.key === 'Escape') {
-				event.preventDefault();
-				event.stopPropagation(); // Prevent closing parent menus
-				_.hide();
-				_.trigger.focus();
+				// Only handle if panel is actually open
+				if (_.panel.getAttribute('aria-hidden') === 'false') {
+					event.preventDefault();
+					event.stopPropagation(); // Prevent closing parent menus
+					_.hide();
+					_.trigger.focus();
+				}
+				// If panel is closed, do nothing - let event bubble to parent
 			}
 		});
 
@@ -194,3 +198,4 @@ if (!customElements.get('dropdown-panel')) {
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };
+//# sourceMappingURL=dropdown-panel.esm.js.map
