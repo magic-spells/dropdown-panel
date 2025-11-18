@@ -69,18 +69,16 @@
 				margin-bottom: 5px;
 				display: inline-flex;
 				align-items: center;
+				gap: 5px;
 				cursor: pointer;
 			}
 
-			dropdown-trigger::after {
-				content: '▼';
-				font-size: 0.7rem;
-				margin-left: 5px;
-				transition: transform 0.2s;
-			}
-
-			dropdown-trigger[aria-expanded='true']::after {
-				transform: rotate(180deg);
+			/* Arrow icons in triggers */
+			.dropdown-arrow {
+				display: inline-block;
+				width: 12px;
+				height: 12px;
+				line-height: 0;
 			}
 
 			dropdown-panel {
@@ -200,12 +198,6 @@
 				align-items: center;
 			}
 
-			/* Right-pointing triangle for nested dropdown triggers */
-			.nested-dropdown dropdown-trigger::after {
-				content: '▶';
-				transform: none;
-			}
-
 			/* Right-opening panels for nested menus */
 			dropdown-panel[opens='right'] {
 				margin-left: -5px;
@@ -224,7 +216,14 @@
 					<ul class="nav-menu">
 						<li>
 							<dropdown-component>
-								<dropdown-trigger>Products</dropdown-trigger>
+								<dropdown-trigger>
+									Products
+									<span class="dropdown-arrow">
+										<svg viewBox="0 0 12 12" fill="currentColor">
+											<path d="M6 8L2 4h8z" />
+										</svg>
+									</span>
+								</dropdown-trigger>
 								<dropdown-panel wide>
 									<div>
 										<a href="#" class="dropdown-item">Software</a>
@@ -255,7 +254,14 @@
 						</li>
 						<li>
 							<dropdown-component>
-								<dropdown-trigger>Solutions</dropdown-trigger>
+								<dropdown-trigger>
+									Solutions
+									<span class="dropdown-arrow">
+										<svg viewBox="0 0 12 12" fill="currentColor">
+											<path d="M6 8L2 4h8z" />
+										</svg>
+									</span>
+								</dropdown-trigger>
 								<dropdown-panel>
 									<a href="#" class="dropdown-item"
 										>For Individuals</a
@@ -269,7 +275,14 @@
 						</li>
 						<li>
 							<dropdown-component>
-								<dropdown-trigger>Resources</dropdown-trigger>
+								<dropdown-trigger>
+									Resources
+									<span class="dropdown-arrow">
+										<svg viewBox="0 0 12 12" fill="currentColor">
+											<path d="M6 8L2 4h8z" />
+										</svg>
+									</span>
+								</dropdown-trigger>
 								<dropdown-panel>
 									<a href="#" class="dropdown-item">Documentation</a>
 									<a href="#" class="dropdown-item">Tutorials</a>
@@ -279,6 +292,11 @@
 									<dropdown-component class="nested-dropdown">
 										<dropdown-trigger class="dropdown-item">
 											Support
+											<span class="dropdown-arrow">
+												<svg viewBox="0 0 12 12" fill="currentColor">
+													<path d="M8 6L4 2v8z" />
+												</svg>
+											</span>
 										</dropdown-trigger>
 										<dropdown-panel opens="right">
 											<a href="#" class="dropdown-item">Contact Us</a>

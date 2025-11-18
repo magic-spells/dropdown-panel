@@ -10,7 +10,7 @@ The component includes only essential functional CSS. This makes it:
 
 - Easy to integrate into any project
 - No opinionated styles to override
-- Lightweight - only 600 bytes of CSS
+- Lightweight - under 1KB of CSS (962 bytes minified)
 - Works with Tailwind, Bootstrap, CSS-in-JS, or plain CSS
 
 Users add their own styling (colors, shadows, animations, spacing).
@@ -240,7 +240,9 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 
 4. **Keyboard interaction**:
    - Enter/Space on trigger toggles panel
-   - Escape closes panel and returns focus to trigger
+   - Escape closes current panel only (uses `event.stopPropagation()` to prevent closing parent menus)
+   - Focus returns to trigger when panel closes
+   - Progressive disclosure: nested menus close one level at a time
 
 ### Event Flow
 
@@ -425,15 +427,31 @@ dropdown-panel[wide] {
 
 ### Nested Dropdown Indicators
 
-Add visual indicators for nested menus using CSS:
+Add visual indicators using HTML elements (not CSS pseudo-elements, which can block the hover bridge):
 
-```css
-/* Style the trigger to show it has a submenu */
-.nested-dropdown dropdown-trigger::after {
-	content: '▶';  /* Right-pointing triangle */
-	transform: none;  /* Override default rotation */
-}
+```html
+<!-- Main dropdown with down arrow -->
+<dropdown-trigger>
+	Products
+	<span class="dropdown-arrow">
+		<svg viewBox="0 0 12 12" fill="currentColor">
+			<path d="M6 8L2 4h8z" />
+		</svg>
+	</span>
+</dropdown-trigger>
+
+<!-- Nested dropdown with right arrow -->
+<dropdown-trigger class="dropdown-item">
+	Support
+	<span class="dropdown-arrow">
+		<svg viewBox="0 0 12 12" fill="currentColor">
+			<path d="M8 6L4 2v8z" />
+		</svg>
+	</span>
+</dropdown-trigger>
 ```
+
+**Important:** Don't use `::after` pseudo-elements for dropdown arrows - they interfere with the hover bridge functionality.
 
 ## Testing the Demo
 
@@ -481,15 +499,27 @@ Potential features to add:
 3. Check if you're targeting the right selectors (use browser DevTools)
 4. For animations, make sure you're targeting both the hidden and visible states
 
+### Hover bridge not working?
+
+1. **Don't use `::before` or `::after` pseudo-elements on `dropdown-trigger`** - they block the invisible hover bridge
+2. Use real HTML elements (`<span>`) for dropdown indicators instead
+3. See the demo for examples using SVG arrows in `<span>` elements
+
 ## Version History
 
-- **v0.3.0** (upcoming) - Stripped to minimal styling
+- **v0.3.0** (upcoming) - Major update: Minimal styling & nested dropdown support
 
   - **BREAKING:** Removed all opinionated styles (colors, shadows, animations, spacing)
-  - Now ships with only functional CSS (positioning, visibility states)
+  - Now ships with only functional CSS under 1KB (962 bytes minified)
   - Easy to integrate into any project (works with Tailwind, CSS-in-JS, etc.)
+  - Added `opens="right"` attribute for nested dropdown menus
+  - Fixed keyboard navigation: Escape key uses `stopPropagation()` for progressive menu closure
+  - Added hover bridge support for right-opening panels
+  - Documented SVG arrow approach (avoiding pseudo-elements that block hover bridge)
+  - Removed `overflow: hidden` to support nested panels
+  - Updated all documentation with 2-space indentation for GitHub
   - Moved example styles to demo for reference
-  - Updated documentation with styling examples
+  - Added `.prettierignore` for markdown files
 
 - **v0.2.2** - Refactored to single `<dropdown-panel>` component with `wide` attribute
   - Removed `<dropdown-menu>` component

@@ -66,6 +66,7 @@ class DropdownComponent extends HTMLElement {
 			}
 			if (event.key === 'Escape') {
 				event.preventDefault();
+				event.stopPropagation(); // Prevent closing parent menus
 				_.hide();
 				_.trigger.focus();
 			}
@@ -75,6 +76,7 @@ class DropdownComponent extends HTMLElement {
 		_.panel.addEventListener('keydown', (event) => {
 			if (event.key === 'Escape') {
 				event.preventDefault();
+				event.stopPropagation(); // Prevent closing parent menus
 				_.hide();
 				_.trigger.focus();
 			}

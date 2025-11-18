@@ -31,7 +31,7 @@
     }
   }
 
-  var css_248z = "dropdown-component{display:inline-block}dropdown-component:hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:before{content:\"\";height:30px;left:-10px;position:absolute;top:50%;transform:perspective(50px) rotateX(50deg);transform-origin:top center;width:calc(100% + 20px);z-index:10}dropdown-component:has(>dropdown-panel[opens=right]):hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:has(~dropdown-panel[opens=right]):before{height:calc(100% + 20px);left:50%;top:-10px;transform:perspective(50px) rotateY(-50deg);transform-origin:center left;width:30px}dropdown-trigger{cursor:pointer;position:relative;user-select:none}dropdown-panel{left:0;opacity:0;pointer-events:none;position:absolute;top:100%}dropdown-panel[opens=right]{left:100%;top:0}dropdown-panel[wide]{width:100%}dropdown-component:hover>dropdown-panel,dropdown-panel[aria-hidden=false]{opacity:1;pointer-events:auto;visibility:visible}";
+  var css_248z = "dropdown-component{display:inline-block}dropdown-component:hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:before{content:\"\";height:30px;left:-10px;position:absolute;top:50%;transform:perspective(50px) rotateX(50deg);transform-origin:top center;width:calc(100% + 20px);z-index:10}dropdown-component:has(>dropdown-panel[opens=right]):hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:has(~dropdown-panel[opens=right]):before{height:calc(100% + 20px);left:calc(100% - 30px);top:-10px;transform:perspective(50px) rotateY(-50deg);transform-origin:center left;width:40px}dropdown-trigger{cursor:pointer;position:relative;user-select:none}dropdown-panel{left:0;opacity:0;pointer-events:none;position:absolute;top:100%}dropdown-panel[opens=right]{left:100%;top:0}dropdown-panel[wide]{width:100%}dropdown-component:hover>dropdown-panel,dropdown-panel[aria-hidden=false]{opacity:1;pointer-events:auto;visibility:visible}";
   styleInject(css_248z);
 
   /**
@@ -102,6 +102,7 @@
   			}
   			if (event.key === 'Escape') {
   				event.preventDefault();
+  				event.stopPropagation(); // Prevent closing parent menus
   				_.hide();
   				_.trigger.focus();
   			}
@@ -111,6 +112,7 @@
   		_.panel.addEventListener('keydown', (event) => {
   			if (event.key === 'Escape') {
   				event.preventDefault();
+  				event.stopPropagation(); // Prevent closing parent menus
   				_.hide();
   				_.trigger.focus();
   			}

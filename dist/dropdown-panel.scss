@@ -29,9 +29,9 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 dropdown-trigger[aria-expanded='true']:has(
 		~ dropdown-panel[opens='right']
 	)::before {
-	left: 50%;
+	left: calc(100% - 30px);
 	top: -10px;
-	width: 30px;
+	width: 40px;
 	height: calc(100% + 20px);
 	transform-origin: center left;
 	transform: perspective(50px) rotateY(-50deg);

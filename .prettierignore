@@ -1,3 +1,4 @@
-**/*.min.js
+dist/
 assets/
 node_modules/
+*.md
