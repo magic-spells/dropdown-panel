@@ -8,6 +8,8 @@ dropdown-component {
 
 // Hover bridge - creates invisible area between trigger and panel
 // This prevents the dropdown from closing when mouse moves between them
+
+// Vertical bridge for downward-opening panels (default)
 dropdown-component:hover > dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']::before {
 	content: '';
@@ -21,19 +23,39 @@ dropdown-trigger[aria-expanded='true']::before {
 	z-index: 10;
 }
 
+// Horizontal bridge for right-opening panels
+dropdown-component:has(> dropdown-panel[opens='right']):hover
+	> dropdown-trigger::before,
+dropdown-trigger[aria-expanded='true']:has(
+		~ dropdown-panel[opens='right']
+	)::before {
+	left: 50%;
+	top: -10px;
+	width: 30px;
+	height: calc(100% + 20px);
+	transform-origin: center left;
+	transform: perspective(50px) rotateY(-50deg);
+}
+
 dropdown-trigger {
 	position: relative;
 	cursor: pointer;
 	user-select: none;
 }
 
-// Default panel positioning (popover style)
+// Default panel positioning (popover style - opens downward)
 dropdown-panel {
 	position: absolute;
 	top: 100%;
 	left: 0;
 	opacity: 0;
 	pointer-events: none;
+}
+
+// Right-opening panel positioning (for nested menus)
+dropdown-panel[opens='right'] {
+	top: 0;
+	left: 100%;
 }
 
 // Wide panel variant (full-width mega menu style)

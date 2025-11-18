@@ -1,37 +1,33 @@
 'use strict';
 
 function styleInject(css, ref) {
-	if (ref === void 0) ref = {};
-	var insertAt = ref.insertAt;
+  if ( ref === void 0 ) ref = {};
+  var insertAt = ref.insertAt;
 
-	if (!css || typeof document === 'undefined') {
-		return;
-	}
+  if (!css || typeof document === 'undefined') { return; }
 
-	var head =
-		document.head || document.getElementsByTagName('head')[0];
-	var style = document.createElement('style');
-	style.type = 'text/css';
+  var head = document.head || document.getElementsByTagName('head')[0];
+  var style = document.createElement('style');
+  style.type = 'text/css';
 
-	if (insertAt === 'top') {
-		if (head.firstChild) {
-			head.insertBefore(style, head.firstChild);
-		} else {
-			head.appendChild(style);
-		}
-	} else {
-		head.appendChild(style);
-	}
+  if (insertAt === 'top') {
+    if (head.firstChild) {
+      head.insertBefore(style, head.firstChild);
+    } else {
+      head.appendChild(style);
+    }
+  } else {
+    head.appendChild(style);
+  }
 
-	if (style.styleSheet) {
-		style.styleSheet.cssText = css;
-	} else {
-		style.appendChild(document.createTextNode(css));
-	}
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    style.appendChild(document.createTextNode(css));
+  }
 }
 
-var css_248z =
-	'dropdown-component {\n  display: inline-block;\n}\n\ndropdown-component:hover > dropdown-trigger::before,\ndropdown-trigger[aria-expanded=true]::before {\n  content: "";\n  position: absolute;\n  left: -10px;\n  top: 50%;\n  width: calc(100% + 20px);\n  height: 30px;\n  transform-origin: top center;\n  transform: perspective(50px) rotateX(50deg);\n  z-index: 10;\n}\n\ndropdown-trigger {\n  position: relative;\n  cursor: pointer;\n  user-select: none;\n}\n\ndropdown-panel {\n  position: absolute;\n  top: 100%;\n  left: 0;\n  opacity: 0;\n  pointer-events: none;\n}\n\ndropdown-panel[wide] {\n  width: 100%;\n}\n\ndropdown-component:hover > dropdown-panel,\ndropdown-panel[aria-hidden=false] {\n  opacity: 1;\n  pointer-events: auto;\n  visibility: visible;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImRyb3Bkb3duLWNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0UscUJBQXFCO0FBQ3ZCOztBQUVBOztFQUVFLFdBQVc7RUFDWCxrQkFBa0I7RUFDbEIsV0FBVztFQUNYLFFBQVE7RUFDUix3QkFBd0I7RUFDeEIsWUFBWTtFQUNaLDRCQUE0QjtFQUM1QiwyQ0FBMkM7RUFDM0MsV0FBVztBQUNiOztBQUVBO0VBQ0Usa0JBQWtCO0VBQ2xCLGVBQWU7RUFDZixpQkFBaUI7QUFDbkI7O0FBRUE7RUFDRSxrQkFBa0I7RUFDbEIsU0FBUztFQUNULE9BQU87RUFDUCxVQUFVO0VBQ1Ysb0JBQW9CO0FBQ3RCOztBQUVBO0VBQ0UsV0FBVztBQUNiOztBQUVBOztFQUVFLFVBQVU7RUFDVixvQkFBb0I7RUFDcEIsbUJBQW1CO0FBQ3JCIiwiZmlsZSI6ImRyb3Bkb3duLWNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiZHJvcGRvd24tY29tcG9uZW50IHtcbiAgZGlzcGxheTogaW5saW5lLWJsb2NrO1xufVxuXG5kcm9wZG93bi1jb21wb25lbnQ6aG92ZXIgPiBkcm9wZG93bi10cmlnZ2VyOjpiZWZvcmUsXG5kcm9wZG93bi10cmlnZ2VyW2FyaWEtZXhwYW5kZWQ9dHJ1ZV06OmJlZm9yZSB7XG4gIGNvbnRlbnQ6IFwiXCI7XG4gIHBvc2l0aW9uOiBhYnNvbHV0ZTtcbiAgbGVmdDogLTEwcHg7XG4gIHRvcDogNTAlO1xuICB3aWR0aDogY2FsYygxMDAlICsgMjBweCk7XG4gIGhlaWdodDogMzBweDtcbiAgdHJhbnNmb3JtLW9yaWdpbjogdG9wIGNlbnRlcjtcbiAgdHJhbnNmb3JtOiBwZXJzcGVjdGl2ZSg1MHB4KSByb3RhdGVYKDUwZGVnKTtcbiAgei1pbmRleDogMTA7XG59XG5cbmRyb3Bkb3duLXRyaWdnZXIge1xuICBwb3NpdGlvbjogcmVsYXRpdmU7XG4gIGN1cnNvcjogcG9pbnRlcjtcbiAgdXNlci1zZWxlY3Q6IG5vbmU7XG59XG5cbmRyb3Bkb3duLXBhbmVsIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICB0b3A6IDEwMCU7XG4gIGxlZnQ6IDA7XG4gIG9wYWNpdHk6IDA7XG4gIHBvaW50ZXItZXZlbnRzOiBub25lO1xufVxuXG5kcm9wZG93bi1wYW5lbFt3aWRlXSB7XG4gIHdpZHRoOiAxMDAlO1xufVxuXG5kcm9wZG93bi1jb21wb25lbnQ6aG92ZXIgPiBkcm9wZG93bi1wYW5lbCxcbmRyb3Bkb3duLXBhbmVsW2FyaWEtaGlkZGVuPWZhbHNlXSB7XG4gIG9wYWNpdHk6IDE7XG4gIHBvaW50ZXItZXZlbnRzOiBhdXRvO1xuICB2aXNpYmlsaXR5OiB2aXNpYmxlO1xufSJdfQ== */';
+var css_248z = "dropdown-component{display:inline-block}dropdown-component:hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:before{content:\"\";height:30px;left:-10px;position:absolute;top:50%;transform:perspective(50px) rotateX(50deg);transform-origin:top center;width:calc(100% + 20px);z-index:10}dropdown-component:has(>dropdown-panel[opens=right]):hover>dropdown-trigger:before,dropdown-trigger[aria-expanded=true]:has(~dropdown-panel[opens=right]):before{height:calc(100% + 20px);left:50%;top:-10px;transform:perspective(50px) rotateY(-50deg);transform-origin:center left;width:30px}dropdown-trigger{cursor:pointer;position:relative;user-select:none}dropdown-panel{left:0;opacity:0;pointer-events:none;position:absolute;top:100%}dropdown-panel[opens=right]{left:100%;top:0}dropdown-panel[wide]{width:100%}dropdown-component:hover>dropdown-panel,dropdown-panel[aria-hidden=false]{opacity:1;pointer-events:auto;visibility:visible}";
 styleInject(css_248z);
 
 /**
@@ -213,6 +209,7 @@ class DropdownPanel extends HTMLElement {
  * @version 0.1.0
  */
 
+
 // define custom elements if not already defined
 if (!customElements.get('dropdown-component')) {
 	customElements.define('dropdown-component', DropdownComponent);
@@ -229,4 +226,3 @@ if (!customElements.get('dropdown-panel')) {
 exports.DropdownComponent = DropdownComponent;
 exports.DropdownPanel = DropdownPanel;
 exports.DropdownTrigger = DropdownTrigger;
-//# sourceMappingURL=dropdown-panel.cjs.js.map

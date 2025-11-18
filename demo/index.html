@@ -151,7 +151,7 @@
 				padding: 0.5rem 0;
 				min-width: 180px;
 				z-index: 20;
-				overflow: hidden;
+				/* Note: overflow: hidden would clip nested panels */
 			}
 
 			/* Default popover panels - animated entrance */
@@ -185,6 +185,32 @@
 				filter: none;
 				transform: none;
 				transition: opacity 200ms ease-out;
+			}
+
+			/* Nested dropdown styling */
+			.nested-dropdown {
+				display: block;
+				position: relative;
+			}
+
+			.nested-dropdown dropdown-trigger {
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			/* Right-pointing triangle for nested dropdown triggers */
+			.nested-dropdown dropdown-trigger::after {
+				content: '▶';
+				transform: none;
+			}
+
+			/* Right-opening panels for nested menus */
+			dropdown-panel[opens='right'] {
+				margin-left: -5px;
+				margin-top: 0;
+				border-radius: 4px;
 			}
 		</style>
 	</head>
@@ -248,7 +274,19 @@
 									<a href="#" class="dropdown-item">Documentation</a>
 									<a href="#" class="dropdown-item">Tutorials</a>
 									<a href="#" class="dropdown-item">Blog</a>
-									<a href="#" class="dropdown-item">Support</a>
+
+									<!-- Nested dropdown example -->
+									<dropdown-component class="nested-dropdown">
+										<dropdown-trigger class="dropdown-item">
+											Support
+										</dropdown-trigger>
+										<dropdown-panel opens="right">
+											<a href="#" class="dropdown-item">Contact Us</a>
+											<a href="#" class="dropdown-item">About Us</a>
+											<a href="#" class="dropdown-item">Help Center</a>
+											<a href="#" class="dropdown-item">FAQ</a>
+										</dropdown-panel>
+									</dropdown-component>
 								</dropdown-panel>
 							</dropdown-component>
 						</li>

@@ -65,25 +65,53 @@ For a larger "mega menu" style layout, add the `wide` attribute to `<dropdown-pa
 </dropdown-component>
 ```
 
-## Panel Styles
+For nested menus, use the `opens="right"` attribute to make panels open to the right:
 
-The `<dropdown-panel>` component supports two layout styles via the `wide` attribute:
+```html
+<dropdown-component>
+	<dropdown-trigger>Resources</dropdown-trigger>
+	<dropdown-panel>
+		<a href="#" class="dropdown-item">Documentation</a>
 
-### Default (Popover Style)
+		<!-- Nested dropdown -->
+		<dropdown-component>
+			<dropdown-trigger class="dropdown-item">Support</dropdown-trigger>
+			<dropdown-panel opens="right">
+				<a href="#" class="dropdown-item">Contact Us</a>
+				<a href="#" class="dropdown-item">Help Center</a>
+				<a href="#" class="dropdown-item">FAQ</a>
+			</dropdown-panel>
+		</dropdown-component>
+	</dropdown-panel>
+</dropdown-component>
+```
 
-- 🧩 **Compact popover panel**, positioned relative to the trigger button
-- Great for short or simple option lists
-- Includes smooth animation effects (blur, scale, transform)
-- Use when you need a small group of links or actions
+## Panel Attributes
 
-### Wide (Mega Menu Style)
+The `<dropdown-panel>` component supports the following attributes:
+
+### `wide` - Full-Width Mega Menu
 
 - 🧩 **Full-width panel**, designed for larger navigation menus
 - Add the `wide` attribute: `<dropdown-panel wide>`
 - Supports multiple columns for richer layouts
 - Use when you have multiple categories or larger navigation needs
 
-Both styles are accessible, keyboard-friendly, and customizable!
+### `opens="right"` - Right-Opening Panels
+
+- 🧩 **Right-opening panel**, perfect for nested menus
+- Add `opens="right"` attribute: `<dropdown-panel opens="right">`
+- Opens to the right of the trigger instead of below
+- Use for submenus and nested navigation
+
+### Default (Popover Style)
+
+- 🧩 **Compact popover panel**, positioned below the trigger button
+- No attributes needed - this is the default behavior
+- Great for short or simple option lists
+- Use when you need a small group of links or actions
+
+All styles are accessible, keyboard-friendly, and customizable!
 
 ## Styling
 
@@ -105,6 +133,7 @@ dropdown-panel {
 	min-width: 200px;
 	border-radius: 4px;
 	z-index: 1000;
+	/* Avoid overflow: hidden - it clips nested panels */
 }
 
 /* Add animations for popover panels */

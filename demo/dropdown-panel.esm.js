@@ -177,6 +177,7 @@ class DropdownPanel extends HTMLElement {
  * @version 0.1.0
  */
 
+
 // define custom elements if not already defined
 if (!customElements.get('dropdown-component')) {
 	customElements.define('dropdown-component', DropdownComponent);
@@ -191,4 +192,3 @@ if (!customElements.get('dropdown-panel')) {
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };
-//# sourceMappingURL=dropdown-panel.esm.js.map
