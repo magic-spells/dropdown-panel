@@ -226,37 +226,50 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
    - Sets up ARIA relationships
    - Adds event listeners
 
-2. **User hovers on dropdown-component** (desktop):
+2. **User hovers on dropdown-component** (desktop/pen):
 
-   - `mouseenter` event triggers `show()` method
+   - `pointerenter` event triggers `show()` method (touch input is ignored — `e.pointerType !== 'touch'`)
    - Sets `aria-expanded="true"` on trigger
    - Sets `aria-hidden="false"` on panel
+   - Registers document `pointerdown` listener for outside dismiss
    - CSS transitions make panel visible
 
-3. **User clicks/taps trigger** (desktop and touch):
+3. **User clicks/taps trigger** (all devices):
 
    - `click` event triggers `toggle()` method
    - Opens panel if closed, closes if open
-   - Primary interaction method on touch devices
+   - On touch devices this is the only open/close mechanism (hover path is skipped)
 
-4. **User leaves dropdown-component**:
+4. **User leaves dropdown-component** (desktop/pen):
 
-   - `mouseleave` event triggers `hide()` method
+   - `pointerleave` event triggers `hide()` method (touch input is ignored)
    - Reverses ARIA states
+   - Removes document `pointerdown` listener
    - CSS transitions hide panel
 
-5. **Keyboard interaction**:
+5. **User taps/clicks outside an open panel** (all devices):
+
+   - Document-level `pointerdown` listener (registered when panel opens)
+   - Calls `hide()` if event target is not inside the component (`!this.contains(event.target)`)
+   - Provides close-on-outside for touch devices where `pointerleave` doesn't fire reliably
+
+6. **Keyboard interaction**:
    - Enter/Space on trigger toggles panel
    - Escape closes current panel only (uses `event.stopPropagation()` to prevent closing parent menus)
    - Focus returns to trigger when panel closes
    - Progressive disclosure: nested menus close one level at a time
+   - Focus-leave does NOT close the panel (intentional — users need to tab into the panel to reach links)
 
 ### Event Flow
 
 ```
 User Action (hover/click/tap/key) → dropdown-component listens → Calls show()/hide()/toggle()
                                                                 ↓
+                                                   Guards: show/hide are idempotent (early return if already in target state)
+                                                                ↓
                                                    Updates ARIA attributes
+                                                                ↓
+                                                   Registers/removes document pointerdown listener
                                                                 ↓
                                                    CSS responds to [aria-hidden] changes
                                                                 ↓
@@ -490,8 +503,7 @@ Potential features to add:
 2. **Offset attribute**: `<dropdown-panel offset="10px">` for custom spacing
 3. **Click-only mode**: Disable hover, only toggle on click
 4. **Animation options**: Different animation styles via attributes
-5. **Auto-close on click outside**: Option to close when clicking outside
-6. **Mobile drawer mode**: Convert to bottom sheet on mobile devices
+5. **Mobile drawer mode**: Convert to bottom sheet on mobile devices
 
 ## Debugging Tips
 
@@ -528,6 +540,9 @@ Potential features to add:
   - Easy to integrate into any project (works with Tailwind, CSS-in-JS, etc.)
   - Added `opens="right"` attribute for nested dropdown menus
   - Added click/tap toggle on trigger for touch device support
+  - Fixed double-tap bug on iPad — replaced `mouseenter`/`mouseleave` with `pointerenter`/`pointerleave`, skipping touch input so only `click` → `toggle()` runs
+  - Added close-on-outside via document `pointerdown` listener (registered on show, removed on hide)
+  - Made `show()`/`hide()` idempotent to prevent double listener registration
   - Fixed hover/ARIA visibility desync — panel visibility now driven solely by ARIA state
   - Fixed ID collisions when multiple components mount simultaneously (replaced `Date.now()` with counter)
   - Added `disconnectedCallback` for proper listener cleanup on unmount

@@ -51,8 +51,17 @@ export class DropdownComponent extends HTMLElement {
 		_.hide();
 
 		// store handler references for cleanup in disconnectedCallback
-		_._onMouseEnter = () => _.show();
-		_._onMouseLeave = () => _.hide();
+		_._onPointerEnter = (e) => {
+			if (e.pointerType !== 'touch') _.show();
+		};
+		_._onPointerLeave = (e) => {
+			if (e.pointerType !== 'touch') _.hide();
+		};
+		_._onDocumentPointerDown = (event) => {
+			if (!_.contains(event.target)) {
+				_.hide();
+			}
+		};
 		_._onTriggerClick = () => _.toggle();
 		_._onTriggerKeydown = (event) => {
 			if (event.key === 'Enter' || event.key === ' ') {
@@ -79,9 +88,9 @@ export class DropdownComponent extends HTMLElement {
 			}
 		};
 
-		// mouse enter and leave events on main dropdown-component element
-		_.addEventListener('mouseenter', _._onMouseEnter);
-		_.addEventListener('mouseleave', _._onMouseLeave);
+		// pointer enter and leave events (skip touch — touch uses click/tap only)
+		_.addEventListener('pointerenter', _._onPointerEnter);
+		_.addEventListener('pointerleave', _._onPointerLeave);
 
 		// click/tap toggle on trigger
 		_.trigger.addEventListener('click', _._onTriggerClick);
@@ -95,8 +104,9 @@ export class DropdownComponent extends HTMLElement {
 
 	disconnectedCallback() {
 		const _ = this;
-		_.removeEventListener('mouseenter', _._onMouseEnter);
-		_.removeEventListener('mouseleave', _._onMouseLeave);
+		_.removeEventListener('pointerenter', _._onPointerEnter);
+		_.removeEventListener('pointerleave', _._onPointerLeave);
+		document.removeEventListener('pointerdown', _._onDocumentPointerDown);
 		if (_.trigger) {
 			_.trigger.removeEventListener('click', _._onTriggerClick);
 			_.trigger.removeEventListener('keydown', _._onTriggerKeydown);
@@ -117,16 +127,20 @@ export class DropdownComponent extends HTMLElement {
 
 	show() {
 		const _ = this;
+		if (_.panel.getAttribute('aria-hidden') === 'false') return;
 		_.panel.setAttribute('aria-hidden', 'false');
 		_.panel.removeAttribute('inert');
 		_.trigger.setAttribute('aria-expanded', 'true');
+		document.addEventListener('pointerdown', _._onDocumentPointerDown);
 	}
 
 	hide() {
 		const _ = this;
+		if (_.panel.getAttribute('aria-hidden') === 'true') return;
 		_.panel.setAttribute('aria-hidden', 'true');
 		_.panel.setAttribute('inert', '');
 		_.trigger.setAttribute('aria-expanded', 'false');
+		document.removeEventListener('pointerdown', _._onDocumentPointerDown);
 	}
 }
 
