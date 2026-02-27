@@ -226,20 +226,26 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
    - Sets up ARIA relationships
    - Adds event listeners
 
-2. **User hovers on dropdown-component**:
+2. **User hovers on dropdown-component** (desktop):
 
    - `mouseenter` event triggers `show()` method
    - Sets `aria-expanded="true"` on trigger
    - Sets `aria-hidden="false"` on panel
    - CSS transitions make panel visible
 
-3. **User leaves dropdown-component**:
+3. **User clicks/taps trigger** (desktop and touch):
+
+   - `click` event triggers `toggle()` method
+   - Opens panel if closed, closes if open
+   - Primary interaction method on touch devices
+
+4. **User leaves dropdown-component**:
 
    - `mouseleave` event triggers `hide()` method
    - Reverses ARIA states
    - CSS transitions hide panel
 
-4. **Keyboard interaction**:
+5. **Keyboard interaction**:
    - Enter/Space on trigger toggles panel
    - Escape closes current panel only (uses `event.stopPropagation()` to prevent closing parent menus)
    - Focus returns to trigger when panel closes
@@ -248,13 +254,13 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 ### Event Flow
 
 ```
-User Action → dropdown-component listens → Calls show()/hide()
-                                         ↓
-                            Updates ARIA attributes
-                                         ↓
-                            CSS responds to [aria-hidden] changes
-                                         ↓
-                            Panel animates in/out
+User Action (hover/click/tap/key) → dropdown-component listens → Calls show()/hide()/toggle()
+                                                                ↓
+                                                   Updates ARIA attributes
+                                                                ↓
+                                                   CSS responds to [aria-hidden] changes
+                                                                ↓
+                                                   Panel animates in/out
 ```
 
 ## Styling System
@@ -303,6 +309,7 @@ dropdown-panel {
 	top: 100%;
 	left: 0;
 	opacity: 0;
+	visibility: hidden;
 	pointer-events: none;
 }
 
@@ -317,8 +324,7 @@ dropdown-panel[wide] {
 	width: 100%;
 }
 
-/* Visible states */
-dropdown-component:hover > dropdown-panel,
+/* Visible state - driven solely by ARIA state set in JS */
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
 	pointer-events: auto;
@@ -399,7 +405,6 @@ dropdown-panel:not([wide]) {
 	transition: all 200ms ease-out;
 }
 
-dropdown-component:hover > dropdown-panel:not([wide]),
 dropdown-panel:not([wide])[aria-hidden='false'] {
 	transform: translateY(0) scale(1);
 }
@@ -522,6 +527,10 @@ Potential features to add:
   - Now ships with only functional CSS under 1KB (962 bytes minified)
   - Easy to integrate into any project (works with Tailwind, CSS-in-JS, etc.)
   - Added `opens="right"` attribute for nested dropdown menus
+  - Added click/tap toggle on trigger for touch device support
+  - Fixed hover/ARIA visibility desync — panel visibility now driven solely by ARIA state
+  - Fixed ID collisions when multiple components mount simultaneously (replaced `Date.now()` with counter)
+  - Added `disconnectedCallback` for proper listener cleanup on unmount
   - Fixed keyboard navigation: Escape key uses `stopPropagation()` for progressive menu closure
   - Added hover bridge support for right-opening panels
   - Documented SVG arrow approach (avoiding pseudo-elements that block hover bridge)
@@ -552,7 +561,7 @@ Before publishing to npm:
 
 ## Notes for Future Development
 
-- The component uses `Date.now()` for generating unique IDs. Consider using a more robust ID generator if needed.
+- The component uses a module-level counter (`_uid`) for generating unique IDs. IDs reset on page reload but are unique within a session.
 - The `inert` attribute is used for hiding panels. Ensure polyfill for older browsers if needed.
 - Focus management could be enhanced to trap focus within open panels.
 - Consider adding RTL (right-to-left) language support.

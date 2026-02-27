@@ -57,7 +57,9 @@ dropdown-panel {
 	top: 100%;
 	left: 0;
 	opacity: 0;
+	visibility: hidden;
 	pointer-events: none;
+	transition: opacity 200ms ease-out, visibility 200ms ease-out;
 }
 
 /* Right-opening panel positioning (for nested menus) */
@@ -71,8 +73,7 @@ dropdown-panel[wide] {
 	width: 100%;
 }
 
-/* Visible states - show panel on hover or when aria-hidden="false" */
-dropdown-component:hover > dropdown-panel,
+/* Visible state - driven solely by ARIA state set in JS */
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
 	pointer-events: auto;

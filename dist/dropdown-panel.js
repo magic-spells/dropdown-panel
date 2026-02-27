@@ -10,6 +10,9 @@
 	 * @class DropdownComponent
 	 * @extends HTMLElement
 	 */
+
+	let _uid$1 = 0;
+
 	class DropdownComponent extends HTMLElement {
 		constructor() {
 			super();
@@ -36,12 +39,12 @@
 			}
 
 			// assign unique id to panel if needed
-			const panelId = _.panel.id || `dropdown-panel-${Date.now()}`;
+			const panelId = _.panel.id || `dropdown-panel-${++_uid$1}`;
 			_.panel.id = panelId;
 
 			// assign unique id to trigger if needed (for aria-labelledby)
 			if (!_.trigger.id) {
-				_.trigger.id = `dropdown-trigger-${Date.now()}`;
+				_.trigger.id = `dropdown-trigger-${++_uid$1}`;
 			}
 
 			// initialize aria attributes
@@ -53,12 +56,11 @@
 			// initial state
 			_.hide();
 
-			// mouse enter and leave events on main dropdown-component element
-			_.addEventListener('mouseenter', () => _.show());
-			_.addEventListener('mouseleave', () => _.hide());
-
-			// show or hide with enter
-			_.trigger.addEventListener('keydown', (event) => {
+			// store handler references for cleanup in disconnectedCallback
+			_._onMouseEnter = () => _.show();
+			_._onMouseLeave = () => _.hide();
+			_._onTriggerClick = () => _.toggle();
+			_._onTriggerKeydown = (event) => {
 				if (event.key === 'Enter' || event.key === ' ') {
 					event.preventDefault();
 					_.toggle();
@@ -73,17 +75,41 @@
 					}
 					// If panel is closed, do nothing - let event bubble to parent
 				}
-			});
-
-			// hide panel when escape
-			_.panel.addEventListener('keydown', (event) => {
+			};
+			_._onPanelKeydown = (event) => {
 				if (event.key === 'Escape') {
 					event.preventDefault();
 					event.stopPropagation(); // Prevent closing parent menus
 					_.hide();
 					_.trigger.focus();
 				}
-			});
+			};
+
+			// mouse enter and leave events on main dropdown-component element
+			_.addEventListener('mouseenter', _._onMouseEnter);
+			_.addEventListener('mouseleave', _._onMouseLeave);
+
+			// click/tap toggle on trigger
+			_.trigger.addEventListener('click', _._onTriggerClick);
+
+			// show or hide with enter/space, close with escape
+			_.trigger.addEventListener('keydown', _._onTriggerKeydown);
+
+			// hide panel when escape pressed inside panel
+			_.panel.addEventListener('keydown', _._onPanelKeydown);
+		}
+
+		disconnectedCallback() {
+			const _ = this;
+			_.removeEventListener('mouseenter', _._onMouseEnter);
+			_.removeEventListener('mouseleave', _._onMouseLeave);
+			if (_.trigger) {
+				_.trigger.removeEventListener('click', _._onTriggerClick);
+				_.trigger.removeEventListener('keydown', _._onTriggerKeydown);
+			}
+			if (_.panel) {
+				_.panel.removeEventListener('keydown', _._onPanelKeydown);
+			}
 		}
 
 		toggle() {
@@ -121,6 +147,9 @@
 	 * @class DropdownTrigger
 	 * @extends HTMLElement
 	 */
+
+	let _uid = 0;
+
 	class DropdownTrigger extends HTMLElement {
 		constructor() {
 			super();
@@ -134,7 +163,7 @@
 
 			// ensure trigger has an ID for ARIA relationships
 			if (!_.id) {
-				_.id = `dropdown-trigger-${Date.now()}`;
+				_.id = `dropdown-trigger-${++_uid}`;
 			}
 
 			// ensure trigger is focusable

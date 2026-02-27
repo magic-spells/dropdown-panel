@@ -4,6 +4,9 @@
  * @class DropdownTrigger
  * @extends HTMLElement
  */
+
+let _uid = 0;
+
 export class DropdownTrigger extends HTMLElement {
 	constructor() {
 		super();
@@ -17,7 +20,7 @@ export class DropdownTrigger extends HTMLElement {
 
 		// ensure trigger has an ID for ARIA relationships
 		if (!_.id) {
-			_.id = `dropdown-trigger-${Date.now()}`;
+			_.id = `dropdown-trigger-${++_uid}`;
 		}
 
 		// ensure trigger is focusable
