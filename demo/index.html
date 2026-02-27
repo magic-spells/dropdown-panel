@@ -161,12 +161,12 @@
 				will-change: opacity, transform, filter;
 				transition:
 					opacity 200ms ease-out,
+					visibility 200ms ease-out,
 					transform 200ms ease-out,
 					filter 200ms ease-out;
 			}
 
 			/* Visible state for popover panels */
-			dropdown-component:hover > dropdown-panel:not([wide]),
 			dropdown-panel:not([wide])[aria-hidden='false'] {
 				transform: translateY(0) scale(1);
 				filter: blur(0px);
@@ -182,13 +182,12 @@
 				padding: 16px 32px;
 				filter: none;
 				transform: none;
-				transition: opacity 200ms ease-out;
+				transition: opacity 200ms ease-out, visibility 200ms ease-out;
 			}
 
 			/* Nested dropdown styling */
 			.nested-dropdown {
 				display: block;
-				position: relative;
 			}
 
 			.nested-dropdown dropdown-trigger {
