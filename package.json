@@ -9,7 +9,6 @@
 	"module": "dist/dropdown-panel.esm.js",
 	"unpkg": "dist/dropdown-panel.min.js",
 	"style": "dist/dropdown-panel.min.css",
-	"sass": "dist/dropdown-panel.scss",
 	"exports": {
 		".": {
 			"import": "./dist/dropdown-panel.esm.js",
@@ -18,8 +17,7 @@
 		},
 		"./css": "./dist/dropdown-panel.css",
 		"./css/min": "./dist/dropdown-panel.min.css",
-		"./scss": "./dist/dropdown-panel.scss",
-		"./scss/*": "./dist/scss/*"
+		"./css/src": "./dist/dropdown-panel.src.css"
 	},
 	"sideEffects": true,
 	"repository": {
@@ -73,7 +71,6 @@
 		"rollup": "^3.0.0",
 		"rollup-plugin-copy": "^3.5.0",
 		"rollup-plugin-postcss": "^4.0.2",
-		"rollup-plugin-serve": "^1.1.1",
-		"sass": "^1.86.3"
+		"rollup-plugin-serve": "^1.1.1"
 	}
 }

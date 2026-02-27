@@ -1,4 +1,4 @@
 /**
- * @file Styles entry point - generates CSS from SCSS
+ * @file Styles entry point - generates CSS output
  */
-import './dropdown-component.scss';
+import './dropdown-component.css';

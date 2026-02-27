@@ -120,7 +120,7 @@ All styles are accessible, keyboard-friendly, and customizable!
 
 The component includes only essential functional styles:
 
-- Positioning logic (absolute/relative based on `wide` attribute)
+- CSS-based positioning logic (uses `:has()` to set relative/static based on `wide` attribute)
 - Show/hide visibility states
 - Hover bridge for better UX
 

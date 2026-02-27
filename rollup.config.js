@@ -29,9 +29,9 @@ export default [
 			copy({
 				targets: [
 					{
-						src: 'src/dropdown-component.scss',
+						src: 'src/dropdown-component.css',
 						dest: 'dist',
-						rename: 'dropdown-panel.scss',
+						rename: 'dropdown-panel.src.css',
 					},
 				],
 			}),

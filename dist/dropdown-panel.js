@@ -35,13 +35,6 @@
 				return;
 			}
 
-			// check if panel has 'wide' attribute for full-width layout
-			if (_.panel.hasAttribute('wide')) {
-				_.style.position = 'static';
-			} else {
-				_.style.position = 'relative';
-			}
-
 			// assign unique id to panel if needed
 			const panelId = _.panel.id || `dropdown-panel-${Date.now()}`;
 			_.panel.id = panelId;

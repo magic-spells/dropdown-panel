@@ -30,7 +30,7 @@ The library consists of three custom elements that work together:
 ```
 src/
 ├── index.js                          # Main entry point, registers all components
-├── dropdown-component.scss           # All styles for the component
+├── dropdown-component.css            # All styles for the component
 └── components/
     ├── dropdown-component.js         # Main orchestrator component
     ├── dropdown-trigger.js           # Trigger button component
@@ -138,12 +138,14 @@ The component supports nested dropdowns inside panel content. Use `opens="right"
 
 **Implementation:**
 
-```javascript
-// In dropdown-component.js connectedCallback()
-if (_.panel.hasAttribute('wide')) {
-	_.style.position = 'static'; // Full-width layout
-} else {
-	_.style.position = 'relative'; // Popover layout
+```css
+/* In dropdown-component.css - position logic handled purely in CSS */
+dropdown-component:has(> dropdown-panel:not([wide])) {
+	position: relative;
+}
+
+dropdown-component:has(> dropdown-panel[wide]) {
+	position: static;
 }
 ```
 
@@ -174,11 +176,11 @@ Following [Adrian Roselli's accessibility guidance](https://adrianroselli.com/20
 **Rationale:**
 Prevents styles from affecting nested dropdowns inside panel content.
 
-```scss
-// ✓ Correct - only affects direct children
+```css
+/* ✓ Correct - only affects direct children */
 dropdown-component:hover > dropdown-panel
 
-// ✗ Wrong - would affect nested panels too
+/* ✗ Wrong - would affect nested panels too */
 dropdown-component:hover dropdown-panel
 ```
 
@@ -195,14 +197,14 @@ dropdown-component:hover dropdown-panel
 
 **Implementation:**
 
-```scss
-// Right-opening panels position to the right
+```css
+/* Right-opening panels position to the right */
 dropdown-panel[opens='right'] {
 	top: 0;
 	left: 100%;
 }
 
-// Horizontal bridge for right-opening panels
+/* Horizontal bridge for right-opening panels */
 dropdown-component:has(> dropdown-panel[opens='right']):hover
 	> dropdown-trigger::before {
 	left: 50%;
@@ -220,7 +222,6 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 1. **On mount** (`dropdown-component.connectedCallback`):
 
    - Finds direct child `<dropdown-trigger>` and `<dropdown-panel>`
-   - Checks for `wide` attribute and sets positioning
    - Assigns IDs if needed
    - Sets up ARIA relationships
    - Adds event listeners
@@ -262,20 +263,28 @@ User Action → dropdown-component listens → Calls show()/hide()
 
 The component includes ONLY the CSS required for functionality:
 
-```scss
-// Component display
+```css
+/* Component display and positioning */
 dropdown-component {
 	display: inline-block;
 }
 
-// Trigger basics
+dropdown-component:has(> dropdown-panel:not([wide])) {
+	position: relative;
+}
+
+dropdown-component:has(> dropdown-panel[wide]) {
+	position: static;
+}
+
+/* Trigger basics */
 dropdown-trigger {
-	position: relative; // Needed for hover bridge
+	position: relative; /* Needed for hover bridge */
 	cursor: pointer;
 	user-select: none;
 }
 
-// Hover bridge - invisible area between trigger and panel
+/* Hover bridge - invisible area between trigger and panel */
 dropdown-component:hover > dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']::before {
 	content: '';
@@ -288,7 +297,7 @@ dropdown-trigger[aria-expanded='true']::before {
 	z-index: 10;
 }
 
-// Panel positioning (default - opens downward)
+/* Panel positioning (default - opens downward) */
 dropdown-panel {
 	position: absolute;
 	top: 100%;
@@ -297,18 +306,18 @@ dropdown-panel {
 	pointer-events: none;
 }
 
-// Right-opening panels (for nested menus)
+/* Right-opening panels (for nested menus) */
 dropdown-panel[opens='right'] {
 	top: 0;
 	left: 100%;
 }
 
-// Wide variant (full-width mega menu)
+/* Wide variant (full-width mega menu) */
 dropdown-panel[wide] {
 	width: 100%;
 }
 
-// Visible states
+/* Visible states */
 dropdown-component:hover > dropdown-panel,
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
@@ -355,7 +364,7 @@ Plus CSS outputs:
 
 - `dist/dropdown-panel.css` (expanded)
 - `dist/dropdown-panel.min.css` (minified)
-- `dist/dropdown-panel.scss` (source)
+- `dist/dropdown-panel.src.css` (source copy)
 
 ## Common Styling Patterns
 

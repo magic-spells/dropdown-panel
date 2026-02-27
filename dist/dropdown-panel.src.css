@@ -1,15 +1,23 @@
-// Dropdown Panel Web Component - Minimal Functional Styles
-// This file contains ONLY the styles required for functionality.
-// All visual styling (colors, shadows, animations) should be added by the user.
+/* Dropdown Panel Web Component - Minimal Functional Styles */
+/* This file contains ONLY the styles required for functionality. */
+/* All visual styling (colors, shadows, animations) should be added by the user. */
 
 dropdown-component {
 	display: inline-block;
 }
 
-// Hover bridge - creates invisible area between trigger and panel
-// This prevents the dropdown from closing when mouse moves between them
+dropdown-component:has(> dropdown-panel:not([wide])) {
+	position: relative;
+}
 
-// Vertical bridge for downward-opening panels (default)
+dropdown-component:has(> dropdown-panel[wide]) {
+	position: static;
+}
+
+/* Hover bridge - creates invisible area between trigger and panel */
+/* This prevents the dropdown from closing when mouse moves between them */
+
+/* Vertical bridge for downward-opening panels (default) */
 dropdown-component:hover > dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']::before {
 	content: '';
@@ -23,7 +31,7 @@ dropdown-trigger[aria-expanded='true']::before {
 	z-index: 10;
 }
 
-// Horizontal bridge for right-opening panels
+/* Horizontal bridge for right-opening panels */
 dropdown-component:has(> dropdown-panel[opens='right']):hover
 	> dropdown-trigger::before,
 dropdown-trigger[aria-expanded='true']:has(
@@ -43,7 +51,7 @@ dropdown-trigger {
 	user-select: none;
 }
 
-// Default panel positioning (popover style - opens downward)
+/* Default panel positioning (popover style - opens downward) */
 dropdown-panel {
 	position: absolute;
 	top: 100%;
@@ -52,18 +60,18 @@ dropdown-panel {
 	pointer-events: none;
 }
 
-// Right-opening panel positioning (for nested menus)
+/* Right-opening panel positioning (for nested menus) */
 dropdown-panel[opens='right'] {
 	top: 0;
 	left: 100%;
 }
 
-// Wide panel variant (full-width mega menu style)
+/* Wide panel variant (full-width mega menu style) */
 dropdown-panel[wide] {
 	width: 100%;
 }
 
-// Visible states - show panel on hover or when aria-hidden="false"
+/* Visible states - show panel on hover or when aria-hidden="false" */
 dropdown-component:hover > dropdown-panel,
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
