@@ -533,32 +533,11 @@ Potential features to add:
 
 ## Version History
 
-- **v0.3.0** (upcoming) - Major update: Minimal styling & nested dropdown support
+- **v1.0.0** - Stable release: Touch fixes, outside dismiss, pointer events
 
-  - **BREAKING:** Removed all opinionated styles (colors, shadows, animations, spacing)
-  - Now ships with only functional CSS under 1KB (962 bytes minified)
-  - Easy to integrate into any project (works with Tailwind, CSS-in-JS, etc.)
-  - Added `opens="right"` attribute for nested dropdown menus
-  - Added click/tap toggle on trigger for touch device support
-  - Fixed double-tap bug on iPad — replaced `mouseenter`/`mouseleave` with `pointerenter`/`pointerleave`, skipping touch input so only `click` → `toggle()` runs
-  - Added close-on-outside via document `pointerdown` listener (registered on show, removed on hide)
+  - Fixed double-tap bug on iPad — replaced `mouseenter`/`mouseleave` with `pointerenter`/`pointerleave`, skipping touch input
+  - Added close-on-outside via document `pointerdown` listener
   - Made `show()`/`hide()` idempotent to prevent double listener registration
-  - Fixed hover/ARIA visibility desync — panel visibility now driven solely by ARIA state
-  - Fixed ID collisions when multiple components mount simultaneously (replaced `Date.now()` with counter)
-  - Added `disconnectedCallback` for proper listener cleanup on unmount
-  - Fixed keyboard navigation: Escape key uses `stopPropagation()` for progressive menu closure
-  - Added hover bridge support for right-opening panels
-  - Documented SVG arrow approach (avoiding pseudo-elements that block hover bridge)
-  - Removed `overflow: hidden` to support nested panels
-  - Updated all documentation with 2-space indentation for GitHub
-  - Moved example styles to demo for reference
-  - Added `.prettierignore` for markdown files
-
-- **v0.2.2** - Refactored to single `<dropdown-panel>` component with `wide` attribute
-  - Removed `<dropdown-menu>` component
-  - Removed ARIA menu roles per accessibility best practices
-  - Added direct child selectors to prevent nested dropdown issues
-  - Fixed export bug (DropdownMenu was imported but not exported)
 
 ## Publishing Checklist
 
@@ -570,7 +549,7 @@ Before publishing to npm:
 4. Test demo locally with `npm run dev`
 5. Update README.md with any API changes
 6. Commit all changes
-7. Create git tag: `git tag v0.x.x`
+7. Create git tag: `git tag vX.X.X`
 8. Push with tags: `git push --tags`
 9. Run `npm publish` (requires npm auth)
 
