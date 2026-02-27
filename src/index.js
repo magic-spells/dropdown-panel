@@ -1,9 +1,3 @@
-/**
- * @file Main entry point for dropdown-panel web component
- * @author Cory Schulz
- * @version 0.1.0
- */
-
 // import components
 import { DropdownComponent } from './components/dropdown-component.js';
 import { DropdownTrigger } from './components/dropdown-trigger.js';

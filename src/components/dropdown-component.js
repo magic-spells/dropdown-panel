@@ -106,7 +106,10 @@ export class DropdownComponent extends HTMLElement {
 		const _ = this;
 		_.removeEventListener('pointerenter', _._onPointerEnter);
 		_.removeEventListener('pointerleave', _._onPointerLeave);
-		document.removeEventListener('pointerdown', _._onDocumentPointerDown);
+		document.removeEventListener(
+			'pointerdown',
+			_._onDocumentPointerDown
+		);
 		if (_.trigger) {
 			_.trigger.removeEventListener('click', _._onTriggerClick);
 			_.trigger.removeEventListener('keydown', _._onTriggerKeydown);
@@ -131,7 +134,10 @@ export class DropdownComponent extends HTMLElement {
 		_.panel.setAttribute('aria-hidden', 'false');
 		_.panel.removeAttribute('inert');
 		_.trigger.setAttribute('aria-expanded', 'true');
-		document.addEventListener('pointerdown', _._onDocumentPointerDown);
+		document.addEventListener(
+			'pointerdown',
+			_._onDocumentPointerDown
+		);
 	}
 
 	hide() {
@@ -140,11 +146,9 @@ export class DropdownComponent extends HTMLElement {
 		_.panel.setAttribute('aria-hidden', 'true');
 		_.panel.setAttribute('inert', '');
 		_.trigger.setAttribute('aria-expanded', 'false');
-		document.removeEventListener('pointerdown', _._onDocumentPointerDown);
+		document.removeEventListener(
+			'pointerdown',
+			_._onDocumentPointerDown
+		);
 	}
-}
-
-// define the element
-if (!customElements.get('dropdown-component')) {
-	customElements.define('dropdown-component', DropdownComponent);
 }
