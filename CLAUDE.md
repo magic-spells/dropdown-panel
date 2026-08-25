@@ -250,11 +250,25 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 
 ### 7. Effects Live in a Second Stylesheet
 
-**Decision:** `effect="fade|slide|scale|blur|swing"` is a no-op unless `@magic-spells/dropdown-panel/css/effects` is loaded.
+**Decision:** `effect="fade|slide|scale|blur|swing"` and the whole trigger-arrow feature are no-ops unless `@magic-spells/dropdown-panel/css/effects` is loaded.
 
 **Rationale:** Nobody pays for animation they did not ask for, and the core stays under a kilobyte. Effects are tunable with `--dp-effect-duration` and `--dp-effect-easing`, adapt to `wide` and `opens="right"`, and all collapse to a plain opacity fade under `prefers-reduced-motion: reduce`.
 
 **Gotcha:** the core 200ms fade is a hard-coded duration. `--dp-effect-duration` only reaches panels that carry an `effect`.
+
+### 9. The Trigger Arrow is a Data-Attribute Hook
+
+**Decision:** `data-dropdown-arrow` on a real child of the trigger. Behaviour comes from `arrow="flip|static|none"` on the host, shape from `arrow-shape="chevron|triangle"`, both in the effects stylesheet.
+
+**Rationale:** A published hook belongs in a namespace the package owns. A class name (`.dropdown-arrow`) collides with utility frameworks and gets hashed away by CSS-modules and scoped-style pipelines; `data-*` survives both and reads as a behaviour hook rather than a style hook, leaving the consumer's own class free for size and colour. Host placement matches `visible` and `trigger`, and each nested `<dropdown-component>` carries its own, so a submenu can differ from its parent.
+
+**Empty hook vs your own glyph:** `[data-dropdown-arrow]:empty` is what the sheet draws into. Non-empty and it only applies the open/close behaviour. `:empty` is literal - whitespace is content, so the tag has to close tight.
+
+**No rotation, ever.** The chevron is two bars pivoting about one point, each swinging through the horizontal, so the pair passes through a flat dash at the midpoint and lands mirrored - inherently symmetric, and close retraces open. The triangle cannot flap, so it mirrors: `scaleY(-1)`, or `scaleX(-1)` on `opens="right"`, where the drawn glyph also points the way it opens (`--_dp-arrow-dir: -90deg`). A `rotate(180deg)` reads as directional and unwinds on close.
+
+**Specificity note:** the direction rules wrap their `:has()` in `:where()` so they do not out-specify the `arrow="static"` / `arrow="none"` opt-outs, which tie with the state rules and win on source order. Keep those opt-out rules last.
+
+**Reduced motion:** the arrow still flips - it is a state readout, not decoration - it just lands instantly (`transition-property: none`).
 
 ### 8. Interaction Mode is Per-Dropdown
 
@@ -512,10 +526,9 @@ dropdown-component[visible] > dropdown-trigger {
 	color: #d8b043;
 }
 
-dropdown-component[visible] > dropdown-trigger > .dropdown-arrow {
-	transform: scaleY(-1);
-}
 ```
+
+The arrow flip is not yours to write - the effects stylesheet does it. See below.
 
 ### Grid Layout for Wide Panels
 
@@ -532,29 +545,34 @@ dropdown-panel[wide] {
 
 ### Dropdown Indicators
 
-Use real elements, never a `::before` on the trigger - that pseudo-element is the hover bridge.
+The hook is `data-dropdown-arrow` on a **real child** of the trigger. Never a `::before` or `::after` on `dropdown-trigger` itself - that box is the hover bridge, and your rule cascades onto it. Pseudo-elements on the hook element are a different box and are fine; they are what the effects stylesheet uses.
 
 ```html
-<!-- down arrow -->
+<!-- empty hook: the effects stylesheet draws and animates the glyph -->
 <dropdown-trigger>
-	Products
-	<span class="dropdown-arrow" aria-hidden="true">
-		<svg viewBox="0 0 12 12" fill="currentColor">
-			<path d="M6 8L2 4h8z" />
-		</svg>
-	</span>
+	Products<span data-dropdown-arrow aria-hidden="true"></span>
 </dropdown-trigger>
 
-<!-- right arrow, for a submenu -->
+<!-- your own glyph: the sheet draws nothing, only flips it -->
 <dropdown-trigger class="dropdown-item">
-	Support
-	<span class="dropdown-arrow" aria-hidden="true">
-		<svg viewBox="0 0 12 12" fill="currentColor">
-			<path d="M8 6L4 2v8z" />
-		</svg>
+	Support<span data-dropdown-arrow aria-hidden="true">
+		<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
 	</span>
 </dropdown-trigger>
 ```
+
+Settings, both on the host, both effects-stylesheet only:
+
+| Attribute     | Values                       | Default   |
+| ------------- | ---------------------------- | --------- |
+| `arrow`       | `flip`, `static`, `none`     | `flip`    |
+| `arrow-shape` | `chevron`, `triangle`        | `chevron` |
+
+`arrow="none"` hides the hook with `display: none`, so arrows can be turned off without touching the markup; in a flex trigger the `gap` goes with it. The glyph is decorative - keep `aria-hidden="true"` on the hook, since hiding it visually is not the same as keeping it out of the accessibility tree.
+
+Size the drawn glyph with `--dp-arrow-size` (default `0.64em`) and `--dp-arrow-thickness` (default `1.5px`). It is timed by `--dp-effect-duration` / `--dp-effect-easing` like everything else in that sheet.
+
+A custom SVG must be drawn symmetric about the centre of its viewBox on the mirror axis, or `scaleY(-1)` visibly shifts it instead of mirroring it.
 
 ## Testing the Demo
 
@@ -601,7 +619,7 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
 ### Hover bridge not working?
 
 1. **Never declare `::before` on `dropdown-trigger`** - that is the bridge, and your rule cascades onto the same box
-2. Use a real `<span>` for indicators
+2. Use a real `<span data-dropdown-arrow>` for indicators. Pseudo-elements *on that span* are fine - the rule is about the trigger, not about pseudo-elements generally
 3. The bridge only renders under `@media (hover: hover)` and only while `:hover` matches - it is correctly absent otherwise
 
 ### Styles not applying?
@@ -612,7 +630,7 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
 
 ## Version History
 
-- **v1.1.0** - `visible` as state, trigger modes, effects, lifecycle events, real keyboard navigation
+- **v2.0.0** - Breaking: `visible` as state, trigger modes, effects, lifecycle events, real keyboard navigation
 
   - `visible` on the host is now the single source of truth, reflected and observed; `aria-expanded`, `aria-hidden` and `inert` became derived output
   - Added `trigger="hover|click|both"`, with a click fallback where `(hover: hover)` does not match
@@ -628,6 +646,7 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
   - Component now recovers from late-arriving children via `MutationObserver` and lazy setup
   - Shared id counter moved to `src/uid.js`; `src/dropdown-component.css` became `src/dropdown-panel.css`
   - Added `dropdown-panel.d.ts` and the `./css/effects` exports
+  - Added the trigger arrow to the effects stylesheet: `data-dropdown-arrow` hook, `arrow="flip|static|none"` and `arrow-shape="chevron|triangle"` on the host, `--dp-arrow-size` / `--dp-arrow-thickness`
 
 - **v1.0.0** - Stable release: touch fixes, outside dismiss, pointer events
 

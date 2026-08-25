@@ -25,3 +25,15 @@ Thumbs.db
 
 # Temporary build files
 *.tmp.js
+
+# Local test artifacts - screenshots, probe pages, runner output.
+# Never commit these; agents and manual debugging drop them here.
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.webp
+**/_probe.html
+**/_scratch*
+test-results/
+playwright-report/

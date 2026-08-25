@@ -75,12 +75,206 @@ dropdown-panel[effect][aria-hidden='false'] {
 	filter: none;
 }
 
+/* ====================================================================== */
+/* Trigger arrow                                                          */
+/* ====================================================================== */
+
+/* Mark the glyph inside the trigger with `data-dropdown-arrow`:
+
+     <dropdown-trigger>
+       Menu<span data-dropdown-arrow aria-hidden="true"></span>
+     </dropdown-trigger>
+
+   Leave that element EMPTY and this sheet draws the glyph for you - a
+   chevron by default, a triangle with `arrow-shape="triangle"`. Put your
+   own SVG inside it and nothing is drawn; only the open/close behaviour
+   applies.
+
+   Both settings live on <dropdown-component>, so a submenu can differ
+   from its parent:
+
+     arrow="flip"            mirror on open (default)
+     arrow="static"          render, never move
+     arrow="none"            do not render
+     arrow-shape="chevron"   two bars that flap (default)
+     arrow-shape="triangle"  one solid glyph that mirrors
+
+   The hook has to be a REAL element. `dropdown-trigger::before` is the
+   package's hover bridge, so a pseudo-element of your own on the trigger
+   replaces it and breaks the trip from trigger to panel. Pseudo-elements
+   on the hook itself are a different box entirely - that is what this
+   sheet uses, and yours are welcome there too.
+
+   The arrow is decorative: mark it `aria-hidden="true"` so it stays out
+   of the accessibility tree whether or not it is on screen. */
+[data-dropdown-arrow] {
+	display: inline-block;
+	flex: 0 0 auto;
+	line-height: 0;
+	vertical-align: middle;
+	transform-origin: center;
+	/* prettier-ignore */
+	--_dp-arrow-easing: var(--dp-effect-easing, cubic-bezier(0.32, 0.72, 0, 1));
+	transition-property: transform;
+	transition-duration: var(--dp-effect-duration, 200ms);
+	transition-timing-function: var(--_dp-arrow-easing);
+}
+
+/* An empty hook is ours to draw in. `:empty` is literal - whitespace
+   counts as content, so close the tag tight: <span ...></span>. */
+[data-dropdown-arrow]:empty {
+	/* 0deg aims the glyph down, -90deg aims it right. Both bars pivot
+	   about the centre of the box, so this rotates the whole glyph. */
+	--_dp-arrow-dir: 0deg;
+	/* How far each bar tilts off the horizontal. Negating it flips the
+	   glyph; passing through zero is the flat dash at the midpoint. */
+	--_dp-arrow-ang: 40deg;
+	--_dp-arrow-bar: var(--dp-arrow-thickness, 1.5px);
+	position: relative;
+	width: var(--dp-arrow-size, 0.64em);
+	height: var(--dp-arrow-size, 0.64em);
+}
+
+/* Chevron - two bars pivoting about one point. Each swings through the
+   horizontal on its way to the opposite angle, so the pair passes
+   through a single flat dash at the midpoint instead of spinning. The
+   halves mirror each other the whole way, and close retraces open.
+
+   Each bar runs half the box plus half its own thickness, so its inner
+   round cap is a disc centred exactly on the pivot. Both caps land on
+   that same point and the joint stays solid at every angle. */
+[data-dropdown-arrow]:empty::before,
+[data-dropdown-arrow]:empty::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	width: calc(50% + var(--_dp-arrow-bar) / 2);
+	height: var(--_dp-arrow-bar);
+	margin-top: calc(var(--_dp-arrow-bar) / -2);
+	background: currentColor;
+	border-radius: var(--_dp-arrow-bar);
+	transition-property: transform;
+	transition-duration: var(--dp-effect-duration, 200ms);
+	transition-timing-function: var(--_dp-arrow-easing);
+}
+
+[data-dropdown-arrow]:empty::before {
+	left: 0;
+	transform-origin: calc(100% - var(--_dp-arrow-bar) / 2) center;
+	transform: rotate(
+		calc(var(--_dp-arrow-dir) + var(--_dp-arrow-ang))
+	);
+}
+
+[data-dropdown-arrow]:empty::after {
+	right: 0;
+	transform-origin: calc(var(--_dp-arrow-bar) / 2) center;
+	transform: rotate(
+		calc(var(--_dp-arrow-dir) - var(--_dp-arrow-ang))
+	);
+}
+
+/* Triangle - one solid glyph, so it cannot flap. It mirrors instead, and
+   its box is centred in the hook so the mirror never shifts it. */
+dropdown-component[arrow-shape='triangle']
+	> dropdown-trigger
+	[data-dropdown-arrow]:empty::before {
+	/* Insets to roughly the chevron's footprint, so swapping shapes does
+	   not change how big the arrow reads. */
+	inset: 22% 12%;
+	width: auto;
+	height: auto;
+	margin-top: 0;
+	border-radius: 0;
+	clip-path: polygon(50% 100%, 0 0, 100% 0);
+	transform-origin: center;
+	transform: rotate(var(--_dp-arrow-dir));
+}
+
+dropdown-component[arrow-shape='triangle']
+	> dropdown-trigger
+	[data-dropdown-arrow]:empty::after {
+	content: none;
+}
+
+/* A submenu points the way it opens, and mirrors on the other axis.
+   Scoped to the direct-child trigger, which a nested component is never
+   inside - it lives in the panel - so parent and child stay independent.
+   `:where()` keeps `:has()` from out-specifying the opt-outs below. */
+dropdown-component:where(:has(> dropdown-panel[opens='right']))
+	> dropdown-trigger
+	[data-dropdown-arrow]:empty {
+	--_dp-arrow-dir: -90deg;
+}
+
+/* Open state */
+dropdown-component[visible]
+	> dropdown-trigger
+	[data-dropdown-arrow]:empty {
+	--_dp-arrow-ang: -40deg;
+}
+
+dropdown-component[visible]
+	> dropdown-trigger
+	[data-dropdown-arrow]:not(:empty),
+dropdown-component[visible][arrow-shape='triangle']
+	> dropdown-trigger
+	[data-dropdown-arrow] {
+	transform: scaleY(-1);
+}
+
+dropdown-component[visible]:where(
+		:has(> dropdown-panel[opens='right'])
+	)
+	> dropdown-trigger
+	[data-dropdown-arrow]:not(:empty),
+dropdown-component[visible][arrow-shape='triangle']:where(
+		:has(> dropdown-panel[opens='right'])
+	)
+	> dropdown-trigger
+	[data-dropdown-arrow] {
+	transform: scaleX(-1);
+}
+
+/* arrow="static" - the glyph renders and stays put. Last of the state
+   rules, and tied with them on specificity, so it wins on source order. */
+dropdown-component[arrow='static'][visible]
+	> dropdown-trigger
+	[data-dropdown-arrow] {
+	transform: none;
+}
+
+dropdown-component[arrow='static'][visible]
+	> dropdown-trigger
+	[data-dropdown-arrow]:empty {
+	--_dp-arrow-ang: 40deg;
+}
+
+/* arrow="none" - no glyph at all, without touching the markup. In a flex
+   trigger the gap goes with it. */
+dropdown-component[arrow='none']
+	> dropdown-trigger
+	[data-dropdown-arrow] {
+	display: none;
+}
+
 /* Motion is opt-out for anyone who asked the OS to reduce it: every
-   effect degrades to the plain opacity fade. */
+   entrance effect degrades to the plain opacity fade.
+
+   The arrow keeps its flip. It is a state readout rather than
+   decoration, and the reduced-motion ask is about travel, not about the
+   fact that something changed - so it lands on the new angle instantly
+   instead of swinging there. */
 @media (prefers-reduced-motion: reduce) {
 	dropdown-panel[effect] {
 		transition-property: opacity;
 		transform: none;
 		filter: none;
+	}
+
+	[data-dropdown-arrow],
+	[data-dropdown-arrow]:empty::before,
+	[data-dropdown-arrow]:empty::after {
+		transition-property: none;
 	}
 }

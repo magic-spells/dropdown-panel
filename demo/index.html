@@ -359,14 +359,11 @@
 			}
 
 			/* ---- Spec bar ----
-			   The eyebrow is a measurement, not an ordinal: each section is labelled
-			   with the actual constant or quantity it teaches, read off like a gauge. */
+			   A one-word eyebrow naming what the section teaches. Nothing else:
+			   with the rule line gone it sits close under nothing and close over
+			   the heading, so the margin is small on purpose. */
 			.spec {
-				display: flex;
-				flex-wrap: wrap;
-				align-items: center;
-				gap: 0.5rem 0.85rem;
-				margin-bottom: 1.35rem;
+				margin-bottom: 0.7rem;
 			}
 
 			.spec-key {
@@ -375,21 +372,6 @@
 				font-size: 0.8rem;
 				letter-spacing: 0.22em;
 				text-transform: uppercase;
-			}
-
-			.spec-rule {
-				flex: 1 1 1.5rem;
-				min-width: 1.5rem;
-				height: 1px;
-				background: linear-gradient(to right, var(--border-accent), var(--border) 65%, transparent);
-			}
-
-			.spec-val {
-				color: var(--cream-dim);
-				font-family: var(--font-mono);
-				font-size: 0.8rem;
-				letter-spacing: 0.04em;
-				white-space: nowrap;
 			}
 
 			.demo-section h2 {
@@ -457,6 +439,15 @@
 				min-height: 20rem;
 			}
 
+			.stage-drop-xs {
+				min-height: 11.5rem;
+			}
+
+			/* A section that runs two stages stacks them with a hairline gap. */
+			.stage + .stage {
+				margin-top: 1rem;
+			}
+
 			.stage-drop-lg {
 				min-height: 23rem;
 			}
@@ -471,6 +462,7 @@
 			/* A stage that reserves room for a panel aligns its row to the top, so
 			   all of the reserved height sits below the trigger instead of half of
 			   it above. */
+			.stage-drop-xs.stage-row,
 			.stage-drop-sm.stage-row,
 			.stage-drop.stage-row,
 			.stage-drop-lg.stage-row {
@@ -481,6 +473,7 @@
 			   caption drop to the floor of the stage with margin-top: auto. Left
 			   in flow it would sit directly under the trigger, where the open
 			   panel covers it. */
+			.stage-drop-xs:not(.stage-row),
 			.stage-drop-sm:not(.stage-row),
 			.stage-drop:not(.stage-row),
 			.stage-drop-lg:not(.stage-row) {
@@ -635,29 +628,14 @@
 				background: rgba(201, 162, 39, 0.09);
 			}
 
-			/* The open-state indicator is a mirror, not a rotation. scaleY(-1)
-			   flips the glyph through the horizontal centre line of its box, so it
-			   reverses identically on close instead of unwinding a spin. Both
-			   triangles are drawn symmetric about the centre of a 12x12 viewBox,
-			   so the mirror never shifts them off their baseline. */
-			.menu-arrow {
-				flex: 0 0 auto;
+			/* Arrows are the package's, not the demo's: an empty
+			   [data-dropdown-arrow] inside the trigger and the effects stylesheet
+			   draws and animates it. Nothing here does. The one exception is the
+			   custom-glyph example below, which supplies its own SVG and so has to
+			   size its own box. */
+			.custom-arrow {
 				width: 11px;
 				height: 11px;
-				line-height: 0;
-				transform-origin: center;
-				transition: transform var(--dp-effect-duration, 200ms)
-					var(--dp-effect-easing, ease-out);
-			}
-
-			dropdown-component[visible] > dropdown-trigger > .menu-arrow-down {
-				transform: scaleY(-1);
-			}
-
-			/* A submenu mirrors on the other axis, because its panel is to the
-			   side rather than below — and left is also the key that closes it. */
-			dropdown-component[visible] > dropdown-trigger > .menu-arrow-right {
-				transform: scaleX(-1);
 			}
 
 			dropdown-panel {
@@ -742,10 +720,21 @@
 			   The bridge is a ::before on the trigger that exists only while the
 			   component is hovered or open, so tinting it shows the real element at
 			   the only moment it is real. Background and outline only — the box it
-			   paints is exactly the box the package declares. */
-			.show-bridge dropdown-trigger::before {
-				background: rgba(201, 162, 39, 0.22);
+			   paints is exactly the box the package declares. Scoped to this one
+			   stage; every other dropdown on the page keeps it invisible. */
+			#bridge-stage dropdown-trigger::before {
+				background: rgba(201, 162, 39, 0.19);
 				outline: 1px dashed var(--brass);
+			}
+
+			/* The wedge sits at z-index 10, above the panel's in-flow rows, so
+			   left alone it washes out the text it crosses. Lift the links over
+			   it — not the nested trigger, whose own wedge would come up with
+			   it. */
+			#bridge-stage dropdown-panel a.menu-item,
+			#bridge-stage dropdown-panel .menu-divider {
+				position: relative;
+				z-index: 12;
 			}
 
 			/* ---- Theme playground ---- */
@@ -1164,7 +1153,6 @@
 				.menu-item,
 				.menu-link,
 				dropdown-trigger,
-				.menu-arrow,
 				.site-foot a {
 					transition: none;
 				}
@@ -1217,8 +1205,6 @@
 			<section class="demo-section">
 				<div class="spec">
 					<span class="spec-key">Anatomy</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">3 elements · 0 deps</span>
 				</div>
 				<h2>The markup.</h2>
 				<p class="demo-desc">
@@ -1231,9 +1217,7 @@
 						<dropdown-component>
 							<dropdown-trigger>
 								Account
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#anatomy" class="menu-item">Profile</a>
@@ -1270,8 +1254,6 @@
 			<section class="demo-section" id="state">
 				<div class="spec">
 					<span class="spec-key">State</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">1 attribute · 3 outputs</span>
 				</div>
 				<h2>One attribute holds the state.</h2>
 				<p class="demo-desc">
@@ -1283,9 +1265,7 @@
 					<dropdown-component id="state-dropdown">
 						<dropdown-trigger>
 							Deploy
-							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-							</span>
+							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel>
 							<a href="#state" class="menu-item">Staging</a>
@@ -1321,8 +1301,6 @@ menu.hide({ restoreFocus: <span class="hl-val">false</span> });
 			<section class="demo-section" id="pointer">
 				<div class="spec">
 					<span class="spec-key">Pointer</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">pointerenter · not touch</span>
 				</div>
 				<h2>Opening on hover.</h2>
 				<p class="demo-desc">
@@ -1335,9 +1313,7 @@ menu.hide({ restoreFocus: <span class="hl-val">false</span> });
 					<dropdown-component>
 						<dropdown-trigger>
 							Workspace
-							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-							</span>
+							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel>
 							<a href="#pointer" class="menu-item">Switch workspace</a>
@@ -1365,8 +1341,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="modes">
 				<div class="spec">
 					<span class="spec-key">Modes</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">hover · click · both</span>
 				</div>
 				<h2>Choosing the interaction.</h2>
 				<p class="demo-desc">
@@ -1379,9 +1353,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component trigger="hover">
 							<dropdown-trigger>
 								hover
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<div class="menu-heading">Pointer only</div>
@@ -1393,9 +1365,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component trigger="click">
 							<dropdown-trigger>
 								click
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<div class="menu-heading">Press only</div>
@@ -1407,9 +1377,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component trigger="both">
 							<dropdown-trigger>
 								both
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<div class="menu-heading">The default</div>
@@ -1435,8 +1403,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="bridge">
 				<div class="spec">
 					<span class="spec-key">Bridge</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">30px · rotateX(50deg)</span>
 				</div>
 				<h2>The invisible bridge.</h2>
 				<p class="demo-desc">
@@ -1450,9 +1416,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component>
 							<dropdown-trigger>
 								Reports
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#bridge" class="menu-item">Weekly summary</a>
@@ -1462,9 +1426,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<dropdown-component>
 									<dropdown-trigger class="menu-item">
 										Exports
-										<span class="menu-arrow menu-arrow-right" aria-hidden="true">
-											<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
-										</span>
+										<span data-dropdown-arrow aria-hidden="true"></span>
 									</dropdown-trigger>
 									<dropdown-panel opens="right">
 										<a href="#bridge" class="menu-item">CSV</a>
@@ -1474,13 +1436,11 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								</dropdown-component>
 							</dropdown-panel>
 						</dropdown-component>
-						<div class="controls">
-							<button class="btn" id="bridge-toggle" aria-pressed="false">Tint the bridge</button>
-						</div>
 					</div>
 					<p class="stage-note">
-						Tinted: the wedge under the trigger, and the sideways one beside
-						<em>Exports</em>. Pure CSS.
+						The gold fill is this page painting an invisible element — the package
+						ships no colour. Hover <em>Reports</em> for the wedge below it, then
+						<em>Exports</em> for the sideways one.
 					</p>
 				</div>
 				<pre
@@ -1527,8 +1487,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="wide">
 				<div class="spec">
 					<span class="spec-key">Wide</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">width: 100%</span>
 				</div>
 				<h2>The full-width mega menu.</h2>
 				<p class="demo-desc">
@@ -1542,9 +1500,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component>
 							<dropdown-trigger>
 								Products
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel wide>
 								<div>
@@ -1576,9 +1532,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component>
 							<dropdown-trigger>
 								Solutions
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#wide" class="menu-item">For individuals</a>
@@ -1616,8 +1570,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="nesting">
 				<div class="spec">
 					<span class="spec-key">Nesting</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">opens="right" · left: 100%</span>
 				</div>
 				<h2>Menus inside menus.</h2>
 				<p class="demo-desc">
@@ -1631,9 +1583,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component>
 							<dropdown-trigger>
 								Resources
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#nesting" class="menu-item">Documentation</a>
@@ -1641,9 +1591,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<dropdown-component>
 									<dropdown-trigger class="menu-item">
 										Support
-										<span class="menu-arrow menu-arrow-right" aria-hidden="true">
-											<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
-										</span>
+										<span data-dropdown-arrow aria-hidden="true"></span>
 									</dropdown-trigger>
 									<dropdown-panel opens="right">
 										<a href="#nesting" class="menu-item">Help centre</a>
@@ -1651,11 +1599,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 										<dropdown-component>
 											<dropdown-trigger class="menu-item">
 												Escalate
-												<span class="menu-arrow menu-arrow-right" aria-hidden="true">
-													<svg viewBox="0 0 12 12" fill="currentColor">
-														<path d="M8 6L4 2v8z" />
-													</svg>
-												</span>
+												<span data-dropdown-arrow aria-hidden="true"></span>
 											</dropdown-trigger>
 											<dropdown-panel opens="right">
 												<a href="#nesting" class="menu-item">Priority one</a>
@@ -1696,13 +1640,11 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="effects">
 				<div class="spec">
 					<span class="spec-key">Effects</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">5 presets · 200ms</span>
 				</div>
 				<h2>Entrance effects.</h2>
 				<p class="demo-desc">
 					The core stylesheet fades and nothing else. Import the opt-in file and
-					<code>effect="…"</code> gives you five presets, tuned by
+					<code>effect="…"</code> gives you five presets plus the trigger arrow, tuned by
 					<code>--dp-effect-duration</code> and <code>--dp-effect-easing</code>, all collapsing to
 					a fade under reduced motion.
 				</p>
@@ -1731,9 +1673,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component id="effects-dropdown">
 							<dropdown-trigger>
 								Insert
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel effect="fade" id="effects-panel">
 								<a href="#effects" class="menu-item">Image</a>
@@ -1757,15 +1697,87 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						</label>
 					</div>
 				</div>
+				<div class="stage stage-drop-xs" id="arrows-stage">
+					<div class="stage-row">
+						<dropdown-component>
+							<dropdown-trigger>
+								chevron
+								<span data-dropdown-arrow aria-hidden="true"></span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#effects" class="menu-item">Two bars, one pivot</a>
+								<a href="#effects" class="menu-item">Flat at the midpoint</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component arrow-shape="triangle">
+							<dropdown-trigger>
+								triangle
+								<span data-dropdown-arrow aria-hidden="true"></span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#effects" class="menu-item">One solid glyph</a>
+								<a href="#effects" class="menu-item">Mirrors instead</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component arrow="static">
+							<dropdown-trigger>
+								static
+								<span data-dropdown-arrow aria-hidden="true"></span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#effects" class="menu-item">Renders</a>
+								<a href="#effects" class="menu-item">Never moves</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component arrow="none">
+							<dropdown-trigger>
+								none
+								<span data-dropdown-arrow aria-hidden="true"></span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#effects" class="menu-item">Same markup</a>
+								<a href="#effects" class="menu-item">No glyph, no gap</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component>
+							<dropdown-trigger>
+								your SVG
+								<span class="custom-arrow" data-dropdown-arrow aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#effects" class="menu-item">Hook is not empty</a>
+								<a href="#effects" class="menu-item">Nothing is drawn</a>
+							</dropdown-panel>
+						</dropdown-component>
+					</div>
+					<p class="stage-note">
+						Leave the hook empty and the sheet draws the glyph; put your own SVG in
+						it and the sheet only flips it. Both settings sit on
+						<code>&lt;dropdown-component&gt;</code>, so a submenu can differ from its
+						parent. Drag the duration up to watch the chevron pass through flat.
+					</p>
+				</div>
 				<pre
 					class="code-block"><span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css'</span>;
 <span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css/effects'</span>;  <span class="hl-cm">// opt in</span>
 
 &lt;<span class="hl-tag">dropdown-panel</span> <span class="hl-attr">effect</span>=<span class="hl-val">"blur"</span>&gt;…&lt;/<span class="hl-tag">dropdown-panel</span>&gt;
 
-<span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">effect</span>] {
+<span class="hl-cm">&lt;!-- empty hook: the sheet draws and animates the glyph --&gt;</span>
+&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">arrow-shape</span>=<span class="hl-val">"triangle"</span>&gt;
+  &lt;<span class="hl-tag">dropdown-trigger</span>&gt;Menu&lt;<span class="hl-tag">span</span> <span class="hl-attr">data-dropdown-arrow</span> <span class="hl-attr">aria-hidden</span>=<span class="hl-val">"true"</span>&gt;&lt;/<span class="hl-tag">span</span>&gt;&lt;/<span class="hl-tag">dropdown-trigger</span>&gt;
+
+<span class="hl-cm">/* never a ::before on the trigger — that box is the hover bridge.</span>
+<span class="hl-cm">   on the hook element they are fine; that is what the sheet uses */</span>
+
+<span class="hl-cm">/* they inherit, so one rule reaches the panel and the arrow */</span>
+<span class="hl-tag">dropdown-component</span> {
   <span class="hl-attr">--dp-effect-duration</span>: <span class="hl-val">200ms</span>;
   <span class="hl-attr">--dp-effect-easing</span>: <span class="hl-val">cubic-bezier(0.32, 0.72, 0, 1)</span>;
+  <span class="hl-attr">--dp-arrow-size</span>: <span class="hl-val">0.64em</span>;
+  <span class="hl-attr">--dp-arrow-thickness</span>: <span class="hl-val">1.5px</span>;
 }</pre>
 			</section>
 
@@ -1773,8 +1785,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="keyboard">
 				<div class="spec">
 					<span class="spec-key">Keyboard</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">Enter · Space · Esc · ↑ ↓</span>
 				</div>
 				<h2>Keyboard and focus.</h2>
 				<p class="demo-desc">
@@ -1787,9 +1797,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 					<dropdown-component>
 						<dropdown-trigger>
 							File
-							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-							</span>
+							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel>
 							<a href="#keyboard" class="menu-item">New document</a>
@@ -1799,9 +1807,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 							<dropdown-component>
 								<dropdown-trigger class="menu-item">
 									Share
-									<span class="menu-arrow menu-arrow-right" aria-hidden="true">
-										<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
-									</span>
+									<span data-dropdown-arrow aria-hidden="true"></span>
 								</dropdown-trigger>
 								<dropdown-panel opens="right">
 									<a href="#keyboard" class="menu-item">Copy link</a>
@@ -1842,8 +1848,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="theme">
 				<div class="spec">
 					<span class="spec-key">Theme</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">10 controls · 0 overrides</span>
 				</div>
 				<h2>Styling it yourself.</h2>
 				<p class="demo-desc">
@@ -1930,9 +1934,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component id="theme-dropdown">
 							<dropdown-trigger>
 								Filters
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel effect="blur" id="theme-panel">
 								<div class="menu-heading">Sort by</div>
@@ -1978,8 +1980,6 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 			<section class="demo-section" id="lifecycle">
 				<div class="spec">
 					<span class="spec-key">Lifecycle</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">4 events · 2 cancelable</span>
 				</div>
 				<h2>Lifecycle events.</h2>
 				<p class="demo-desc">
@@ -1992,9 +1992,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<dropdown-component id="lifecycle-dropdown">
 							<dropdown-trigger>
 								Actions
-								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
-								</span>
+								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#lifecycle" class="menu-item">Rename</a>
@@ -2037,12 +2035,10 @@ nav.addEventListener(<span class="hl-val">'dropdown-panel:show'</span>, (e) =&gt
 			<section class="demo-section" id="reference">
 				<div class="spec">
 					<span class="spec-key">Reference</span>
-					<span class="spec-rule" aria-hidden="true"></span>
-					<span class="spec-val">5 attributes · 4 events</span>
 				</div>
 				<h2>The full reference.</h2>
 				<p class="demo-desc">
-					Three elements, five attributes, three methods, four events.
+					Three elements, seven attributes, three methods, four events.
 				</p>
 				<pre
 					class="code-block"><span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel'</span>;
@@ -2073,7 +2069,8 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div>
 							The button. Gets <code>role="button"</code>, <code>tabindex</code>,
 							<code>aria-haspopup</code>, <code>aria-controls</code>, <code>aria-expanded</code>.
-							Draws the bridge with its <code>::before</code> — leave that alone.
+							Draws the bridge with its <code>::before</code> — leave that one alone. A
+							pseudo-element on the arrow hook inside it is a different box, and fine.
 						</div>
 					</div>
 					<div class="ref-row">
@@ -2134,6 +2131,22 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 							<code>blur</code> or <code>swing</code>. No-op without the effects stylesheet.
 						</div>
 					</div>
+					<div class="ref-row">
+						<div><code>arrow</code></div>
+						<div><code>flip</code></div>
+						<div>
+							On the host. <code>flip</code> mirrors the arrow on open, <code>static</code>
+							leaves it, <code>none</code> hides it. Effects stylesheet only.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>arrow-shape</code></div>
+						<div><code>chevron</code></div>
+						<div>
+							On the host. <code>chevron</code> or <code>triangle</code>, drawn only when the
+							<code>[data-dropdown-arrow]</code> hook is empty. Effects stylesheet only.
+						</div>
+					</div>
 				</div>
 
 				<h3 class="ref-heading">CSS Custom Properties</h3>
@@ -2151,7 +2164,17 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>--dp-effect-easing</code></div>
 						<div><code>cubic-bezier(0.32, 0.72, 0, 1)</code></div>
-						<div>Effect timing function. Decelerate-only.</div>
+						<div>Effect timing function. Decelerate-only. Also times the arrow.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>--dp-arrow-size</code></div>
+						<div><code>0.64em</code></div>
+						<div>Box the drawn glyph fills. Empty hook only.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>--dp-arrow-thickness</code></div>
+						<div><code>1.5px</code></div>
+						<div>Chevron bar weight. Empty hook only.</div>
 					</div>
 				</div>
 				<p class="ref-note">
@@ -2363,17 +2386,10 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			renderPointerCapability();
 			fine.addEventListener('change', renderPointerCapability);
 
-			// ---- Bridge: tint the ::before that is already there ----
-			// Nothing is created or measured — the class only paints the box the
-			// package declares, at the moment the package declares it.
-			const bridgeStage = $('#bridge-stage');
-			const bridgeButton = $('#bridge-toggle');
-
-			bridgeButton.addEventListener('click', () => {
-				const on = bridgeStage.classList.toggle('show-bridge');
-				bridgeButton.setAttribute('aria-pressed', String(on));
-				bridgeButton.textContent = on ? 'Hide the bridge' : 'Tint the bridge';
-			});
+			// ---- Bridge ----
+			// No script. The tint is one CSS rule scoped to #bridge-stage; nothing
+			// is created or measured, and the box it paints is the box the package
+			// declares, at the moment the package declares it.
 
 			// ---- Effects: swap the attribute, nothing else ----
 			const effectsPanel = $('#effects-panel');
@@ -2402,8 +2418,12 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 				});
 			}
 
+			// Set on the section, not the panel: the property inherits, so one
+			// write reaches the entrance effect and every arrow below it.
+			const effectsSection = $('#effects');
+
 			effectsDuration.addEventListener('input', () => {
-				effectsPanel.style.setProperty('--dp-effect-duration', `${effectsDuration.value}ms`);
+				effectsSection.style.setProperty('--dp-effect-duration', `${effectsDuration.value}ms`);
 				effectsDuration.parentElement.querySelector('.theme-value').textContent =
 					`${effectsDuration.value}ms`;
 				renderEffect();

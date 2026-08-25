@@ -43,6 +43,7 @@ export class DropdownComponent extends HTMLElement {
 	#reflecting = false;
 	#openSource = null;
 	#hoverSuppressed = false;
+	#pointerDismissed = false;
 	#observer = null;
 	#validationTimer = null;
 
@@ -96,6 +97,7 @@ export class DropdownComponent extends HTMLElement {
 
 		_.detachListeners();
 		_.#detachDocumentListeners();
+		_.#clearDismissed();
 		DropdownComponent.#shown.delete(_);
 
 		_.#observer?.disconnect();
@@ -210,10 +212,15 @@ export class DropdownComponent extends HTMLElement {
 
 		_.handlers.documentPointerDown = (event) => {
 			if (_.contains(event.target)) return;
-			_.hide();
+			_.#dismiss();
 		};
 
 		_.handlers.documentKeydown = (event) => _.#handleKeydown(event);
+
+		// one shared handler for both ends of a recorded dismissal: the
+		// click that completes the press, and any press that starts a
+		// new interaction without one
+		_.handlers.endDismissal = () => _.#clearDismissed();
 
 		_.addEventListener('pointerenter', _.handlers.pointerEnter);
 		_.addEventListener('pointerleave', _.handlers.pointerLeave);
@@ -295,11 +302,25 @@ export class DropdownComponent extends HTMLElement {
 
 	/**
 	 * Shows the panel when hidden, hides it when shown.
+	 *
+	 * A press outside the component closes the panel on `pointerdown`,
+	 * which lands before the `click` it produces. An external toggle
+	 * button is outside the component, so without the guard below every
+	 * one of its clicks would read the already-cleared state and re-open
+	 * the panel — leaving it impossible to close.
 	 */
 	toggle() {
 		const _ = this;
 
 		if (!_.#setup()) return;
+
+		// the press behind this click already closed the panel: the
+		// interaction as a whole is a close, not a close plus a re-open
+		if (_.#pointerDismissed) {
+			_.#clearDismissed();
+			return;
+		}
+
 		if (_.#visible) _.hide();
 		else _.#open('api');
 	}
@@ -396,12 +417,81 @@ export class DropdownComponent extends HTMLElement {
 		_.#visible = true;
 		_.#openSource = source;
 		_.#hoverSuppressed = false;
+		// an open panel cannot also be one an outside press just closed
+		_.#clearDismissed();
 		_.#reflect(true);
 		_.#applyState();
 		_.#attachDocumentListeners();
 		DropdownComponent.#shown.add(_);
 
 		_.#emit('show');
+	}
+
+	/**
+	 * Closes this dropdown in response to a pointer press outside of it,
+	 * and records the dismissal so that toggle() can tell the resulting
+	 * click apart from a fresh one.
+	 * @private
+	 */
+	#dismiss() {
+		const _ = this;
+
+		// hide() cascades into nested panels, so the ones about to close
+		// are collected first — each owns a toggle() that has to settle
+		// closed too
+		const closing = [_];
+		for (const other of DropdownComponent.#shown) {
+			if (other !== _ && _.contains(other)) closing.push(other);
+		}
+
+		_.hide();
+
+		// a canceled before-hide leaves a panel open; only what actually
+		// closed remembers the dismissal
+		for (const component of closing) {
+			if (!component.#visible) component.#markDismissed();
+		}
+	}
+
+	/**
+	 * Remembers that an outside press just closed this panel, until the
+	 * interaction that press belongs to is over.
+	 * @private
+	 */
+	#markDismissed() {
+		const _ = this;
+
+		_.#pointerDismissed = true;
+
+		// The record is bounded by the interaction itself, not by a
+		// timer: the click this press produces ends it. Bound on window
+		// rather than document, in the bubble phase, so it runs after
+		// every consumer handler on the path — the button's own, and
+		// delegated ones on document or on window bound at load time.
+		window.addEventListener('click', _.handlers.endDismissal);
+		// Presses that never produce a click — a drag, a scroll, a
+		// context menu — are released by the next press instead. Capture
+		// phase, so it lands before the bubble-phase documentPointerDown
+		// that may record a fresh dismissal for the same press.
+		document.addEventListener('pointerdown', _.handlers.endDismissal, {
+			capture: true,
+		});
+	}
+
+	/**
+	 * Forgets a recorded dismissal and unbinds what was watching for the
+	 * end of it.
+	 * @private
+	 */
+	#clearDismissed() {
+		const _ = this;
+
+		_.#pointerDismissed = false;
+
+		window.removeEventListener('click', _.handlers.endDismissal);
+		document.removeEventListener('pointerdown', _.handlers.endDismissal, {
+			capture: true,
+		});
 	}
 
 	/**

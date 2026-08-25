@@ -12,7 +12,7 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 - 🔗 Nested submenus with `opens="right"`
 - 📐 Full-width mega menus with `wide`
 - ⌨️ Keyboard navigation - arrows, `Home`/`End`, and `Escape` one level at a time
-- ✨ Five optional entrance effects, in a second opt-in stylesheet
+- ✨ Five optional entrance effects and a drawn trigger arrow, in a second opt-in stylesheet
 - 🔔 Four cancelable lifecycle events
 - ♿ Disclosure semantics - no ARIA menu roles
 - 🧩 TypeScript definitions included
@@ -144,6 +144,8 @@ dropdown-trigger.dropdown-item {
 | `wide`    | `<dropdown-panel>`    | absent   | Full-width mega menu. `width: 100%`, host goes `position: static`.                                                       |
 | `opens`   | `<dropdown-panel>`    | `down`   | `right` opens the panel beside the trigger instead of below it. For submenus.                                            |
 | `effect`  | `<dropdown-panel>`    | none     | `fade`, `slide`, `scale`, `blur` or `swing`. Requires the effects stylesheet; a no-op without it.                        |
+| `arrow`   | `<dropdown-component>`| `flip`   | `flip` mirrors the trigger arrow on open, `static` leaves it alone, `none` hides it. Requires the effects stylesheet.    |
+| `arrow-shape` | `<dropdown-component>`| `chevron` | `chevron` or `triangle`. Drawn only when the arrow hook is empty. Requires the effects stylesheet.                   |
 
 ### `visible` is the state
 
@@ -226,7 +228,7 @@ You do not need these to keep one menu open at a time - the component already do
 
 ## Effects
 
-Entrance effects live in a separate stylesheet so nobody pays for animation they did not ask for. Import it, then opt in per panel:
+Entrance effects and the trigger arrow live in a separate stylesheet so nobody pays for animation they did not ask for. Import it, then opt in per panel:
 
 ```javascript
 import '@magic-spells/dropdown-panel/css/effects';
@@ -248,6 +250,43 @@ dropdown-panel {
 Under `prefers-reduced-motion: reduce` every effect degrades to the plain opacity fade.
 
 Without the effects stylesheet the `effect` attribute does nothing, and panels use the core 200ms opacity fade. That core fade is a fixed 200ms - `--dp-effect-duration` only reaches panels that carry an `effect`.
+
+### The trigger arrow
+
+The same stylesheet handles the little arrow inside the trigger. Mark it with `data-dropdown-arrow`:
+
+```html
+<dropdown-trigger>
+  Menu<span data-dropdown-arrow aria-hidden="true"></span>
+</dropdown-trigger>
+```
+
+Leave that element **empty** and the sheet draws the glyph for you. Put your own SVG inside it and the sheet draws nothing - it only handles the open/close behaviour. Either way the arrow is decorative, so give it `aria-hidden="true"`; hiding it visually is not the same as keeping it out of the accessibility tree.
+
+`:empty` is literal - whitespace counts as content, so close the tag tight.
+
+Two attributes, both on `<dropdown-component>`, so a submenu can differ from its parent:
+
+```html
+<dropdown-component arrow="static">          <!-- renders, never moves -->
+<dropdown-component arrow="none">            <!-- hidden, markup untouched -->
+<dropdown-component arrow-shape="triangle">  <!-- solid glyph, empty hook only -->
+```
+
+The default is `arrow="flip"` with `arrow-shape="chevron"`. The chevron is two bars pivoting about one point: each swings through the horizontal, so the pair passes through a single flat dash at the midpoint and lands mirrored. The triangle cannot flap, so it mirrors instead - `scaleY(-1)`, or `scaleX(-1)` on an `opens="right"` submenu, where the glyph also points the way it opens. Never a rotation: a mirror reverses identically on close where a spin unwinds.
+
+`--dp-effect-duration` and `--dp-effect-easing` time the arrow too, and two more properties size the drawn glyph:
+
+```css
+dropdown-component {
+  --dp-arrow-size: 0.64em; /* box the glyph fills */
+  --dp-arrow-thickness: 1.5px; /* chevron bar weight */
+}
+```
+
+Under `prefers-reduced-motion: reduce` the arrow still flips - it is a state readout, not decoration - but it lands on the new angle instantly instead of travelling.
+
+**The hook has to be a real element**, never a pseudo-element on the trigger - see [The hover bridge](#the-hover-bridge).
 
 ## Styling
 
@@ -306,18 +345,28 @@ dropdown-panel {
 
 The invisible shape that keeps the pointer "inside" the component while it travels from the trigger to the panel is `dropdown-trigger::before`, gated behind `@media (hover: hover)` and rendered only while the component is hovered. It sits at `z-index: 10`; the panel ships at `z-index: 11` so an unstyled panel never has its first row eaten by the bridge.
 
-**That `::before` belongs to the package.** Declaring your own on `dropdown-trigger` cascades onto the same box and breaks the bridge. Use a real element for dropdown arrows:
+**That `::before` belongs to the package.** Declaring your own on `dropdown-trigger` cascades onto the same box and breaks the bridge. So a dropdown arrow has to be a real child element, never a pseudo-element on the trigger:
 
 ```html
+<!-- ✓ a real element - the sheet draws and animates it -->
 <dropdown-trigger>
-  Menu
-  <span class="dropdown-arrow" aria-hidden="true">
-    <svg viewBox="0 0 12 12" fill="currentColor">
-      <path d="M6 8L2 4h8z" />
-    </svg>
+  Menu<span data-dropdown-arrow aria-hidden="true"></span>
+</dropdown-trigger>
+
+<!-- ✓ or your own glyph in the same hook -->
+<dropdown-trigger>
+  Menu<span data-dropdown-arrow aria-hidden="true">
+    <svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
   </span>
 </dropdown-trigger>
+
+<!-- ✗ replaces the bridge -->
+<style>
+  dropdown-trigger::after { content: '▾'; }
+</style>
 ```
+
+The rule is about `dropdown-trigger` itself, not about pseudo-elements generally. `::before` and `::after` on the **hook element** are a different box entirely - that is exactly what the effects stylesheet uses to draw the chevron, and yours are welcome there too.
 
 ### Tailwind
 

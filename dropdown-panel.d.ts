@@ -15,6 +15,10 @@ export interface DropdownHideOptions {
 
 export type DropdownTriggerMode = 'hover' | 'click' | 'both';
 
+export type DropdownArrowBehavior = 'flip' | 'static' | 'none';
+
+export type DropdownArrowShape = 'chevron' | 'triangle';
+
 export interface DropdownComponentEventMap {
 	/** Cancelable. Preventing it aborts the show. */
 	'dropdown-panel:before-show': CustomEvent<DropdownPanelEventDetail>;
@@ -30,6 +34,16 @@ export interface DropdownComponentEventMap {
  * **Attributes**
  * - `visible` — boolean, reflected. The source of truth for shown state.
  * - `trigger` — `hover` | `click` | `both` (default `both`).
+ * - `arrow` — `flip` | `static` | `none` (default `flip`). Behaviour of the
+ *   `[data-dropdown-arrow]` element inside the trigger. Requires
+ *   `@magic-spells/dropdown-panel/css/effects`.
+ * - `arrow-shape` — `chevron` | `triangle` (default `chevron`). The glyph the
+ *   stylesheet draws, and only when the hook element is empty. Requires
+ *   `@magic-spells/dropdown-panel/css/effects`.
+ *
+ * The arrow hook must be a real child element — never a pseudo-element on
+ * `<dropdown-trigger>`, whose `::before` is the hover bridge — and should
+ * carry `aria-hidden="true"`.
  */
 export class DropdownComponent extends HTMLElement {
 	/** Bound event handler references, kept for cleanup. */
