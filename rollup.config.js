@@ -1,3 +1,4 @@
+import { rmSync } from 'node:fs';
 import resolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import postcss from 'rollup-plugin-postcss';
@@ -6,12 +7,77 @@ import serve from 'rollup-plugin-serve';
 
 const production = !process.env.ROLLUP_WATCH;
 const name = 'dropdown-panel';
+const demoDir = 'demo/dist';
 
-// css processing configuration
-const cssConfig = {
-	extract: true,
-	minimize: production,
-	sourceMap: !production,
+let distCleaned = false;
+
+/**
+ * Wipes dist once per production build. Sourcemaps written by an earlier
+ * `npm run dev` otherwise survive into a published package, pointing at
+ * code that no longer exists.
+ */
+const cleanDist = () => ({
+	name: 'clean-dist',
+	buildStart() {
+		if (distCleaned || !production) return;
+		distCleaned = true;
+		rmSync('dist', { recursive: true, force: true });
+	},
+});
+
+/**
+ * A css-only build still needs a javascript entry chunk. postcss
+ * extracts the real stylesheet and leaves an empty stub behind; delete
+ * it so it never ends up in the published tarball.
+ * @param {string} file - path of the stub chunk
+ */
+const removeStub = (file) => ({
+	name: 'remove-css-stub',
+	writeBundle() {
+		rmSync(file, { force: true });
+		rmSync(`${file}.map`, { force: true });
+	},
+});
+
+/**
+ * Copies build output into the demo folder. Every copy is attached to
+ * the config that writes the file it copies, so a failed build can never
+ * silently republish stale demo assets.
+ * @param {string[]} sources - glob patterns relative to the repo root
+ */
+const copyToDemo = (sources) =>
+	copy({
+		targets: sources.map((src) => ({ src, dest: demoDir })),
+		hook: 'writeBundle',
+	});
+
+/**
+ * One stylesheet build.
+ * @param {Object} options - build options
+ * @param {string} options.input - source css file
+ * @param {string} options.file - output file name inside dist
+ * @param {boolean} options.minimize - whether to minify
+ * @param {Array} [options.extraPlugins] - plugins appended to the build
+ */
+const cssBuild = ({ input, file, minimize, extraPlugins = [] }) => {
+	const stub = `dist/_stub-${file}.js`;
+
+	return {
+		input,
+		output: {
+			file: stub,
+			format: 'es',
+		},
+		plugins: [
+			postcss({
+				extract: file,
+				minimize,
+				sourceMap: !production,
+			}),
+			removeStub(stub),
+			...extraPlugins,
+		],
+	};
 };
 
 // rollup configuration
@@ -25,16 +91,9 @@ export default [
 			sourcemap: !production,
 		},
 		plugins: [
+			cleanDist(),
 			resolve(),
-			copy({
-				targets: [
-					{
-						src: 'src/dropdown-component.css',
-						dest: 'dist',
-						rename: 'dropdown-panel.src.css',
-					},
-				],
-			}),
+			copyToDemo([`dist/${name}.esm.js*`]),
 			!production &&
 				serve({
 					open: true,
@@ -42,20 +101,6 @@ export default [
 					host: 'localhost',
 					port: 3000,
 				}),
-		],
-	},
-	// css build (unminified)
-	{
-		input: 'src/styles.js',
-		output: {
-			file: `dist/${name}.css.tmp.js`, // Temporary JS file (will be deleted)
-			format: 'es',
-		},
-		plugins: [
-			postcss({
-				...cssConfig,
-				extract: `${name}.css`,
-			}),
 		],
 	},
 	// cjs version
@@ -97,37 +142,44 @@ export default [
 			}),
 		],
 	},
-	// css build (minified)
-	{
-		input: 'src/styles.js',
-		output: {
-			file: `dist/${name}.min.css.tmp.js`, // Temporary JS file (will be deleted)
-			format: 'es',
-		},
-		plugins: [
-			postcss({
-				...cssConfig,
-				extract: `${name}.min.css`,
-				minimize: true,
-			}),
-			// Additional copy plugin at the end to copy files for GitHub Pages demo
+	// core css (unminified)
+	cssBuild({
+		input: `src/${name}.css`,
+		file: `${name}.css`,
+		minimize: false,
+		extraPlugins: [
 			copy({
 				targets: [
 					{
-						src: 'dist/dropdown-panel.esm.js',
-						dest: 'demo',
-					},
-					{
-						src: 'dist/dropdown-panel.esm.js.map',
-						dest: 'demo',
-					},
-					{
-						src: 'dist/dropdown-panel.min.css',
-						dest: 'demo',
+						src: `src/${name}.css`,
+						dest: 'dist',
+						rename: `${name}.src.css`,
 					},
 				],
-				hook: 'writeBundle', // Run this after all output files are written
+				hook: 'writeBundle',
 			}),
+			copyToDemo([`dist/${name}.css*`]),
 		],
-	},
+	}),
+	// core css (minified)
+	cssBuild({
+		input: `src/${name}.css`,
+		file: `${name}.min.css`,
+		minimize: true,
+		extraPlugins: [copyToDemo([`dist/${name}.min.css*`])],
+	}),
+	// effects css (unminified)
+	cssBuild({
+		input: `src/${name}.effects.css`,
+		file: `${name}.effects.css`,
+		minimize: false,
+		extraPlugins: [copyToDemo([`dist/${name}.effects.css*`])],
+	}),
+	// effects css (minified)
+	cssBuild({
+		input: `src/${name}.effects.css`,
+		file: `${name}.effects.min.css`,
+		minimize: true,
+		extraPlugins: [copyToDemo([`dist/${name}.effects.min.css*`])],
+	}),
 ];

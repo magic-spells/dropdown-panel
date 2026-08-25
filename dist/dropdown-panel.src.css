@@ -1,48 +1,26 @@
 /* Dropdown Panel Web Component - Minimal Functional Styles */
 /* This file contains ONLY the styles required for functionality. */
-/* All visual styling (colors, shadows, animations) should be added by the user. */
+/* Visual styling belongs to the consumer, or to the opt-in */
+/* dropdown-panel.effects.css. */
 
 dropdown-component {
 	display: inline-block;
 }
 
+/* Popover panels position against the component itself */
 dropdown-component:has(> dropdown-panel:not([wide])) {
 	position: relative;
 }
 
+/* Wide (mega menu) panels intentionally position against the nearest
+   positioned ANCESTOR rather than the component, so they can span a
+   whole nav bar. That ancestor is the consumer's responsibility: give
+   the wrapper the panel should span `position: relative`. With no
+   positioned ancestor, `top: 100%` resolves against the initial
+   containing block and the panel lands a viewport-height below the
+   fold. */
 dropdown-component:has(> dropdown-panel[wide]) {
 	position: static;
-}
-
-/* Hover bridge - creates invisible area between trigger and panel */
-/* This prevents the dropdown from closing when mouse moves between them */
-
-/* Vertical bridge for downward-opening panels (default) */
-dropdown-component:hover > dropdown-trigger::before,
-dropdown-trigger[aria-expanded='true']::before {
-	content: '';
-	position: absolute;
-	left: -10px;
-	top: 50%;
-	width: calc(100% + 20px);
-	height: 30px;
-	transform-origin: top center;
-	transform: perspective(50px) rotateX(50deg);
-	z-index: 10;
-}
-
-/* Horizontal bridge for right-opening panels */
-dropdown-component:has(> dropdown-panel[opens='right']):hover
-	> dropdown-trigger::before,
-dropdown-trigger[aria-expanded='true']:has(
-		~ dropdown-panel[opens='right']
-	)::before {
-	left: calc(100% - 30px);
-	top: -10px;
-	width: 40px;
-	height: calc(100% + 20px);
-	transform-origin: center left;
-	transform: perspective(50px) rotateY(-50deg);
 }
 
 dropdown-trigger {
@@ -51,15 +29,63 @@ dropdown-trigger {
 	user-select: none;
 }
 
-/* Default panel positioning (popover style - opens downward) */
+/* Hover bridge - an invisible but hit-testable shape that keeps the
+   pointer "inside" the component while it travels from the trigger to
+   the panel.
+
+   Only rendered while the component is hovered. Rendering it for a shown
+   panel the pointer has already left would leave an invisible strip
+   sitting over the neighbouring nav item. Gated on (hover: hover) so
+   iOS sticky hover cannot strand it over a neighbour after a tap. */
+@media (hover: hover) {
+	/* Vertical bridge for downward-opening panels (default) */
+	dropdown-component:hover > dropdown-trigger::before {
+		content: '';
+		position: absolute;
+		left: -20px;
+		top: 50%;
+		width: calc(100% + 40px);
+		height: 30px;
+		transform-origin: top center;
+		transform: perspective(50px) rotateX(50deg);
+		z-index: 10;
+	}
+
+	/* Horizontal bridge for right-opening panels */
+	dropdown-component:has(> dropdown-panel[opens='right']):hover
+		> dropdown-trigger::before {
+		left: calc(100% - 30px);
+		top: -10px;
+		width: 40px;
+		height: calc(100% + 20px);
+		transform-origin: center left;
+		transform: perspective(50px) rotateY(-50deg);
+	}
+}
+
+/* Default panel positioning (popover style - opens downward).
+
+   z-index sits above the hover bridge (10) so an unstyled panel does not
+   have the top strip of its first item eaten by the bridge.
+
+   There is deliberately no `visibility` here. It would have to be
+   transitioned to survive a fade-out, and any consumer writing
+   `transition: opacity 300ms` resets the whole shorthand and silently
+   kills that transition, snapping the panel away mid-fade. Hit-testing
+   is handled by `pointer-events`, assistive tech by `aria-hidden`, and
+   tab order / find-in-page by `inert` - all set by the component. For
+   the same reason the transition below uses longhands, so a consumer
+   overriding one property does not have to restate the rest. */
 dropdown-panel {
 	position: absolute;
 	top: 100%;
 	left: 0;
+	z-index: 11;
 	opacity: 0;
-	visibility: hidden;
 	pointer-events: none;
-	transition: opacity 200ms ease-out, visibility 200ms ease-out;
+	transition-property: opacity;
+	transition-duration: 200ms;
+	transition-timing-function: ease-out;
 }
 
 /* Right-opening panel positioning (for nested menus) */
@@ -73,9 +99,8 @@ dropdown-panel[wide] {
 	width: 100%;
 }
 
-/* Visible state - driven solely by ARIA state set in JS */
+/* Shown state - derived from the `visible` attribute on the host */
 dropdown-panel[aria-hidden='false'] {
 	opacity: 1;
 	pointer-events: auto;
-	visibility: visible;
 }
