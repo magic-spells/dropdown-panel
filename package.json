@@ -1,7 +1,7 @@
 {
 	"name": "@magic-spells/dropdown-panel",
-	"version": "1.0.0",
-	"description": "Accessible custom dropdown panel web component.",
+	"version": "2.0.0",
+	"description": "Accessible dropdown, popover and mega menu web component.",
 	"author": "Cory Schulz",
 	"license": "MIT",
 	"type": "module",
@@ -11,13 +11,17 @@
 	"style": "dist/dropdown-panel.min.css",
 	"exports": {
 		".": {
+			"types": "./dropdown-panel.d.ts",
 			"import": "./dist/dropdown-panel.esm.js",
 			"require": "./dist/dropdown-panel.cjs.js",
 			"default": "./dist/dropdown-panel.esm.js"
 		},
 		"./css": "./dist/dropdown-panel.css",
 		"./css/min": "./dist/dropdown-panel.min.css",
-		"./css/src": "./dist/dropdown-panel.src.css"
+		"./css/src": "./dist/dropdown-panel.src.css",
+		"./css/effects": "./dist/dropdown-panel.effects.css",
+		"./css/effects/min": "./dist/dropdown-panel.effects.min.css",
+		"./package.json": "./package.json"
 	},
 	"sideEffects": true,
 	"repository": {
@@ -30,19 +34,23 @@
 	},
 	"keywords": [
 		"dropdown",
-		"select",
-		"combobox",
-		"listbox",
+		"dropdown-menu",
+		"popover",
+		"mega-menu",
+		"navigation",
+		"nav-menu",
+		"hover-menu",
 		"web-components",
+		"custom-elements",
 		"accessibility",
 		"a11y",
-		"keyboard-navigation",
-		"custom-elements",
-		"form-elements"
+		"keyboard-navigation"
 	],
+	"types": "./dropdown-panel.d.ts",
 	"files": [
 		"dist/",
-		"src/"
+		"src/",
+		"dropdown-panel.d.ts"
 	],
 	"scripts": {
 		"build": "rollup -c",
