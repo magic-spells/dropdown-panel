@@ -2,389 +2,2534 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Dropdown Panel — @magic-spells</title>
 		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0" />
-		<title>Dropdown Panel Demo</title>
-		<link rel="stylesheet" href="dropdown-panel.min.css" />
+			name="description"
+			content="An accessible dropdown and mega-menu web component. Hover, click or both, nested submenus, five entrance effects, 3 kB and no dependencies." />
+		<link rel="canonical" href="https://magic-spells.github.io/dropdown-panel/demo/" />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="@magic-spells/dropdown-panel" />
+		<meta
+			property="og:description"
+			content="A panel that drops. Three custom elements, one attribute for state, five entrance effects. 3 kB min + gzip, no dependencies." />
+		<meta property="og:url" content="https://magic-spells.github.io/dropdown-panel/demo/" />
+		<meta name="twitter:card" content="summary" />
+		<!-- Inlined as a data URI so the repo stays binary-free and the browser's
+		     automatic /favicon.ico request never 404s. A trigger bar with the
+		     panel dropped open beneath it — the component's own silhouette. -->
+		<link
+			rel="icon"
+			href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306080f'/%3E%3Crect x='6' y='5.5' width='11' height='3.5' rx='1.75' fill='%23d8b043'/%3E%3Crect x='6' y='13' width='20' height='13.5' rx='3' fill='%23d8b043'/%3E%3Cpath d='M10 18h12M10 22h8' stroke='%2306080f' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&display=swap"
+			rel="stylesheet" />
+
+		<link rel="stylesheet" href="./dist/dropdown-panel.css" />
+		<link rel="stylesheet" href="./dist/dropdown-panel.effects.css" />
+
 		<style>
 			:root {
-				--panel-bg-color: #ffffff;
-				--panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-				--panel-border-radius: 4px;
-				--item-hover-bg: #f0f5ff;
+				/* Brass is a warm yellow metal at roughly 43°; --bg-deep is that
+				   hue's complement, about 223°, pushed to near-black — a cold blue
+				   ground so the gold reads as metal rather than as amber light. */
+				--bg-deep: #06080f;
+				--bg-card: #0e1118;
+				--bg-card-hover: #141822;
+				--bg-well: #080a11;
+				--border: #232a36;
+				--border-accent: #4a4231;
+
+				/* Approved accent. --brass carries edges, glows and rules; text uses
+				   --brass-text, two steps lighter, because #c9a227 is a border colour
+				   first and every text step on this page clears 7:1 without it. */
+				--brass: #c9a227;
+				--brass-dim: #8a6d1c;
+				--brass-glow: rgba(201, 162, 39, 0.13);
+				--brass-text: #d8b043;
+
+				/* Text ramp — measured against --bg-card #0e1118, the darkest surface
+				   any of these sit on: cream 17.1:1 · cream-dim 12.4:1 · text 14.4:1 ·
+				   text-dim 9.3:1 · brass-text 9.2:1. */
+				--cream: #f7f3ea;
+				--cream-dim: #d9d1c0;
+				--text: #e6e0d2;
+				--text-dim: #bdb5a4;
+
+				--font-display: 'Cormorant Garamond', Georgia, serif;
+				--font-body: 'Outfit', system-ui, sans-serif;
+				--font-mono: 'Courier New', ui-monospace, monospace;
+
+				/* ---- The menu skin ----
+				   The package ships no visual styling at all, so every colour, radius
+				   and shadow below is ordinary CSS this page writes — the same CSS a
+				   consumer writes. Only --dp-effect-duration and --dp-effect-easing
+				   are the component's own properties. */
+				--menu-bg: #171b26;
+				--menu-border: #2c3444;
+				--menu-radius: 10px;
+				--menu-pad: 6px;
+				--menu-min-width: 200px;
+				--menu-offset: 8px;
+				--menu-item-hover: #212838;
+				--menu-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+				--dp-effect-duration: 200ms;
+				--dp-effect-easing: cubic-bezier(0.32, 0.72, 0, 1);
 			}
 
-			html * {
+			* {
 				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			html {
+				background: var(--bg-deep);
+				scroll-behavior: smooth;
 			}
 
 			body {
-				font-family:
-					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-					Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
-					sans-serif;
-				line-height: 1.6;
-				margin: 0;
-				padding: 16px;
-				color: #333;
-				background-color: #f9f9f9;
+				min-width: 0;
+				color: var(--text);
+				background: var(--bg-deep);
+				font-family: var(--font-body);
+				font-weight: 300;
+				overflow-x: hidden;
+				-webkit-font-smoothing: antialiased;
 			}
 
-			header {
-				background-color: #00274c;
-				color: white;
-				padding: 1rem;
-				padding-bottom: 0px;
-				margin-bottom: 2rem;
-				border-radius: 5px;
+			/* ---- Noise overlay ----
+			   Modest z-index on purpose: above page content and the scrim (1000),
+			   but an extreme value here pins a viewport-sized fixed layer at the
+			   top of the stacking order and invites the compositor re-sort/tile
+			   jank the packages just fixed. Open panels sit at 60, well under it,
+			   so the grain falls over them the same as over everything else. */
+			body::before {
+				content: '';
+				position: fixed;
+				inset: 0;
+				z-index: 2000;
+				pointer-events: none;
+				opacity: 0.025;
+				background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+				background-repeat: repeat;
+				background-size: 256px;
+			}
+
+			:where(a, button, [tabindex]):focus-visible {
+				outline: 2px solid var(--brass-text);
+				outline-offset: 3px;
+			}
+
+			/* ---- Hero ---- */
+			.hero {
 				position: relative;
-			}
-
-			h1 {
-				margin: 0;
-				font-size: 1.8rem;
-			}
-
-			.nav-menu {
+				padding: 4rem 1.5rem 2.5rem;
 				display: flex;
-				list-style: none;
-				padding: 0;
-				margin: 0;
+				flex-direction: column;
 				align-items: center;
+				text-align: center;
+				overflow: hidden;
 			}
 
-			.nav-menu .normal-link {
-				padding: 0.5rem 0.5rem;
-				margin-bottom: 5px;
-				display: inline-flex;
-				align-items: center;
-				font-weight: 500;
-			}
-
-			dropdown-trigger {
-				color: white;
-				font-weight: 500;
-				padding: 0.5rem 0.5rem 0.5rem;
-				margin-bottom: 5px;
-				display: inline-flex;
-				align-items: center;
-				gap: 5px;
-				cursor: pointer;
-			}
-
-			/* Arrow icons in triggers */
-			.dropdown-arrow {
-				display: inline-block;
-				width: 12px;
-				height: 12px;
-				line-height: 0;
-			}
-
-			dropdown-panel {
+			.hero::before {
+				content: '';
 				position: absolute;
-				top: 100%;
-				left: -8px;
-				background: white;
-				box-shadow: var(--panel-shadow);
-				border-radius: var(--panel-border-radius);
-				min-width: 200px;
-				z-index: 100;
+				top: -38%;
+				left: 50%;
+				width: 1000px;
+				height: 900px;
+				max-width: 130vw;
+				transform: translateX(-50%);
+				background: radial-gradient(ellipse, var(--brass-glow), transparent 68%);
+				pointer-events: none;
 			}
 
-			.dropdown-item {
-				display: block;
-				padding: 0.5rem 1rem;
-				color: black;
+			/* The component's own affordance, borrowed as the page's opening mark:
+			   a trigger bar with its panel dropped open underneath. The panel drops
+			   once on load, which is the whole gesture the package is about. */
+			.hero-mark {
+				position: relative;
+				width: 98px;
+				margin-bottom: 2.25rem;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+			}
+
+			.hero-mark-trigger {
+				width: 48px;
+				height: 6px;
+				background: var(--brass);
+				border-radius: 6px;
+			}
+
+			.hero-mark-panel {
+				width: 98px;
+				margin-top: 9px;
+				padding: 9px 10px;
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				background: rgba(201, 162, 39, 0.07);
+				border: 1px solid var(--brass-dim);
+				border-radius: 7px;
+				transform-origin: top center;
+				animation: mark-drop 560ms cubic-bezier(0.32, 0.72, 0, 1) 140ms both;
+			}
+
+			.hero-mark-panel i {
+				height: 4px;
+				background: var(--brass-dim);
+				border-radius: 4px;
+			}
+
+			.hero-mark-panel i:nth-child(2) {
+				width: 72%;
+			}
+
+			.hero-mark-panel i:nth-child(3) {
+				width: 52%;
+			}
+
+			@keyframes mark-drop {
+				from {
+					opacity: 0;
+					transform: perspective(240px) rotateX(-26deg) translateY(-7px);
+				}
+				to {
+					opacity: 1;
+					transform: perspective(240px) rotateX(0) translateY(0);
+				}
+			}
+
+			.hero-badge {
+				position: relative;
+				max-width: 100%;
+				margin-bottom: 2.25rem;
+				padding: 0.45em 1.25em;
+				color: var(--brass-text);
+				border: 1px solid var(--border-accent);
+				border-radius: 100px;
+				font-size: 0.95rem;
+				font-weight: 400;
+				letter-spacing: 0.1em;
 				text-decoration: none;
-				cursor: pointer;
+				text-transform: uppercase;
+				transition: border-color 0.3s ease;
+			}
+
+			.hero-badge:hover {
+				border-color: var(--brass-dim);
+			}
+
+			.hero h1 {
+				position: relative;
+				max-width: 11ch;
+				margin-bottom: 1.5rem;
+				color: var(--cream);
+				font-family: var(--font-display);
+				font-size: clamp(3.1rem, 10vw, 7.4rem);
+				font-weight: 300;
+				letter-spacing: -0.025em;
+				line-height: 0.95;
+			}
+
+			.hero h1 em {
+				color: var(--brass-text);
+				font-style: italic;
+				font-weight: 300;
+			}
+
+			.hero-tagline {
+				position: relative;
+				max-width: 600px;
+				font-size: 1.1rem;
+				line-height: 1.72;
+				text-wrap: pretty;
+			}
+
+			/* ---- Install ---- */
+			.install {
+				position: relative;
+				margin-top: 2.5rem;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.55rem;
+				max-width: 100%;
+			}
+
+			.install-label {
+				color: var(--text-dim);
+				font-size: 0.8rem;
+				font-weight: 400;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+
+			.install-value {
+				max-width: calc(100vw - 2.5rem);
+				padding: 0.6em 1.1em;
+				color: var(--cream);
+				background: var(--bg-card);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				font-family: var(--font-mono);
+				font-size: clamp(0.76rem, 3.4vw, 0.94rem);
 				white-space: nowrap;
-				transition: background-color 0.2s ease;
+				overflow-x: auto;
+				user-select: all;
+				cursor: copy;
+				transition:
+					border-color 0.3s ease,
+					color 0.3s ease;
 			}
 
-			.dropdown-item:hover,
-			.dropdown-item:focus {
-				background-color: #e6edf3;
+			.install-value:hover {
+				border-color: var(--brass-dim);
 			}
 
-			.dropdown-divider {
-				height: 1px;
-				background-color: #e5e5e5;
-				margin: 0.5rem 0;
+			.install.copied .install-label {
+				color: var(--brass-text);
 			}
 
-			.container {
-				max-width: 1200px;
+			.install.copied .install-value {
+				color: var(--brass-text);
+				border-color: var(--brass-dim);
+			}
+
+			.size-note {
+				display: flex;
+				align-items: baseline;
+				justify-content: center;
+				gap: 0.45rem;
+				margin-top: 0.75rem;
+			}
+
+			.size-value {
+				color: var(--brass-text);
+				font-family: var(--font-mono);
+				font-size: 0.92rem;
+			}
+
+			.size-label {
+				color: var(--cream-dim);
+				font-family: var(--font-mono);
+				font-size: 0.72rem;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+
+			.hero-line {
+				position: relative;
+				width: 1px;
+				height: 70px;
+				margin-top: 2.75rem;
+				background: linear-gradient(var(--brass-dim), transparent);
+			}
+
+			/* ---- Sections ---- */
+			.demos {
+				width: min(1080px, 100%);
 				margin: 0 auto;
-				padding: 0 1rem;
+				padding: 1rem 1.25rem 6rem;
+				display: flex;
+				flex-direction: column;
+				gap: 3rem;
 			}
 
 			.demo-section {
-				background-color: white;
-				border-radius: 8px;
-				padding: 2rem;
-				margin-bottom: 2rem;
-				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-			}
-
-			.code-example {
-				background-color: #f5f5f5;
-				padding: 1rem;
-				border-radius: 4px;
-				overflow: auto;
-				font-family: monospace;
-				margin: 1rem 0;
-			}
-
-			/* ===================================
-         EXAMPLE DROPDOWN STYLING
-         The component is unstyled by default.
-         Below are example styles for reference.
-         ================================== */
-
-			/* Panel base styling - applies to all panels */
-			dropdown-panel {
-				background-color: #ffffff;
-				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-				padding: 0.5rem 0;
-				min-width: 180px;
-				z-index: 20;
-				/* Note: overflow: hidden would clip nested panels */
-			}
-
-			/* Default popover panels - animated entrance */
-			dropdown-panel:not([wide]) {
-				filter: blur(4px);
-				transform: translateY(5px) scale(0.98);
-				border-radius: 4px;
-				margin-top: -5px;
-				will-change: opacity, transform, filter;
+				min-width: 0;
+				padding: 2.5rem;
+				background: var(--bg-card);
+				border: 1px solid var(--border);
+				border-radius: 16px;
 				transition:
-					opacity 200ms ease-out,
-					visibility 200ms ease-out,
-					transform 200ms ease-out,
-					filter 200ms ease-out;
+					background 0.3s ease,
+					border-color 0.3s ease;
 			}
 
-			/* Visible state for popover panels */
-			dropdown-panel:not([wide])[aria-hidden='false'] {
-				transform: translateY(0) scale(1);
-				filter: blur(0px);
+			.demo-section:hover {
+				background: var(--bg-card-hover);
+				border-color: var(--border-accent);
 			}
 
-			/* Wide panels - mega menu style */
+			/* ---- Spec bar ----
+			   The eyebrow is a measurement, not an ordinal: each section is labelled
+			   with the actual constant or quantity it teaches, read off like a gauge. */
+			.spec {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.5rem 0.85rem;
+				margin-bottom: 1.35rem;
+			}
+
+			.spec-key {
+				color: var(--brass-text);
+				font-family: var(--font-mono);
+				font-size: 0.8rem;
+				letter-spacing: 0.22em;
+				text-transform: uppercase;
+			}
+
+			.spec-rule {
+				flex: 1 1 1.5rem;
+				min-width: 1.5rem;
+				height: 1px;
+				background: linear-gradient(to right, var(--border-accent), var(--border) 65%, transparent);
+			}
+
+			.spec-val {
+				color: var(--cream-dim);
+				font-family: var(--font-mono);
+				font-size: 0.8rem;
+				letter-spacing: 0.04em;
+				white-space: nowrap;
+			}
+
+			.demo-section h2 {
+				margin-bottom: 0.85rem;
+				color: var(--cream);
+				font-family: var(--font-display);
+				font-size: clamp(2rem, 5vw, 3.1rem);
+				font-weight: 400;
+				letter-spacing: -0.01em;
+				line-height: 1.08;
+			}
+
+			.demo-section h2 em {
+				color: var(--brass-text);
+				font-style: italic;
+				font-weight: 400;
+			}
+
+			.demo-desc {
+				max-width: 660px;
+				margin-bottom: 1.35rem;
+				font-size: 1.07rem;
+				line-height: 1.72;
+				text-wrap: pretty;
+			}
+
+			.demo-desc code,
+			.ref-note code,
+			.stage-note code {
+				color: var(--cream);
+				font-family: var(--font-mono);
+				font-size: 0.94em;
+			}
+
+			.demo-desc strong {
+				color: var(--cream);
+				font-weight: 400;
+			}
+
+			/* ---- Stage ----
+			   position: relative, and never overflow: hidden. A dropdown is the one
+			   component in this family that opens inside the page rather than in the
+			   top layer, so any clipping ancestor cuts the panel off — and a nested
+			   panel is the first thing to go. Nothing between .demos and the trigger
+			   sets overflow at all. */
+			.stage {
+				position: relative;
+				min-width: 0;
+				padding: 2rem;
+				background:
+					radial-gradient(ellipse at 50% 130%, var(--brass-glow), transparent 60%),
+					linear-gradient(135deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0.035));
+				border: 1px solid var(--border);
+				border-radius: 12px;
+			}
+
+			/* An open panel is absolutely positioned, so it contributes nothing to
+			   the stage's height. Each stage that hosts one reserves the room by
+			   hand — otherwise the panel lands on top of the code block below it. */
+			.stage-drop-sm {
+				min-height: 16rem;
+			}
+
+			.stage-drop {
+				min-height: 20rem;
+			}
+
+			.stage-drop-lg {
+				min-height: 23rem;
+			}
+
+			.stage-row {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.9rem 1.25rem;
+			}
+
+			/* A stage that reserves room for a panel aligns its row to the top, so
+			   all of the reserved height sits below the trigger instead of half of
+			   it above. */
+			.stage-drop-sm.stage-row,
+			.stage-drop.stage-row,
+			.stage-drop-lg.stage-row {
+				align-items: flex-start;
+			}
+
+			/* And when it is not itself a row, it is a column — which lets the
+			   caption drop to the floor of the stage with margin-top: auto. Left
+			   in flow it would sit directly under the trigger, where the open
+			   panel covers it. */
+			.stage-drop-sm:not(.stage-row),
+			.stage-drop:not(.stage-row),
+			.stage-drop-lg:not(.stage-row) {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.stage-note {
+				margin-top: auto;
+				padding-top: 1rem;
+				max-width: 62ch;
+				color: var(--text-dim);
+				font-size: 0.9rem;
+				line-height: 1.65;
+			}
+
+			.controls {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.btn {
+				padding: 0.65em 1.45em;
+				color: var(--cream);
+				background: transparent;
+				border: 1px solid var(--border-accent);
+				border-radius: 100px;
+				font: inherit;
+				font-size: 0.95rem;
+				font-weight: 400;
+				letter-spacing: 0.09em;
+				text-transform: uppercase;
+				cursor: pointer;
+				transition:
+					color 0.25s ease,
+					border-color 0.25s ease;
+			}
+
+			.btn:hover {
+				color: var(--brass-text);
+				border-color: var(--brass-dim);
+			}
+
+			.btn:active {
+				transform: translateY(1px);
+			}
+
+			/* ---- Segmented control ---- */
+			.seg {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+			}
+
+			.seg-btn {
+				padding: 0.45em 0.95em;
+				color: var(--cream-dim);
+				background: transparent;
+				border: 1px solid var(--border-accent);
+				border-radius: 100px;
+				font: inherit;
+				font-size: 0.85rem;
+				font-weight: 500;
+				cursor: pointer;
+				transition:
+					color 0.2s ease,
+					background 0.2s ease,
+					border-color 0.2s ease;
+			}
+
+			.seg-btn:hover {
+				color: var(--brass-text);
+				border-color: var(--brass-dim);
+			}
+
+			/* Selected state uses the page's inverted pairing: #0c0f16 on
+			   --brass-text is 9.3:1, one step over the ramp's floor. */
+			.seg-btn.is-active {
+				color: #0c0f16;
+				background: var(--brass-text);
+				border-color: var(--brass-text);
+			}
+
+			.readout {
+				min-width: min(100%, 280px);
+				color: var(--cream-dim);
+				font-family: var(--font-mono);
+				font-size: 0.9rem;
+				line-height: 1.5;
+				/* the readouts write two lines with a \n */
+				white-space: pre-line;
+			}
+
+			/* Column-aligned readouts need runs of spaces kept, which pre-line
+			   collapses. They can outgrow a phone, so they scroll on their own. */
+			.readout-cols {
+				white-space: pre;
+				overflow-x: auto;
+			}
+
+			/* ==================================================================
+			   The menu skin — everything below is this page's own CSS.
+			   The component ships positioning and visibility and nothing else.
+			   ================================================================== */
+
+			/* A stand-in nav bar. A wide panel is 100% of the nearest positioned
+			   ancestor, so the bar has to be that ancestor or the mega menu spans
+			   the whole stage and drops below all of it. */
+			.menubar {
+				position: relative;
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.2rem;
+				padding: 0.4rem;
+				background: rgba(255, 255, 255, 0.03);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+			}
+
+			.menu-link {
+				padding: 0.5em 0.85em;
+				color: var(--text-dim);
+				border-radius: 8px;
+				font-size: 0.95rem;
+				text-decoration: none;
+				transition: color 0.2s ease;
+			}
+
+			.menu-link:hover {
+				color: var(--brass-text);
+			}
+
+			dropdown-trigger {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.5em 0.85em;
+				color: var(--cream-dim);
+				border-radius: 8px;
+				font-size: 0.95rem;
+				transition:
+					color 0.2s ease,
+					background 0.2s ease;
+			}
+
+			dropdown-trigger:hover,
+			dropdown-trigger[aria-expanded='true'] {
+				color: var(--brass-text);
+				background: rgba(201, 162, 39, 0.09);
+			}
+
+			/* The open-state indicator is a mirror, not a rotation. scaleY(-1)
+			   flips the glyph through the horizontal centre line of its box, so it
+			   reverses identically on close instead of unwinding a spin. Both
+			   triangles are drawn symmetric about the centre of a 12x12 viewBox,
+			   so the mirror never shifts them off their baseline. */
+			.menu-arrow {
+				flex: 0 0 auto;
+				width: 11px;
+				height: 11px;
+				line-height: 0;
+				transform-origin: center;
+				transition: transform var(--dp-effect-duration, 200ms)
+					var(--dp-effect-easing, ease-out);
+			}
+
+			dropdown-component[visible] > dropdown-trigger > .menu-arrow-down {
+				transform: scaleY(-1);
+			}
+
+			/* A submenu mirrors on the other axis, because its panel is to the
+			   side rather than below — and left is also the key that closes it. */
+			dropdown-component[visible] > dropdown-trigger > .menu-arrow-right {
+				transform: scaleX(-1);
+			}
+
+			dropdown-panel {
+				/* Above the section card and the code block, far below the noise
+				   layer at 2000. The hover bridge sits at 10 inside the package. */
+				z-index: 60;
+				min-width: var(--menu-min-width);
+				margin-top: var(--menu-offset);
+				padding: var(--menu-pad);
+				background: var(--menu-bg);
+				border: 1px solid var(--menu-border);
+				border-radius: var(--menu-radius);
+				box-shadow: var(--menu-shadow);
+				/* No overflow: hidden. It would clip every nested panel. */
+			}
+
+			dropdown-panel[opens='right'] {
+				margin-top: 0;
+				margin-left: var(--menu-offset);
+			}
+
 			dropdown-panel[wide] {
-				margin-top: 5px;
-				border-radius: 5px;
 				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-				gap: 1.5rem;
-				padding: 16px 32px;
-				filter: none;
-				transform: none;
-				transition: opacity 200ms ease-out, visibility 200ms ease-out;
+				grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+				gap: 1.1rem 1.75rem;
+				padding: 1.4rem 1.5rem;
 			}
 
-			/* Nested dropdown styling */
-			.nested-dropdown {
+			.menu-item {
+				display: block;
+				padding: 0.5em 0.85em;
+				color: var(--text);
+				border-radius: 6px;
+				font-size: 0.92rem;
+				text-decoration: none;
+				white-space: nowrap;
+				transition:
+					background 0.18s ease,
+					color 0.18s ease;
+			}
+
+			.menu-item:hover,
+			.menu-item:focus-visible {
+				color: var(--cream);
+				background: var(--menu-item-hover);
+			}
+
+			.menu-divider {
+				height: 1px;
+				margin: 0.4rem 0.5rem;
+				background: var(--menu-border);
+			}
+
+			.menu-heading {
+				padding: 0.2rem 0.85rem 0.55rem;
+				color: var(--brass-text);
+				font-family: var(--font-mono);
+				font-size: 0.68rem;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+			}
+
+			/* A nested component is a block inside the panel so its trigger fills
+			   the row like any other item. */
+			dropdown-panel dropdown-component {
 				display: block;
 			}
 
-			.nested-dropdown dropdown-trigger {
-				width: 100%;
+			dropdown-trigger.menu-item {
 				display: flex;
-				justify-content: space-between;
 				align-items: center;
+				justify-content: space-between;
+				width: 100%;
 			}
 
-			/* Right-opening panels for nested menus */
-			dropdown-panel[opens='right'] {
-				margin-left: -5px;
-				margin-top: 0;
-				border-radius: 4px;
+			dropdown-trigger.menu-item[aria-expanded='true'] {
+				color: var(--brass-text);
+				background: var(--menu-item-hover);
+			}
+
+			/* ---- Bridge reveal (demo only) ----
+			   The bridge is a ::before on the trigger that exists only while the
+			   component is hovered or open, so tinting it shows the real element at
+			   the only moment it is real. Background and outline only — the box it
+			   paints is exactly the box the package declares. */
+			.show-bridge dropdown-trigger::before {
+				background: rgba(201, 162, 39, 0.22);
+				outline: 1px dashed var(--brass);
+			}
+
+			/* ---- Theme playground ---- */
+			.theme-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 0 3rem;
+				margin-top: 1.5rem;
+				padding: 0.4rem 1.5rem 0.9rem;
+				border: 1px solid var(--border);
+				border-radius: 12px;
+			}
+
+			/* A fixed control column so every slider, swatch and select shares one
+			   right edge, and the readouts line up in a single monospace column.
+			   Colour rows have no readout — their swatch simply lands in the same
+			   control column and the third cell stays empty. */
+			.theme-row {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) 110px 6ch;
+				align-items: center;
+				gap: 1rem;
+				padding: 0.62rem 0;
+				border-top: 1px solid var(--border);
+				cursor: pointer;
+			}
+
+			/* Two columns puts two rows against the top edge */
+			.theme-row:nth-child(-n + 2) {
+				border-top: 0;
+			}
+
+			.theme-row > input,
+			.theme-row > select {
+				justify-self: end;
+			}
+
+			.theme-row > select {
+				width: 110px;
+				padding: 0.25rem 0.3rem;
+				color: var(--cream-dim);
+				background: #161a24;
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				font-family: inherit;
+				font-size: 0.72rem;
+			}
+
+			.theme-label {
+				color: var(--cream-dim);
+				font-size: 0.85rem;
+				letter-spacing: 0.04em;
+			}
+
+			.theme-value {
+				color: var(--brass-text);
+				font-family: var(--font-mono);
+				font-size: 0.78rem;
+				text-align: right;
+			}
+
+			.theme-row input[type='range'] {
+				width: 100%;
+				height: 2px;
+				appearance: none;
+				background: var(--border-accent);
+				border-radius: 2px;
+				cursor: pointer;
+			}
+
+			.theme-row input[type='range']::-webkit-slider-thumb {
+				width: 13px;
+				height: 13px;
+				appearance: none;
+				background: var(--brass-text);
+				border-radius: 50%;
+				cursor: pointer;
+			}
+
+			.theme-row input[type='range']::-moz-range-thumb {
+				width: 13px;
+				height: 13px;
+				background: var(--brass-text);
+				border: none;
+				border-radius: 50%;
+				cursor: pointer;
+			}
+
+			.theme-row input[type='color'] {
+				width: 42px;
+				height: 24px;
+				padding: 0;
+				background: transparent;
+				border: 1px solid var(--border-accent);
+				border-radius: 5px;
+				cursor: pointer;
+			}
+
+			/* Toggle switch built on the native checkbox, so it keeps keyboard
+			   operation and the label association for free */
+			.theme-row input[type='checkbox'] {
+				position: relative;
+				width: 34px;
+				height: 19px;
+				appearance: none;
+				background: var(--border-accent);
+				border-radius: 100px;
+				cursor: pointer;
+				transition: background 0.22s ease;
+			}
+
+			.theme-row input[type='checkbox']::after {
+				content: '';
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				width: 15px;
+				height: 15px;
+				background: var(--cream-dim);
+				border-radius: 50%;
+				transition:
+					transform 0.22s ease,
+					background 0.22s ease;
+			}
+
+			.theme-row input[type='checkbox']:checked {
+				background: var(--brass-dim);
+			}
+
+			.theme-row input[type='checkbox']:checked::after {
+				background: var(--cream);
+				transform: translateX(15px);
+			}
+
+			.theme-row input[type='checkbox']:focus-visible {
+				outline: 2px solid var(--brass-text);
+				outline-offset: 2px;
+			}
+
+			/* ---- Code ---- */
+			.code-block {
+				max-width: 100%;
+				margin-top: 1.5rem;
+				padding: 1.25rem 1.4rem;
+				color: var(--text);
+				background: var(--bg-well);
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				font-family: var(--font-mono);
+				font-size: 0.82rem;
+				line-height: 1.75;
+				overflow-x: auto;
+				white-space: pre;
+				-webkit-overflow-scrolling: touch;
+			}
+
+			.hl-tag {
+				color: var(--brass-text);
+			}
+
+			.hl-attr {
+				color: #c8a9e5;
+			}
+
+			.hl-val {
+				color: #efb092;
+			}
+
+			.hl-cm {
+				color: var(--text-dim);
+				font-style: italic;
+			}
+
+			.event-log {
+				height: 158px;
+				margin-top: 1rem;
+				padding: 1rem;
+				color: var(--cream-dim);
+				background: var(--bg-well);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				font-family: var(--font-mono);
+				font-size: 0.86rem;
+				line-height: 1.6;
+				overflow: auto;
+				white-space: pre-wrap;
+			}
+
+			kbd {
+				display: inline-block;
+				padding: 0.15em 0.5em;
+				color: var(--cream);
+				background: rgba(255, 255, 255, 0.05);
+				border: 1px solid var(--border-accent);
+				border-radius: 5px;
+				font-family: var(--font-mono);
+				font-size: 0.82em;
+				line-height: 1.5;
+				white-space: nowrap;
+			}
+
+			.key-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem 1.4rem;
+				margin-top: 1.1rem;
+				list-style: none;
+			}
+
+			.key-list li {
+				display: flex;
+				align-items: baseline;
+				gap: 0.5rem;
+				color: var(--text-dim);
+				font-size: 0.88rem;
+			}
+
+			/* ---- Reference tables ---- */
+			.ref-heading {
+				margin: 2.25rem 0 0.85rem;
+				color: var(--brass-text);
+				font-family: var(--font-mono);
+				font-size: 0.8rem;
+				font-weight: 400;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+			}
+
+			.ref-table {
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				overflow: hidden;
+			}
+
+			.ref-row {
+				display: grid;
+				grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 2fr);
+				gap: 1rem;
+				padding: 0.8rem 1rem;
+				border-top: 1px solid var(--border);
+				font-size: 0.94rem;
+				line-height: 1.55;
+				align-items: baseline;
+			}
+
+			.ref-row:first-child {
+				border-top: 0;
+			}
+
+			.ref-head {
+				color: var(--cream-dim);
+				background: rgba(0, 0, 0, 0.24);
+				font-size: 0.8rem;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+			}
+
+			.ref-row code {
+				color: var(--cream);
+				font-family: var(--font-mono);
+				font-size: 0.84rem;
+				overflow-wrap: anywhere;
+			}
+
+			.ref-note {
+				max-width: 700px;
+				margin-top: 0.4rem;
+				font-size: 1.02rem;
+				line-height: 1.72;
+			}
+
+			/* ---- Site footer ---- */
+			.site-foot {
+				width: min(1080px, calc(100% - 2.5rem));
+				margin: 0 auto;
+				padding: 2rem 1.5rem 4rem;
+				border-top: 1px solid var(--border);
+				color: var(--text-dim);
+				font-family: var(--font-mono);
+				font-size: 0.86rem;
+				letter-spacing: 0.05em;
+				text-align: center;
+			}
+
+			.site-foot a {
+				color: var(--brass-text);
+				text-decoration: none;
+				border-bottom: 1px solid transparent;
+				transition: border-color 0.25s ease;
+			}
+
+			.site-foot a:hover {
+				border-bottom-color: var(--brass-dim);
+			}
+
+			/* ---- Responsive ---- */
+			/* Each row is label + a 110px control + a 6ch readout, so two of them
+			   plus the 3rem gutter run out of room long before the page does. */
+			@media (max-width: 900px) {
+				.theme-grid {
+					grid-template-columns: 1fr;
+				}
+
+				/* One column, so only the very first row sits on the top edge */
+				.theme-row:nth-child(2) {
+					border-top: 1px solid var(--border);
+				}
+
+				/* Narrower columns make every panel taller, so the reserved room
+				   under a trigger grows with them. */
+				.stage-drop-sm {
+					min-height: 17rem;
+				}
+
+				.stage-drop {
+					min-height: 23rem;
+				}
+
+				.stage-drop-lg {
+					min-height: 28rem;
+				}
+			}
+
+			@media (max-width: 640px) {
+				.hero {
+					padding-inline: 1rem;
+				}
+
+				.demos {
+					padding-inline: 0.75rem;
+					gap: 2.25rem;
+				}
+
+				.demo-section {
+					padding: 1.75rem 1rem;
+				}
+
+				.stage {
+					padding: 1.25rem 1rem;
+				}
+
+				.ref-row {
+					grid-template-columns: 1fr;
+					gap: 0.3rem;
+				}
+
+				.ref-head {
+					display: none;
+				}
+
+				.theme-grid {
+					padding-inline: 1rem;
+				}
+
+				.code-block {
+					padding-inline: 1rem;
+					font-size: 0.76rem;
+				}
+
+				/* A submenu needs the width of a second panel to its right. On a
+				   phone there isn't one, so it indents underneath instead — the
+				   fallback a production menu ships, and the reason nothing in the
+				   chain may clip. */
+				dropdown-panel[opens='right'] {
+					top: 100%;
+					left: 0;
+					width: calc(100% - 1rem);
+					min-width: 0;
+					margin-top: 4px;
+					margin-left: 1rem;
+				}
+
+				/* No minimum, so a panel whose trigger has wrapped to the right of
+				   a narrow bar shrinks to its content instead of running off the
+				   edge. A closed panel is still laid out — only its paint is
+				   suppressed — so an oversized one widens the page even shut. */
+				:root {
+					--menu-min-width: 0px;
+				}
+
+				dropdown-panel {
+					max-width: calc(100vw - 2rem);
+				}
+
+				/* Four mega-menu columns stacked into one is a very tall panel;
+				   two keeps it inside a stage a phone can show whole. */
+				dropdown-panel[wide] {
+					grid-template-columns: repeat(2, minmax(0, 1fr));
+					gap: 0.9rem 1rem;
+					padding: 1.1rem;
+				}
+
+				.stage-drop-sm {
+					min-height: 17rem;
+				}
+
+				.stage-drop {
+					min-height: 23rem;
+				}
+
+				.stage-drop-lg {
+					min-height: 28rem;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				html {
+					scroll-behavior: auto;
+				}
+
+				.demo-section,
+				.btn,
+				.seg-btn,
+				.hero-badge,
+				.install-value,
+				.menu-item,
+				.menu-link,
+				dropdown-trigger,
+				.menu-arrow,
+				.site-foot a {
+					transition: none;
+				}
+
+				.hero-mark-panel {
+					animation: none;
+				}
+
+				.btn:active {
+					transform: none;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<header>
-			<div class="container">
-				<h1>Dropdown Panel Demo</h1>
-				<p>A lightweight, accessible dropdown panel web component</p>
-
-				<nav>
-					<ul class="nav-menu">
-						<li>
-							<dropdown-component>
-								<dropdown-trigger>
-									Products
-									<span class="dropdown-arrow">
-										<svg viewBox="0 0 12 12" fill="currentColor">
-											<path d="M6 8L2 4h8z" />
-										</svg>
-									</span>
-								</dropdown-trigger>
-								<dropdown-panel wide>
-									<div>
-										<a href="#" class="dropdown-item">Software</a>
-										<a href="#" class="dropdown-item">Hardware</a>
-										<a href="#" class="dropdown-item">Services</a>
-										<a href="#" class="dropdown-item"
-											>Special Offers</a
-										>
-									</div>
-									<div>
-										<a href="#" class="dropdown-item">Software</a>
-										<a href="#" class="dropdown-item">Hardware</a>
-										<a href="#" class="dropdown-item">Services</a>
-										<a href="#" class="dropdown-item"
-											>Special Offers</a
-										>
-									</div>
-									<div>
-										<a href="#" class="dropdown-item">Software</a>
-										<a href="#" class="dropdown-item">Hardware</a>
-										<a href="#" class="dropdown-item">Services</a>
-										<a href="#" class="dropdown-item"
-											>Special Offers</a
-										>
-									</div>
-								</dropdown-panel>
-							</dropdown-component>
-						</li>
-						<li>
-							<dropdown-component>
-								<dropdown-trigger>
-									Solutions
-									<span class="dropdown-arrow">
-										<svg viewBox="0 0 12 12" fill="currentColor">
-											<path d="M6 8L2 4h8z" />
-										</svg>
-									</span>
-								</dropdown-trigger>
-								<dropdown-panel>
-									<a href="#" class="dropdown-item"
-										>For Individuals</a
-									>
-									<a href="#" class="dropdown-item"
-										>For Small Business</a
-									>
-									<a href="#" class="dropdown-item">For Enterprise</a>
-								</dropdown-panel>
-							</dropdown-component>
-						</li>
-						<li>
-							<dropdown-component>
-								<dropdown-trigger>
-									Resources
-									<span class="dropdown-arrow">
-										<svg viewBox="0 0 12 12" fill="currentColor">
-											<path d="M6 8L2 4h8z" />
-										</svg>
-									</span>
-								</dropdown-trigger>
-								<dropdown-panel>
-									<a href="#" class="dropdown-item">Documentation</a>
-									<a href="#" class="dropdown-item">Tutorials</a>
-									<a href="#" class="dropdown-item">Blog</a>
-
-									<!-- Nested dropdown example -->
-									<dropdown-component class="nested-dropdown">
-										<dropdown-trigger class="dropdown-item">
-											Support
-											<span class="dropdown-arrow">
-												<svg viewBox="0 0 12 12" fill="currentColor">
-													<path d="M8 6L4 2v8z" />
-												</svg>
-											</span>
-										</dropdown-trigger>
-										<dropdown-panel opens="right">
-											<a href="#" class="dropdown-item">Contact Us</a>
-											<a href="#" class="dropdown-item">About Us</a>
-											<a href="#" class="dropdown-item"
-												>Help Center</a
-											>
-											<a href="#" class="dropdown-item">FAQ</a>
-										</dropdown-panel>
-									</dropdown-component>
-								</dropdown-panel>
-							</dropdown-component>
-						</li>
-						<li>
-							<a
-								href="#"
-								class="normal-link"
-								style="color: white; text-decoration: none"
-								>About</a
-							>
-						</li>
-						<li>
-							<a
-								href="#"
-								class="normal-link"
-								style="color: white; text-decoration: none"
-								>Contact</a
-							>
-						</li>
-					</ul>
-				</nav>
+		<!-- ======== HERO ======== -->
+		<header class="hero">
+			<div class="hero-mark" aria-hidden="true">
+				<span class="hero-mark-trigger"></span>
+				<span class="hero-mark-panel"><i></i><i></i><i></i></span>
 			</div>
+			<a class="hero-badge" href="https://github.com/magic-spells/dropdown-panel"
+				>@magic-spells/dropdown-panel</a
+			>
+			<h1>A panel that <em>drops</em>.</h1>
+			<p class="hero-tagline">
+				Three custom elements, no dependencies, and one attribute that holds the state.
+			</p>
+
+			<div class="install">
+				<span class="install-label" id="install-label">Install</span>
+				<code class="install-value" id="install-value" title="Click to copy"
+					>npm install @magic-spells/dropdown-panel</code
+				>
+				<!-- dropdown-panel.min.js plus dropdown-panel.min.css, each gzipped
+				     on its own the way a CDN serves them. The entrance effects are a
+				     second, opt-in stylesheet and add 0.4 kB when you want them. -->
+				<div class="size-note">
+					<span class="size-value">3.0 kB</span>
+					<span class="size-label">min + gzip, js + css</span>
+				</div>
+			</div>
+
+			<div class="hero-line" aria-hidden="true"></div>
 		</header>
 
-		<div class="container">
+		<!-- ======== SECTIONS ======== -->
+		<main class="demos">
+			<!-- ---- Anatomy ---- -->
 			<section class="demo-section">
-				<h2>Features</h2>
-				<ul>
-					<li>Lightweight and customizable</li>
-					<li>Hover or click activation</li>
-					<li>
-						Supports both compact popover and full-width mega menu
-						styles using the <code>wide</code> attribute
-					</li>
-					<li>Keyboard accessible</li>
-					<li>Follows accessibility best practices</li>
-					<li>No dependencies</li>
-				</ul>
+				<div class="spec">
+					<span class="spec-key">Anatomy</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">3 elements · 0 deps</span>
+				</div>
+				<h2>The markup.</h2>
+				<p class="demo-desc">
+					The component wires the pair, the trigger is the button, the panel holds whatever you put
+					in it. Ids and ARIA are written on connect. Everything you can <em>see</em> below is this
+					page's own CSS.
+				</p>
+				<div class="stage stage-drop">
+					<nav class="menubar">
+						<dropdown-component>
+							<dropdown-trigger>
+								Account
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#anatomy" class="menu-item">Profile</a>
+								<a href="#anatomy" class="menu-item">Preferences</a>
+								<a href="#anatomy" class="menu-item">Billing</a>
+								<div class="menu-divider" aria-hidden="true"></div>
+								<a href="#anatomy" class="menu-item">Sign out</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<a class="menu-link" href="#anatomy">Docs</a>
+						<a class="menu-link" href="#anatomy">Changelog</a>
+					</nav>
+					<p class="stage-note">
+						Hover, tap, or press <kbd>Enter</kbd> on the trigger. All three set
+						<code>visible</code>.
+					</p>
+				</div>
+				<pre
+					class="code-block">&lt;<span class="hl-tag">dropdown-component</span>&gt;
+  &lt;<span class="hl-tag">dropdown-trigger</span>&gt;Account&lt;/<span class="hl-tag">dropdown-trigger</span>&gt;
+  &lt;<span class="hl-tag">dropdown-panel</span>&gt;
+    &lt;<span class="hl-tag">a</span> <span class="hl-attr">href</span>=<span class="hl-val">"/profile"</span>&gt;Profile&lt;/<span class="hl-tag">a</span>&gt;
+    &lt;<span class="hl-tag">a</span> <span class="hl-attr">href</span>=<span class="hl-val">"/billing"</span>&gt;Billing&lt;/<span class="hl-tag">a</span>&gt;
+  &lt;/<span class="hl-tag">dropdown-panel</span>&gt;
+&lt;/<span class="hl-tag">dropdown-component</span>&gt;
+
+<span class="hl-cm">// ids, aria-controls, aria-expanded, aria-hidden, aria-labelledby</span>
+<span class="hl-cm">// and inert are all written for you on connect</span>
+<span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel'</span>;
+<span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css'</span>;</pre>
 			</section>
 
-			<section class="demo-section">
-				<h2>How to Use</h2>
-				<div class="code-example">
-					<pre>
-&lt;dropdown-component&gt;
-  &lt;dropdown-trigger&gt;Menu Label&lt;/dropdown-trigger&gt;
-  &lt;dropdown-panel&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 1&lt;/a&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 2&lt;/a&gt;
-    &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 3&lt;/a&gt;
-  &lt;/dropdown-panel&gt;
-&lt;/dropdown-component&gt;
-</pre
+			<!-- ---- State ---- -->
+			<section class="demo-section" id="state">
+				<div class="spec">
+					<span class="spec-key">State</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">1 attribute · 3 outputs</span>
+				</div>
+				<h2>One attribute holds the state.</h2>
+				<p class="demo-desc">
+					<code>visible</code> on the host is the truth, and it reflects.
+					<code>aria-expanded</code>, <code>aria-hidden</code> and <code>inert</code> are
+					<strong>derived output</strong> — never write them yourself.
+				</p>
+				<div class="stage stage-drop-sm stage-row" id="state-stage">
+					<dropdown-component id="state-dropdown">
+						<dropdown-trigger>
+							Deploy
+							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+							</span>
+						</dropdown-trigger>
+						<dropdown-panel>
+							<a href="#state" class="menu-item">Staging</a>
+							<a href="#state" class="menu-item">Production</a>
+							<a href="#state" class="menu-item">Rollback</a>
+						</dropdown-panel>
+					</dropdown-component>
+					<div class="controls">
+						<button class="btn" id="state-show">show()</button>
+						<button class="btn" id="state-hide">hide()</button>
+						<button class="btn" id="state-toggle">toggle()</button>
+					</div>
+					<output class="readout readout-cols" id="state-readout">reading…</output>
+				</div>
+				<pre
+					class="code-block"><span class="hl-tag">const</span> menu = document.querySelector(<span class="hl-val">'#account-menu'</span>);
+
+menu.visible = <span class="hl-val">true</span>;              <span class="hl-cm">// adds the attribute</span>
+menu.setAttribute(<span class="hl-val">'visible'</span>, <span class="hl-val">''</span>);  <span class="hl-cm">// identical</span>
+menu.toggle();
+
+<span class="hl-cm">// hide() restores focus only if focus is inside the panel,</span>
+<span class="hl-cm">// so closing a menu you never entered never steals it back</span>
+menu.hide({ restoreFocus: <span class="hl-val">false</span> });
+
+<span class="hl-cm">/* style the open state off the host, not off the ARIA */</span>
+<span class="hl-tag">dropdown-component</span>[<span class="hl-attr">visible</span>] &gt; <span class="hl-tag">dropdown-trigger</span> {
+  <span class="hl-attr">color</span>: <span class="hl-val">#d8b043</span>;
+}</pre>
+			</section>
+
+			<!-- ---- Pointer ---- -->
+			<section class="demo-section" id="pointer">
+				<div class="spec">
+					<span class="spec-key">Pointer</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">pointerenter · not touch</span>
+				</div>
+				<h2>Opening on hover.</h2>
+				<p class="demo-desc">
+					Hover runs on <code>pointerenter</code> and ignores
+					<code>pointerType: touch</code> — no more double-tap on iOS. Touch dismisses on an
+					outside <code>pointerdown</code> instead, and a <strong>clicked</strong>-open panel
+					latches rather than closing on leave.
+				</p>
+				<div class="stage stage-drop-sm stage-row" id="pointer-stage">
+					<dropdown-component>
+						<dropdown-trigger>
+							Workspace
+							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+							</span>
+						</dropdown-trigger>
+						<dropdown-panel>
+							<a href="#pointer" class="menu-item">Switch workspace</a>
+							<a href="#pointer" class="menu-item">Invite people</a>
+							<div class="menu-divider" aria-hidden="true"></div>
+							<a href="#pointer" class="menu-item">Workspace settings</a>
+						</dropdown-panel>
+					</dropdown-component>
+					<output class="readout" id="pointer-readout"
+						>Nothing yet. Hover it, tap it, or click somewhere else.</output
 					>
 				</div>
+				<pre class="code-block"><span class="hl-cm">// hover, but never from a synthetic touch pointer</span>
+host.addEventListener(<span class="hl-val">'pointerenter'</span>, (e) =&gt; {
+  <span class="hl-tag">if</span> (e.pointerType !== <span class="hl-val">'touch'</span>) host.show();
+});
 
-				<p>
-					Add the <code>wide</code> attribute to get a full-width
-					"mega-menu" style dropdown.
+<span class="hl-cm">// registered on open, removed on close — one listener, never two</span>
+document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
+  <span class="hl-tag">if</span> (!host.contains(e.target)) host.hide();
+});</pre>
+			</section>
+
+			<!-- ---- Modes ---- -->
+			<section class="demo-section" id="modes">
+				<div class="spec">
+					<span class="spec-key">Modes</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">hover · click · both</span>
+				</div>
+				<h2>Choosing the interaction.</h2>
+				<p class="demo-desc">
+					<code>both</code> is the default: hover on a fine pointer, click everywhere.
+					<code>hover</code> drops the click toggle only where <code>(hover: hover)</code> matches;
+					<code>click</code> drops the hover path entirely.
+				</p>
+				<div class="stage stage-drop" id="modes-stage">
+					<nav class="menubar">
+						<dropdown-component trigger="hover">
+							<dropdown-trigger>
+								hover
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<div class="menu-heading">Pointer only</div>
+								<a href="#modes" class="menu-item">Opens on enter</a>
+								<a href="#modes" class="menu-item">Closes on leave</a>
+								<a href="#modes" class="menu-item">Inert on touch</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component trigger="click">
+							<dropdown-trigger>
+								click
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<div class="menu-heading">Press only</div>
+								<a href="#modes" class="menu-item">Press to open</a>
+								<a href="#modes" class="menu-item">Press to close</a>
+								<a href="#modes" class="menu-item">Outside dismisses</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component trigger="both">
+							<dropdown-trigger>
+								both
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<div class="menu-heading">The default</div>
+								<a href="#modes" class="menu-item">Hover on a mouse</a>
+								<a href="#modes" class="menu-item">Tap on a screen</a>
+								<a href="#modes" class="menu-item">Keys either way</a>
+							</dropdown-panel>
+						</dropdown-component>
+					</nav>
+					<p class="stage-note">
+						This device reports <code id="modes-pointer">measuring…</code>, so
+						<code>trigger="hover"</code> <span id="modes-verdict">is being measured</span>. Only
+						one stays open at a time, for free.
+					</p>
+				</div>
+				<pre
+					class="code-block">&lt;<span class="hl-tag">dropdown-component</span>&gt;                     <span class="hl-cm">&lt;!-- both, the default --&gt;</span>
+&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"hover"</span>&gt;    <span class="hl-cm">&lt;!-- fine pointers only --&gt;</span>
+&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"click"</span>&gt;    <span class="hl-cm">&lt;!-- press to toggle --&gt;</span></pre>
+			</section>
+
+			<!-- ---- Bridge ---- -->
+			<section class="demo-section" id="bridge">
+				<div class="spec">
+					<span class="spec-key">Bridge</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">30px · rotateX(50deg)</span>
+				</div>
+				<h2>The invisible bridge.</h2>
+				<p class="demo-desc">
+					A 30px <code>::before</code> on the trigger, skewed into a wedge, covers the diagonal
+					trip from trigger to panel. It exists <strong>only while hovered</strong>, inside
+					<code>@media (hover: hover)</code> — one left standing after an iOS tap would sit over
+					the next nav item.
+				</p>
+				<div class="stage stage-drop-lg" id="bridge-stage">
+					<div class="stage-row">
+						<dropdown-component>
+							<dropdown-trigger>
+								Reports
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#bridge" class="menu-item">Weekly summary</a>
+								<a href="#bridge" class="menu-item">Retention</a>
+								<a href="#bridge" class="menu-item">Funnels</a>
+								<div class="menu-divider" aria-hidden="true"></div>
+								<dropdown-component>
+									<dropdown-trigger class="menu-item">
+										Exports
+										<span class="menu-arrow menu-arrow-right" aria-hidden="true">
+											<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
+										</span>
+									</dropdown-trigger>
+									<dropdown-panel opens="right">
+										<a href="#bridge" class="menu-item">CSV</a>
+										<a href="#bridge" class="menu-item">Parquet</a>
+										<a href="#bridge" class="menu-item">Scheduled</a>
+									</dropdown-panel>
+								</dropdown-component>
+							</dropdown-panel>
+						</dropdown-component>
+						<div class="controls">
+							<button class="btn" id="bridge-toggle" aria-pressed="false">Tint the bridge</button>
+						</div>
+					</div>
+					<p class="stage-note">
+						Tinted: the wedge under the trigger, and the sideways one beside
+						<em>Exports</em>. Pure CSS.
+					</p>
+				</div>
+				<pre
+					class="code-block"><span class="hl-cm">/* dropdown-panel.css — the whole of it */</span>
+<span class="hl-attr">@media</span> (<span class="hl-attr">hover</span>: <span class="hl-val">hover</span>) {
+  <span class="hl-tag">dropdown-component</span>:hover &gt; <span class="hl-tag">dropdown-trigger</span>::before {
+    <span class="hl-attr">content</span>: <span class="hl-val">''</span>;
+    <span class="hl-attr">position</span>: <span class="hl-val">absolute</span>;
+    <span class="hl-attr">left</span>: <span class="hl-val">-20px</span>;
+    <span class="hl-attr">top</span>: <span class="hl-val">50%</span>;
+    <span class="hl-attr">width</span>: <span class="hl-val">calc(100% + 40px)</span>;
+    <span class="hl-attr">height</span>: <span class="hl-val">30px</span>;
+    <span class="hl-attr">transform-origin</span>: <span class="hl-val">top center</span>;
+    <span class="hl-attr">transform</span>: <span class="hl-val">perspective(50px) rotateX(50deg)</span>;
+    <span class="hl-attr">z-index</span>: <span class="hl-val">10</span>;
+  }
+
+  <span class="hl-cm">/* a right-opening panel gets the same wedge, rotated onto Y */</span>
+  <span class="hl-tag">dropdown-component</span>:has(&gt; <span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">opens</span>=<span class="hl-val">'right'</span>]):hover
+    &gt; <span class="hl-tag">dropdown-trigger</span>::before {
+    <span class="hl-attr">left</span>: <span class="hl-val">calc(100% - 30px)</span>;
+    <span class="hl-attr">top</span>: <span class="hl-val">-10px</span>;
+    <span class="hl-attr">width</span>: <span class="hl-val">40px</span>;
+    <span class="hl-attr">height</span>: <span class="hl-val">calc(100% + 20px)</span>;
+    <span class="hl-attr">transform</span>: <span class="hl-val">perspective(50px) rotateY(-50deg)</span>;
+  }
+}
+
+<span class="hl-cm">/* a decorative ::after on the trigger replaces the bridge outright,</span>
+<span class="hl-cm">   so put the arrow in a real element and mirror it — scaleY(-1)</span>
+<span class="hl-cm">   flips through the centre line and reverses identically on close,</span>
+<span class="hl-cm">   where a rotation would unwind a spin */</span>
+<span class="hl-tag">.menu-arrow</span> {
+  <span class="hl-attr">transform-origin</span>: <span class="hl-val">center</span>;
+  <span class="hl-attr">transition</span>: <span class="hl-val">transform var(--dp-effect-duration, 200ms)</span>;
+}
+
+<span class="hl-tag">dropdown-component</span>[<span class="hl-attr">visible</span>] &gt; <span class="hl-tag">dropdown-trigger</span> &gt; <span class="hl-tag">.menu-arrow</span> {
+  <span class="hl-attr">transform</span>: <span class="hl-val">scaleY(-1)</span>;
+}</pre>
+			</section>
+
+			<!-- ---- Wide ---- -->
+			<section class="demo-section" id="wide">
+				<div class="spec">
+					<span class="spec-key">Wide</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">width: 100%</span>
+				</div>
+				<h2>The full-width mega menu.</h2>
+				<p class="demo-desc">
+					<code>wide</code> makes the panel <code>width: 100%</code> and the host
+					<code>position: static</code>, so it measures against
+					<strong>the nearest positioned ancestor</strong>. Give your nav bar
+					<code>position: relative</code> and the mega menu spans it. Two CSS rules, no script.
+				</p>
+				<div class="stage stage-drop-lg" id="wide-stage">
+					<nav class="menubar">
+						<dropdown-component>
+							<dropdown-trigger>
+								Products
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel wide>
+								<div>
+									<div class="menu-heading">Software</div>
+									<a href="#wide" class="menu-item">Web apps</a>
+									<a href="#wide" class="menu-item">Mobile apps</a>
+									<a href="#wide" class="menu-item">Desktop</a>
+								</div>
+								<div>
+									<div class="menu-heading">Hardware</div>
+									<a href="#wide" class="menu-item">Laptops</a>
+									<a href="#wide" class="menu-item">Displays</a>
+									<a href="#wide" class="menu-item">Keyboards</a>
+								</div>
+								<div>
+									<div class="menu-heading">Services</div>
+									<a href="#wide" class="menu-item">Onboarding</a>
+									<a href="#wide" class="menu-item">Migration</a>
+									<a href="#wide" class="menu-item">Support plans</a>
+								</div>
+								<div>
+									<div class="menu-heading">Offers</div>
+									<a href="#wide" class="menu-item">Bundles</a>
+									<a href="#wide" class="menu-item">Education</a>
+									<a href="#wide" class="menu-item">Refurbished</a>
+								</div>
+							</dropdown-panel>
+						</dropdown-component>
+						<dropdown-component>
+							<dropdown-trigger>
+								Solutions
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#wide" class="menu-item">For individuals</a>
+								<a href="#wide" class="menu-item">For small teams</a>
+								<a href="#wide" class="menu-item">For enterprise</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<a class="menu-link" href="#wide">Pricing</a>
+						<a class="menu-link" href="#wide">Contact</a>
+					</nav>
+					<p class="stage-note">
+						A mega menu and a popover in one bar, no coordination.
+					</p>
+				</div>
+				<pre
+					class="code-block">&lt;<span class="hl-tag">nav</span> <span class="hl-attr">class</span>=<span class="hl-val">"menubar"</span>&gt;                <span class="hl-cm">/* position: relative */</span>
+  &lt;<span class="hl-tag">dropdown-component</span>&gt;
+    &lt;<span class="hl-tag">dropdown-trigger</span>&gt;Products&lt;/<span class="hl-tag">dropdown-trigger</span>&gt;
+    &lt;<span class="hl-tag">dropdown-panel</span> <span class="hl-attr">wide</span>&gt;…&lt;/<span class="hl-tag">dropdown-panel</span>&gt;
+  &lt;/<span class="hl-tag">dropdown-component</span>&gt;
+&lt;/<span class="hl-tag">nav</span>&gt;
+
+<span class="hl-cm">/* dropdown-panel.css */</span>
+<span class="hl-tag">dropdown-component</span>:has(&gt; <span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">wide</span>]) { <span class="hl-attr">position</span>: <span class="hl-val">static</span>; }
+<span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">wide</span>] { <span class="hl-attr">width</span>: <span class="hl-val">100%</span>; }
+
+<span class="hl-cm">/* your stylesheet does the layout */</span>
+<span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">wide</span>] {
+  <span class="hl-attr">display</span>: <span class="hl-val">grid</span>;
+  <span class="hl-attr">grid-template-columns</span>: <span class="hl-val">repeat(auto-fit, minmax(160px, 1fr))</span>;
+}</pre>
+			</section>
+
+			<!-- ---- Nesting ---- -->
+			<section class="demo-section" id="nesting">
+				<div class="spec">
+					<span class="spec-key">Nesting</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">opens="right" · left: 100%</span>
+				</div>
+				<h2>Menus inside menus.</h2>
+				<p class="demo-desc">
+					A dropdown inside a panel is just another dropdown. <code>opens="right"</code> moves it
+					to <code>top: 0; left: 100%</code> and rotates the bridge onto Y.
+					<strong>Nothing in the chain may set <code>overflow: hidden</code></strong> — that clips
+					the submenu at the parent's edge.
+				</p>
+				<div class="stage stage-drop-lg" id="nesting-stage">
+					<nav class="menubar">
+						<dropdown-component>
+							<dropdown-trigger>
+								Resources
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#nesting" class="menu-item">Documentation</a>
+								<a href="#nesting" class="menu-item">Tutorials</a>
+								<dropdown-component>
+									<dropdown-trigger class="menu-item">
+										Support
+										<span class="menu-arrow menu-arrow-right" aria-hidden="true">
+											<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
+										</span>
+									</dropdown-trigger>
+									<dropdown-panel opens="right">
+										<a href="#nesting" class="menu-item">Help centre</a>
+										<a href="#nesting" class="menu-item">Contact us</a>
+										<dropdown-component>
+											<dropdown-trigger class="menu-item">
+												Escalate
+												<span class="menu-arrow menu-arrow-right" aria-hidden="true">
+													<svg viewBox="0 0 12 12" fill="currentColor">
+														<path d="M8 6L4 2v8z" />
+													</svg>
+												</span>
+											</dropdown-trigger>
+											<dropdown-panel opens="right">
+												<a href="#nesting" class="menu-item">Priority one</a>
+												<a href="#nesting" class="menu-item">Talk to a human</a>
+											</dropdown-panel>
+										</dropdown-component>
+									</dropdown-panel>
+								</dropdown-component>
+								<a href="#nesting" class="menu-item">Blog</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<a class="menu-link" href="#nesting">Community</a>
+					</nav>
+					<p class="stage-note">
+						Three levels. <kbd>Esc</kbd> closes one at a time. Under 640px they indent instead —
+						no room to the right on a phone.
+					</p>
+				</div>
+				<pre
+					class="code-block">&lt;<span class="hl-tag">dropdown-panel</span>&gt;
+  &lt;<span class="hl-tag">a</span> <span class="hl-attr">href</span>=<span class="hl-val">"/docs"</span>&gt;Documentation&lt;/<span class="hl-tag">a</span>&gt;
+
+  &lt;<span class="hl-tag">dropdown-component</span>&gt;                    <span class="hl-cm">&lt;!-- nested --&gt;</span>
+    &lt;<span class="hl-tag">dropdown-trigger</span>&gt;Support&lt;/<span class="hl-tag">dropdown-trigger</span>&gt;
+    &lt;<span class="hl-tag">dropdown-panel</span> <span class="hl-attr">opens</span>=<span class="hl-val">"right"</span>&gt;…&lt;/<span class="hl-tag">dropdown-panel</span>&gt;
+  &lt;/<span class="hl-tag">dropdown-component</span>&gt;
+&lt;/<span class="hl-tag">dropdown-panel</span>&gt;
+
+<span class="hl-cm">/* the child combinator is what keeps the levels apart */</span>
+<span class="hl-tag">dropdown-component</span>:hover &gt; <span class="hl-tag">dropdown-panel</span>   <span class="hl-cm">/* ✓ */</span>
+<span class="hl-tag">dropdown-component</span>:hover   <span class="hl-tag">dropdown-panel</span>   <span class="hl-cm">/* ✗ opens every level */</span>
+
+<span class="hl-cm">/* and never do this to a panel or anything above one */</span>
+<span class="hl-tag">dropdown-panel</span> { <span class="hl-attr">overflow</span>: <span class="hl-val">hidden</span>; }             <span class="hl-cm">/* ✗ clips submenus */</span></pre>
+			</section>
+
+			<!-- ---- Effects ---- -->
+			<section class="demo-section" id="effects">
+				<div class="spec">
+					<span class="spec-key">Effects</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">5 presets · 200ms</span>
+				</div>
+				<h2>Entrance effects.</h2>
+				<p class="demo-desc">
+					The core stylesheet fades and nothing else. Import the opt-in file and
+					<code>effect="…"</code> gives you five presets, tuned by
+					<code>--dp-effect-duration</code> and <code>--dp-effect-easing</code>, all collapsing to
+					a fade under reduced motion.
+				</p>
+				<div class="stage stage-drop" id="effects-stage">
+					<div class="stage-row">
+						<div class="seg" role="group" aria-label="Entrance effect">
+							<button class="seg-btn is-active" type="button" aria-pressed="true" data-effect="fade">
+								fade
+							</button>
+							<button class="seg-btn" type="button" aria-pressed="false" data-effect="slide">
+								slide
+							</button>
+							<button class="seg-btn" type="button" aria-pressed="false" data-effect="scale">
+								scale
+							</button>
+							<button class="seg-btn" type="button" aria-pressed="false" data-effect="blur">
+								blur
+							</button>
+							<button class="seg-btn" type="button" aria-pressed="false" data-effect="swing">
+								swing
+							</button>
+						</div>
+						<output class="readout" id="effects-readout">effect="fade" · 200ms</output>
+					</div>
+					<div class="stage-row" style="margin-top: 1.25rem">
+						<dropdown-component id="effects-dropdown">
+							<dropdown-trigger>
+								Insert
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel effect="fade" id="effects-panel">
+								<a href="#effects" class="menu-item">Image</a>
+								<a href="#effects" class="menu-item">Table</a>
+								<a href="#effects" class="menu-item">Code block</a>
+								<a href="#effects" class="menu-item">Divider</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<label class="theme-row" style="border-top: 0; min-width: min(100%, 300px)">
+							<span class="theme-label">Duration</span>
+							<input
+								type="range"
+								id="effects-duration"
+								data-prop="--dp-effect-duration"
+								data-unit="ms"
+								min="60"
+								max="900"
+								step="10"
+								value="200" />
+							<span class="theme-value">200ms</span>
+						</label>
+					</div>
+				</div>
+				<pre
+					class="code-block"><span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css'</span>;
+<span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css/effects'</span>;  <span class="hl-cm">// opt in</span>
+
+&lt;<span class="hl-tag">dropdown-panel</span> <span class="hl-attr">effect</span>=<span class="hl-val">"blur"</span>&gt;…&lt;/<span class="hl-tag">dropdown-panel</span>&gt;
+
+<span class="hl-tag">dropdown-panel</span>[<span class="hl-attr">effect</span>] {
+  <span class="hl-attr">--dp-effect-duration</span>: <span class="hl-val">200ms</span>;
+  <span class="hl-attr">--dp-effect-easing</span>: <span class="hl-val">cubic-bezier(0.32, 0.72, 0, 1)</span>;
+}</pre>
+			</section>
+
+			<!-- ---- Keyboard ---- -->
+			<section class="demo-section" id="keyboard">
+				<div class="spec">
+					<span class="spec-key">Keyboard</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">Enter · Space · Esc · ↑ ↓</span>
+				</div>
+				<h2>Keyboard and focus.</h2>
+				<p class="demo-desc">
+					The panel carries <code>inert</code> while closed — correct on the first paint, not just
+					after a toggle. <kbd>↓</kbd> and <kbd>↑</kbd> open on the first or last item and wrap;
+					<kbd>→</kbd> and <kbd>←</kbd> step through submenus. Tab out deliberately does
+					<strong>not</strong> close: you have to be able to tab in.
+				</p>
+				<div class="stage stage-drop stage-row" id="keyboard-stage">
+					<dropdown-component>
+						<dropdown-trigger>
+							File
+							<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+								<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+							</span>
+						</dropdown-trigger>
+						<dropdown-panel>
+							<a href="#keyboard" class="menu-item">New document</a>
+							<a href="#keyboard" class="menu-item">Open recent</a>
+							<a href="#keyboard" class="menu-item">Duplicate</a>
+							<div class="menu-divider" aria-hidden="true"></div>
+							<dropdown-component>
+								<dropdown-trigger class="menu-item">
+									Share
+									<span class="menu-arrow menu-arrow-right" aria-hidden="true">
+										<svg viewBox="0 0 12 12" fill="currentColor"><path d="M8 6L4 2v8z" /></svg>
+									</span>
+								</dropdown-trigger>
+								<dropdown-panel opens="right">
+									<a href="#keyboard" class="menu-item">Copy link</a>
+									<a href="#keyboard" class="menu-item">Invite by email</a>
+								</dropdown-panel>
+							</dropdown-component>
+						</dropdown-panel>
+					</dropdown-component>
+					<output class="readout readout-cols" id="keyboard-readout"
+						>Tab to the trigger and press a key.</output
+					>
+					<ul class="key-list">
+						<li><kbd>Tab</kbd> reach the trigger</li>
+						<li><kbd>Enter</kbd> <kbd>Space</kbd> toggle</li>
+						<li><kbd>↓</kbd> open on the first item</li>
+						<li><kbd>↑</kbd> open on the last item</li>
+						<li><kbd>Home</kbd> <kbd>End</kbd> first, last</li>
+						<li><kbd>→</kbd> into a submenu</li>
+						<li><kbd>←</kbd> back out of one</li>
+						<li><kbd>Esc</kbd> close one level</li>
+					</ul>
+				</div>
+				<pre class="code-block"><span class="hl-cm">// no role="menu", no role="menuitem" — this is site navigation,</span>
+<span class="hl-cm">// not an application menu, and the roles promise interactions</span>
+<span class="hl-cm">// screen-reader users would then be right to expect</span>
+
+<span class="hl-tag">dropdown-trigger</span>   <span class="hl-attr">role</span>=<span class="hl-val">"button"</span> <span class="hl-attr">tabindex</span>=<span class="hl-val">"0"</span> <span class="hl-attr">aria-haspopup</span>=<span class="hl-val">"true"</span>
+                   <span class="hl-attr">aria-expanded</span>=<span class="hl-val">"false"</span> <span class="hl-attr">aria-controls</span>=<span class="hl-val">"…"</span>
+<span class="hl-tag">dropdown-panel</span>     <span class="hl-attr">role</span>=<span class="hl-val">"group"</span> <span class="hl-attr">aria-hidden</span>=<span class="hl-val">"true"</span> <span class="hl-attr">inert</span>
+                   <span class="hl-attr">aria-labelledby</span>=<span class="hl-val">"…"</span>
+
+<span class="hl-cm">// only the innermost open dropdown answers a key, which is what</span>
+<span class="hl-cm">// keeps a nested menu from taking its parents down with it</span>
+<span class="hl-tag">if</span> (host.querySelector(<span class="hl-val">'dropdown-component[visible]'</span>)) <span class="hl-tag">return</span>;</pre>
+			</section>
+
+			<!-- ---- Theme ---- -->
+			<section class="demo-section" id="theme">
+				<div class="spec">
+					<span class="spec-key">Theme</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">10 controls · 0 overrides</span>
+				</div>
+				<h2>Styling it yourself.</h2>
+				<p class="demo-desc">
+					There is no theming API, because there is nothing to override. The package sets
+					<code>position</code>, <code>opacity</code> and <code>pointer-events</code>, and stops.
+					Every control below writes a property this page invented — only
+					<strong>duration</strong> and <strong>easing</strong> belong to the component.
+				</p>
+				<div class="theme-grid">
+					<label class="theme-row">
+						<span class="theme-label">Panel background</span>
+						<input type="color" data-prop="--menu-bg" value="#171b26" />
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Border</span>
+						<input type="color" data-prop="--menu-border" value="#2c3444" />
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Item hover</span>
+						<input type="color" data-prop="--menu-item-hover" value="#212838" />
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Corner radius</span>
+						<input type="range" data-prop="--menu-radius" data-unit="px" min="0" max="26" value="10" />
+						<span class="theme-value">10px</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Panel padding</span>
+						<input type="range" data-prop="--menu-pad" data-unit="px" min="0" max="24" value="6" />
+						<span class="theme-value">6px</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Minimum width</span>
+						<input
+							type="range"
+							data-prop="--menu-min-width"
+							data-unit="px"
+							min="120"
+							max="360"
+							step="5"
+							value="200" />
+						<span class="theme-value">200px</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Offset from trigger</span>
+						<input type="range" data-prop="--menu-offset" data-unit="px" min="0" max="30" value="8" />
+						<span class="theme-value">8px</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Effect duration</span>
+						<input
+							type="range"
+							data-prop="--dp-effect-duration"
+							data-unit="ms"
+							min="60"
+							max="900"
+							step="10"
+							value="200" />
+						<span class="theme-value">200ms</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Effect</span>
+						<select id="theme-effect">
+							<option value="fade">fade</option>
+							<option value="slide">slide</option>
+							<option value="scale">scale</option>
+							<option value="blur" selected>blur</option>
+							<option value="swing">swing</option>
+						</select>
+						<span class="theme-value">blur</span>
+					</label>
+					<label class="theme-row">
+						<span class="theme-label">Trigger mode</span>
+						<select id="theme-trigger">
+							<option value="both">both</option>
+							<option value="hover">hover</option>
+							<option value="click">click</option>
+						</select>
+						<span class="theme-value">both</span>
+					</label>
+				</div>
+				<div class="stage stage-drop" id="theme-stage">
+					<div class="stage-row">
+						<dropdown-component id="theme-dropdown">
+							<dropdown-trigger>
+								Filters
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel effect="blur" id="theme-panel">
+								<div class="menu-heading">Sort by</div>
+								<a href="#theme" class="menu-item">Newest first</a>
+								<a href="#theme" class="menu-item">Most relevant</a>
+								<a href="#theme" class="menu-item">Price, low to high</a>
+								<div class="menu-divider" aria-hidden="true"></div>
+								<a href="#theme" class="menu-item">Clear filters</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<button class="btn" id="theme-reset">Reset</button>
+					</div>
+					<p class="stage-note">
+						The last two rows set attributes on the element rather than properties.
+						<em>Reset</em> restores all ten.
+					</p>
+				</div>
+				<pre
+					class="code-block"><span class="hl-cm">/* the component's entire stylesheet contribution */</span>
+<span class="hl-tag">dropdown-panel</span> {
+  <span class="hl-attr">position</span>: <span class="hl-val">absolute</span>;
+  <span class="hl-attr">top</span>: <span class="hl-val">100%</span>;
+  <span class="hl-attr">left</span>: <span class="hl-val">0</span>;
+  <span class="hl-attr">z-index</span>: <span class="hl-val">11</span>;
+  <span class="hl-attr">opacity</span>: <span class="hl-val">0</span>;
+  <span class="hl-attr">pointer-events</span>: <span class="hl-val">none</span>;
+  <span class="hl-cm">/* longhands, so overriding one does not reset the rest */</span>
+  <span class="hl-attr">transition-property</span>: <span class="hl-val">opacity</span>;
+  <span class="hl-attr">transition-duration</span>: <span class="hl-val">200ms</span>;
+}
+
+<span class="hl-cm">/* and yours does the rest */</span>
+<span class="hl-tag">dropdown-panel</span> {
+  <span class="hl-attr">background</span>: <span class="hl-val">#171b26</span>;
+  <span class="hl-attr">border-radius</span>: <span class="hl-val">10px</span>;
+  <span class="hl-attr">box-shadow</span>: <span class="hl-val">0 14px 34px rgba(0, 0, 0, 0.5)</span>;
+  <span class="hl-attr">min-width</span>: <span class="hl-val">200px</span>;
+  <span class="hl-cm">/* never overflow: hidden */</span>
+}</pre>
+			</section>
+
+			<!-- ---- Lifecycle ---- -->
+			<section class="demo-section" id="lifecycle">
+				<div class="spec">
+					<span class="spec-key">Lifecycle</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">4 events · 2 cancelable</span>
+				</div>
+				<h2>Lifecycle events.</h2>
+				<p class="demo-desc">
+					Four bubbling events on the host, each carrying <code>{ trigger, panel }</code>. The two
+					<code>before-</code> ones are cancelable — <code>preventDefault()</code> and nothing
+					happens. Flip the switch to refuse.
+				</p>
+				<div class="stage stage-drop-sm" id="lifecycle-stage">
+					<div class="stage-row">
+						<dropdown-component id="lifecycle-dropdown">
+							<dropdown-trigger>
+								Actions
+								<span class="menu-arrow menu-arrow-down" aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								</span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<a href="#lifecycle" class="menu-item">Rename</a>
+								<a href="#lifecycle" class="menu-item">Move to…</a>
+								<a href="#lifecycle" class="menu-item">Archive</a>
+							</dropdown-panel>
+						</dropdown-component>
+						<label class="theme-row" style="border-top: 0; min-width: min(100%, 300px)">
+							<span class="theme-label">Refuse to open</span>
+							<input type="checkbox" id="lifecycle-block" role="switch" />
+							<span class="theme-value">off</span>
+						</label>
+						<button class="btn" id="lifecycle-clear">Clear log</button>
+					</div>
+					<pre
+						class="event-log"
+						id="event-log"
+						role="log"
+						aria-live="polite"
+						aria-label="Event log">
+No events yet.</pre>
+				</div>
+				<pre
+					class="code-block"><span class="hl-tag">const</span> menu = document.querySelector(<span class="hl-val">'dropdown-component'</span>);
+
+<span class="hl-tag">for</span> (<span class="hl-tag">const</span> name <span class="hl-tag">of</span> [<span class="hl-val">'before-show'</span>, <span class="hl-val">'show'</span>, <span class="hl-val">'before-hide'</span>, <span class="hl-val">'hide'</span>]) {
+  menu.addEventListener(<span class="hl-val">`dropdown-panel:${name}`</span>, (event) =&gt; {
+    console.log(name, event.detail.trigger, event.detail.panel);
+  });
+}
+
+<span class="hl-cm">// cancelable — this menu refuses to open</span>
+menu.addEventListener(<span class="hl-val">'dropdown-panel:before-show'</span>, (e) =&gt; e.preventDefault());
+
+<span class="hl-cm">// they bubble, so one listener on the nav hears every menu in it</span>
+nav.addEventListener(<span class="hl-val">'dropdown-panel:show'</span>, (e) =&gt; track(e.detail.trigger));</pre>
+			</section>
+
+			<!-- ---- Reference ---- -->
+			<section class="demo-section" id="reference">
+				<div class="spec">
+					<span class="spec-key">Reference</span>
+					<span class="spec-rule" aria-hidden="true"></span>
+					<span class="spec-val">5 attributes · 4 events</span>
+				</div>
+				<h2>The full reference.</h2>
+				<p class="demo-desc">
+					Three elements, five attributes, three methods, four events.
+				</p>
+				<pre
+					class="code-block"><span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel'</span>;
+<span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css'</span>;
+<span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel/css/effects'</span>;  <span class="hl-cm">// optional</span>
+
+<span class="hl-tag">const</span> menu = document.querySelector(<span class="hl-val">'dropdown-component'</span>);
+menu.show();
+menu.hide();
+menu.toggle();
+menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span></pre>
+
+				<h3 class="ref-heading">Elements</h3>
+				<div class="ref-table">
+					<div class="ref-row ref-head">
+						<div>Element</div>
+						<div>Required</div>
+						<div>Role</div>
+					</div>
+					<div class="ref-row">
+						<div><code>&lt;dropdown-component&gt;</code></div>
+						<div>Yes</div>
+						<div>The host. State, listeners, public API. Both children must be <em>direct</em> children.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>&lt;dropdown-trigger&gt;</code></div>
+						<div>Yes</div>
+						<div>
+							The button. Gets <code>role="button"</code>, <code>tabindex</code>,
+							<code>aria-haspopup</code>, <code>aria-controls</code>, <code>aria-expanded</code>.
+							Draws the bridge with its <code>::before</code> — leave that alone.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>&lt;dropdown-panel&gt;</code></div>
+						<div>Yes</div>
+						<div>
+							The content. Gets <code>role="group"</code>, <code>aria-hidden</code>,
+							<code>aria-labelledby</code>, <code>inert</code>. Holds anything.
+						</div>
+					</div>
+				</div>
+
+				<h3 class="ref-heading">Attributes</h3>
+				<div class="ref-table">
+					<div class="ref-row ref-head">
+						<div>Attribute</div>
+						<div>Default</div>
+						<div>Description</div>
+					</div>
+					<div class="ref-row">
+						<div><code>visible</code></div>
+						<div>absent</div>
+						<div>
+							On the host. Source of truth, observed and reflected. Mirrors the
+							<code>visible</code> property.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>trigger</code></div>
+						<div><code>both</code></div>
+						<div>
+							On the host. <code>both</code> = hover on fine pointers plus click;
+							<code>hover</code> = hover only where <code>(hover: hover)</code> matches;
+							<code>click</code> = no hover path.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>wide</code></div>
+						<div>absent</div>
+						<div>
+							On the panel. <code>width: 100%</code>, host goes <code>position: static</code> — the
+							panel spans the nearest positioned ancestor.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>opens</code></div>
+						<div><code>down</code></div>
+						<div>
+							On the panel. <code>right</code> moves it to <code>top: 0; left: 100%</code> and
+							rotates the bridge onto Y. The submenu case.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>effect</code></div>
+						<div>none</div>
+						<div>
+							On the panel. <code>fade</code>, <code>slide</code>, <code>scale</code>,
+							<code>blur</code> or <code>swing</code>. No-op without the effects stylesheet.
+						</div>
+					</div>
+				</div>
+
+				<h3 class="ref-heading">CSS Custom Properties</h3>
+				<div class="ref-table">
+					<div class="ref-row ref-head">
+						<div>Property</div>
+						<div>Default</div>
+						<div>Description</div>
+					</div>
+					<div class="ref-row">
+						<div><code>--dp-effect-duration</code></div>
+						<div><code>200ms</code></div>
+						<div>Effect duration. Effects stylesheet only.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>--dp-effect-easing</code></div>
+						<div><code>cubic-bezier(0.32, 0.72, 0, 1)</code></div>
+						<div>Effect timing function. Decelerate-only.</div>
+					</div>
+				</div>
+				<p class="ref-note">
+					That is the whole list. Colours, shadows, radii and z-index are yours —
+					<code>dropdown-panel { … }</code> matches like any other tag. Never
+					<code>overflow: hidden</code> on a panel or above one.
 				</p>
 
-				<div class="code-example">
-					<pre>
-&lt;dropdown-component&gt;
-  &lt;dropdown-trigger&gt;Menu Label&lt;/dropdown-trigger&gt;
-  &lt;dropdown-panel wide&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 1&lt;/a&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 2&lt;/a&gt;
-    &lt;div class="dropdown-divider"&gt;&lt;/div&gt;
-    &lt;a href="#" class="dropdown-item"&gt;Option 3&lt;/a&gt;
-  &lt;/dropdown-panel&gt;
-&lt;/dropdown-component&gt;
-</pre
-					>
+				<h3 class="ref-heading">Methods &amp; Properties</h3>
+				<div class="ref-table">
+					<div class="ref-row ref-head">
+						<div>Name</div>
+						<div>Type</div>
+						<div>Description</div>
+					</div>
+					<div class="ref-row">
+						<div><code>show()</code></div>
+						<div>method</div>
+						<div>Opens. Idempotent, and safe on an unconnected or incomplete element.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>hide({ restoreFocus })</code></div>
+						<div>method</div>
+						<div>Closes. Restores focus only when focus was inside the panel.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>toggle()</code></div>
+						<div>method</div>
+						<div>Opens if closed, closes if open.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>visible</code></div>
+						<div>boolean</div>
+						<div>Get and set. Reflects the <code>visible</code> attribute both ways.</div>
+					</div>
 				</div>
-			</section>
-		</div>
 
-		<script src="dropdown-panel.esm.js" type="module"></script>
+				<h3 class="ref-heading">Events</h3>
+				<div class="ref-table">
+					<div class="ref-row ref-head">
+						<div>Event</div>
+						<div>Cancelable</div>
+						<div>When it fires</div>
+					</div>
+					<div class="ref-row">
+						<div><code>dropdown-panel:before-show</code></div>
+						<div>Yes</div>
+						<div>Before opening. <code>preventDefault()</code> aborts.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>dropdown-panel:show</code></div>
+						<div>No</div>
+						<div>After the state turns open.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>dropdown-panel:before-hide</code></div>
+						<div>Yes</div>
+						<div>Before closing. <code>preventDefault()</code> aborts.</div>
+					</div>
+					<div class="ref-row">
+						<div><code>dropdown-panel:hide</code></div>
+						<div>No</div>
+						<div>After the state turns closed.</div>
+					</div>
+				</div>
+				<p class="ref-note">
+					All four fire on the host and bubble — one listener on the nav hears every menu. You do
+					not need them to keep a single menu open; the component already does that.
+				</p>
+
+				<h3 class="ref-heading">Accessibility</h3>
+				<p class="ref-note">
+					A disclosure pattern, not a menu one — no <code>role="menu"</code> or
+					<code>menuitem</code> anywhere, because those promise a keyboard model site navigation
+					rarely delivers. Write your items as real links or buttons and the rest follows.
+				</p>
+
+				<h3 class="ref-heading">Browser support</h3>
+				<p class="ref-note">
+					Chrome 105+, Edge 105+, Safari 15.4+, Firefox 121+ — custom elements, Pointer Events,
+					<code>inert</code>, <code>:has()</code>. <code>:has()</code> is load-bearing: it switches
+					the host between <code>relative</code> and <code>static</code> for <code>wide</code>.
+				</p>
+			</section>
+		</main>
+
+		<footer class="site-foot">
+			Built for the layer just below ·
+			<a href="https://github.com/magic-spells/dropdown-panel">@magic-spells/dropdown-panel</a> · MIT
+			License
+		</footer>
+
+		<script type="module">
+			import './dist/dropdown-panel.esm.js';
+
+			const $ = (selector, root = document) => root.querySelector(selector);
+			const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+			// ---- Click to copy the install command ----
+			// The <code> is also user-select: all, so a failed or blocked clipboard
+			// write still leaves the whole command selected in one click.
+			const install = $('.install');
+			const installValue = $('#install-value');
+			const installLabel = $('#install-label');
+			let copiedTimer = 0;
+
+			installValue.addEventListener('click', async () => {
+				try {
+					await navigator.clipboard.writeText(installValue.textContent.trim());
+					install.classList.add('copied');
+					installLabel.textContent = 'Copied';
+					clearTimeout(copiedTimer);
+					copiedTimer = setTimeout(() => {
+						install.classList.remove('copied');
+						installLabel.textContent = 'Install';
+					}, 1400);
+				} catch {
+					/* selection fallback — the command is already highlighted */
+				}
+			});
+
+			// ---- Shared helpers ----
+			// The demo never reads aria-* to decide anything; `visible` on the host
+			// is the state and everything else is output.
+			const isOpen = (host) => host.hasAttribute('visible') || host.visible === true;
+
+			const label = (element) => (element?.firstChild?.textContent ?? '').trim() || '—';
+
+			// ---- State: show / hide / toggle, and the derived attributes ----
+			const stateHost = $('#state-dropdown');
+			const stateTrigger = $('dropdown-trigger', stateHost);
+			const statePanel = $('dropdown-panel', stateHost);
+			const stateReadout = $('#state-readout');
+
+			const present = (element, name) => (element.hasAttribute(name) ? 'present' : 'absent');
+
+			const renderState = () => {
+				const row = (owner, name, value) => `${owner.padEnd(9)}${name.padEnd(15)}${value}`;
+				stateReadout.textContent = [
+					row('host', 'visible', present(stateHost, 'visible')),
+					row('trigger', 'aria-expanded', stateTrigger.getAttribute('aria-expanded') ?? '—'),
+					row('panel', 'aria-hidden', statePanel.getAttribute('aria-hidden') ?? '—'),
+					row('panel', 'inert', present(statePanel, 'inert')),
+				].join('\n');
+			};
+
+			// One observer over the three elements, so the readout is a view of the
+			// live DOM rather than a copy the buttons keep in step by hand.
+			const stateObserver = new MutationObserver(renderState);
+			for (const element of [stateHost, stateTrigger, statePanel]) {
+				stateObserver.observe(element, { attributes: true });
+			}
+			renderState();
+
+			$('#state-show').addEventListener('click', () => stateHost.show());
+			$('#state-hide').addEventListener('click', () => stateHost.hide());
+			$('#state-toggle').addEventListener('click', () => stateHost.toggle());
+
+			// ---- Pointer: name the input that actually moved the state ----
+			const pointerStage = $('#pointer-stage');
+			const pointerHost = $('dropdown-component', pointerStage);
+			const pointerReadout = $('#pointer-readout');
+
+			const sayPointer = (line) => {
+				pointerReadout.textContent = `${line}\npanel ${isOpen(pointerHost) ? 'open' : 'closed'}`;
+			};
+
+			// pointerenter fires for touch too; the component ignores those, and the
+			// readout says so rather than pretending the hover did the work.
+			pointerHost.addEventListener('pointerenter', (event) => {
+				requestAnimationFrame(() =>
+					sayPointer(
+						event.pointerType === 'touch'
+							? 'pointerenter · touch · ignored'
+							: `pointerenter · ${event.pointerType} · show()`
+					)
+				);
+			});
+
+			// A panel opened by a click latches: leaving does not close it, and
+			// only the state line can say which of the two happened.
+			pointerHost.addEventListener('pointerleave', (event) => {
+				requestAnimationFrame(() =>
+					sayPointer(
+						event.pointerType === 'touch'
+							? 'pointerleave · touch · ignored'
+							: `pointerleave · ${event.pointerType}`
+					)
+				);
+			});
+
+			pointerHost.addEventListener('click', () => {
+				requestAnimationFrame(() => sayPointer('click on the trigger'));
+			});
+
+			document.addEventListener('pointerdown', (event) => {
+				if (pointerStage.contains(event.target) || !isOpen(pointerHost)) return;
+				requestAnimationFrame(() => sayPointer('pointerdown outside · hide()'));
+			});
+
+			// ---- Modes: report what this device's pointer can actually do ----
+			const fine = matchMedia('(hover: hover) and (pointer: fine)');
+			const renderPointerCapability = () => {
+				$('#modes-pointer').textContent = fine.matches ? 'hover: hover' : 'hover: none';
+				$('#modes-verdict').textContent = fine.matches
+					? 'opens on hover here'
+					: 'does nothing here';
+			};
+			renderPointerCapability();
+			fine.addEventListener('change', renderPointerCapability);
+
+			// ---- Bridge: tint the ::before that is already there ----
+			// Nothing is created or measured — the class only paints the box the
+			// package declares, at the moment the package declares it.
+			const bridgeStage = $('#bridge-stage');
+			const bridgeButton = $('#bridge-toggle');
+
+			bridgeButton.addEventListener('click', () => {
+				const on = bridgeStage.classList.toggle('show-bridge');
+				bridgeButton.setAttribute('aria-pressed', String(on));
+				bridgeButton.textContent = on ? 'Hide the bridge' : 'Tint the bridge';
+			});
+
+			// ---- Effects: swap the attribute, nothing else ----
+			const effectsPanel = $('#effects-panel');
+			const effectsReadout = $('#effects-readout');
+			const effectsDuration = $('#effects-duration');
+			const effectButtons = $$('[data-effect]');
+
+			const renderEffect = () => {
+				effectsReadout.textContent = `effect="${effectsPanel.getAttribute('effect')}" · ${effectsDuration.value}ms`;
+			};
+
+			for (const button of effectButtons) {
+				button.addEventListener('click', () => {
+					for (const other of effectButtons) {
+						const active = other === button;
+						other.classList.toggle('is-active', active);
+						other.setAttribute('aria-pressed', String(active));
+					}
+					effectsPanel.setAttribute('effect', button.dataset.effect);
+					renderEffect();
+					// Re-open so the change is visible immediately rather than on the
+					// next hover, which is easy to miss when the difference is 200ms.
+					const host = effectsPanel.parentElement;
+					host.hide();
+					requestAnimationFrame(() => host.show());
+				});
+			}
+
+			effectsDuration.addEventListener('input', () => {
+				effectsPanel.style.setProperty('--dp-effect-duration', `${effectsDuration.value}ms`);
+				effectsDuration.parentElement.querySelector('.theme-value').textContent =
+					`${effectsDuration.value}ms`;
+				renderEffect();
+			});
+
+			// ---- Keyboard: say what the key did, not what it is meant to do ----
+			// The readout is written after the component has handled the event, from
+			// the live DOM, so it stays honest whatever the key turns out to do.
+			const keyboardStage = $('#keyboard-stage');
+			const keyboardReadout = $('#keyboard-readout');
+
+			const KEY_NAMES = {
+				' ': 'Space',
+				ArrowDown: '↓',
+				ArrowUp: '↑',
+				ArrowRight: '→',
+				ArrowLeft: '←',
+				Escape: 'Esc',
+			};
+
+			const describeFocus = (element) => {
+				if (!element || !keyboardStage.contains(element)) return 'outside the stage';
+				if (element.tagName === 'DROPDOWN-TRIGGER') return `trigger “${label(element)}”`;
+				if (element.classList.contains('menu-item')) return `item “${label(element)}”`;
+				return element.tagName.toLowerCase();
+			};
+
+			// Capture phase: the component calls stopPropagation() on the keys it
+			// handles, so a bubbling listener here would never see Enter or the
+			// arrows — the very keys this readout exists to report.
+			keyboardStage.addEventListener(
+				'keydown',
+				(event) => {
+					const name = KEY_NAMES[event.key] ?? event.key;
+					requestAnimationFrame(() => {
+						const open = $$('dropdown-component', keyboardStage).filter(isOpen).length;
+						keyboardReadout.textContent = [
+							`key    ${name}`,
+							`focus  ${describeFocus(document.activeElement)}`,
+							`open   ${open} level${open === 1 ? '' : 's'}`,
+						].join('\n');
+					});
+				},
+				true
+			);
+
+			// ---- Theme playground ----
+			// Every control writes an inherited custom property onto the stage. Only
+			// the last two are the component's own; the rest are this page's tokens,
+			// read back by the stylesheet above — which is the point of the section.
+			const themeStage = $('#theme-stage');
+			const themePanel = $('#theme-panel');
+			const themeHost = $('#theme-dropdown');
+			const themeInputs = $$('.theme-grid input[data-prop]');
+			const themeEffect = $('#theme-effect');
+			const themeTrigger = $('#theme-trigger');
+
+			const applyProp = (input) => {
+				const value = `${input.value}${input.dataset.unit ?? ''}`;
+				themeStage.style.setProperty(input.dataset.prop, value);
+				const readout = input.parentElement.querySelector('.theme-value');
+				if (readout) readout.textContent = value;
+			};
+
+			const applyEffect = () => {
+				themePanel.setAttribute('effect', themeEffect.value);
+				themeEffect.parentElement.querySelector('.theme-value').textContent = themeEffect.value;
+			};
+
+			const applyTriggerMode = () => {
+				themeHost.setAttribute('trigger', themeTrigger.value);
+				themeTrigger.parentElement.querySelector('.theme-value').textContent = themeTrigger.value;
+			};
+
+			for (const input of themeInputs) {
+				input.addEventListener('input', () => applyProp(input));
+			}
+			themeEffect.addEventListener('change', applyEffect);
+			themeTrigger.addEventListener('change', applyTriggerMode);
+
+			$('#theme-reset').addEventListener('click', () => {
+				themeStage.removeAttribute('style');
+				for (const input of themeInputs) {
+					input.value = input.defaultValue;
+					const readout = input.parentElement.querySelector('.theme-value');
+					if (readout) readout.textContent = `${input.value}${input.dataset.unit ?? ''}`;
+				}
+				themeEffect.value = 'blur';
+				applyEffect();
+				themeTrigger.value = 'both';
+				applyTriggerMode();
+			});
+
+			// ---- Lifecycle: the four real events ----
+			const lifecycleHost = $('#lifecycle-dropdown');
+			const lifecycleBlock = $('#lifecycle-block');
+			const eventLog = $('#event-log');
+			const EMPTY_LOG = 'No events yet.';
+
+			const write = (line) => {
+				if (eventLog.textContent === EMPTY_LOG) eventLog.textContent = '';
+				eventLog.textContent += `${line}\n`;
+				eventLog.scrollTop = eventLog.scrollHeight;
+			};
+
+			// The names are namespaced; the log drops the prefix so the four line up
+			// in one column — 'before-show' is exactly 11 characters.
+			for (const name of ['before-show', 'show', 'before-hide', 'hide']) {
+				lifecycleHost.addEventListener(`dropdown-panel:${name}`, (event) => {
+					const blocked = name === 'before-show' && lifecycleBlock.checked;
+					if (blocked) event.preventDefault();
+					write(
+						`${name.padEnd(11)} trigger “${label(event.detail?.trigger ?? lifecycleHost)}”` +
+							(blocked ? '  · prevented' : '')
+					);
+				});
+			}
+
+			lifecycleBlock.addEventListener('change', () => {
+				lifecycleBlock.parentElement.querySelector('.theme-value').textContent =
+					lifecycleBlock.checked ? 'on' : 'off';
+			});
+
+			$('#lifecycle-clear').addEventListener('click', () => {
+				eventLog.textContent = EMPTY_LOG;
+			});
+		</script>
 	</body>
 </html>

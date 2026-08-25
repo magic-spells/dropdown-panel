@@ -1,0 +1,86 @@
+/* Dropdown Panel Web Component - Optional Entrance Effects */
+/* Opt in per panel with the `effect` attribute: */
+/*   <dropdown-panel effect="blur"> */
+/* Load alongside dropdown-panel.css. Without this file the `effect` */
+/* attribute is a no-op. */
+
+/* Tweak timing globally, per component or per panel:
+     dropdown-panel { --dp-effect-duration: 320ms; }
+   Transitions use longhands so overriding one property from the core
+   stylesheet - or from your own - does not clobber the rest. */
+dropdown-panel[effect] {
+	transition-property: opacity, transform, filter;
+	transition-duration: var(--dp-effect-duration, 200ms);
+	/* prettier-ignore */
+	--_dp-easing: var(--dp-effect-easing, cubic-bezier(0.32, 0.72, 0, 1));
+	transition-timing-function: var(--_dp-easing);
+}
+
+/* fade - opacity only, handled entirely by the shared rule above */
+
+/* slide - travels along the axis the panel opens on */
+dropdown-panel[effect='slide'] {
+	transform: translateY(8px);
+}
+
+dropdown-panel[effect='slide'][opens='right'] {
+	transform: translateX(8px);
+}
+
+/* scale - origin follows the panel's anchor point */
+dropdown-panel[effect='scale'] {
+	transform: scale(0.96);
+	transform-origin: top left;
+}
+
+dropdown-panel[effect='scale'][wide] {
+	transform-origin: top center;
+}
+
+dropdown-panel[effect='scale'][opens='right'] {
+	transform-origin: left top;
+}
+
+/* blur - the softest of the set */
+dropdown-panel[effect='blur'] {
+	transform: scale(0.98);
+	filter: blur(4px);
+	transform-origin: top left;
+}
+
+dropdown-panel[effect='blur'][wide] {
+	transform-origin: top center;
+}
+
+dropdown-panel[effect='blur'][opens='right'] {
+	transform-origin: left top;
+}
+
+/* swing - hinges down from the top edge */
+dropdown-panel[effect='swing'] {
+	transform: perspective(800px) rotateX(-8deg);
+	transform-origin: top center;
+}
+
+dropdown-panel[effect='swing'][opens='right'] {
+	transform: perspective(800px) rotateY(8deg);
+	transform-origin: left center;
+}
+
+/* Shown state - resets every transform and filter the effects apply.
+   Must stay last: it ties with the per-effect rules on specificity and
+   wins on source order. */
+dropdown-panel[effect][aria-hidden='false'] {
+	transform: none;
+	filter: none;
+}
+
+/* Motion is opt-out for anyone who asked the OS to reduce it: every
+   effect degrades to the plain opacity fade. */
+@media (prefers-reduced-motion: reduce) {
+	dropdown-panel[effect] {
+		transition-property: opacity;
+		transform: none;
+		filter: none;
+	}
+}
