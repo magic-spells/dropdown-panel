@@ -2,18 +2,26 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1" />
 		<title>Dropdown Panel — @magic-spells</title>
 		<meta
 			name="description"
 			content="An accessible dropdown and mega-menu web component. Hover, click or both, nested submenus, five entrance effects, 3 kB and no dependencies." />
-		<link rel="canonical" href="https://magic-spells.github.io/dropdown-panel/demo/" />
+		<link
+			rel="canonical"
+			href="https://magic-spells.github.io/dropdown-panel/demo/" />
 		<meta property="og:type" content="website" />
-		<meta property="og:title" content="@magic-spells/dropdown-panel" />
+		<meta
+			property="og:title"
+			content="@magic-spells/dropdown-panel" />
 		<meta
 			property="og:description"
 			content="A panel that drops. Three custom elements, one attribute for state, five entrance effects. 3 kB min + gzip, no dependencies." />
-		<meta property="og:url" content="https://magic-spells.github.io/dropdown-panel/demo/" />
+		<meta
+			property="og:url"
+			content="https://magic-spells.github.io/dropdown-panel/demo/" />
 		<meta name="twitter:card" content="summary" />
 		<!-- Inlined as a data URI so the repo stays binary-free and the browser's
 		     automatic /favicon.ico request never 404s. A trigger bar with the
@@ -23,7 +31,10 @@
 			href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2306080f'/%3E%3Crect x='6' y='5.5' width='11' height='3.5' rx='1.75' fill='%23d8b043'/%3E%3Crect x='6' y='13' width='20' height='13.5' rx='3' fill='%23d8b043'/%3E%3Cpath d='M10 18h12M10 22h8' stroke='%2306080f' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			rel="preconnect"
+			href="https://fonts.gstatic.com"
+			crossorigin />
 		<link
 			href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&display=swap"
 			rel="stylesheet" />
@@ -144,7 +155,11 @@
 				height: 900px;
 				max-width: 130vw;
 				transform: translateX(-50%);
-				background: radial-gradient(ellipse, var(--brass-glow), transparent 68%);
+				background: radial-gradient(
+					ellipse,
+					var(--brass-glow),
+					transparent 68%
+				);
 				pointer-events: none;
 			}
 
@@ -178,7 +193,8 @@
 				border: 1px solid var(--brass-dim);
 				border-radius: 7px;
 				transform-origin: top center;
-				animation: mark-drop 560ms cubic-bezier(0.32, 0.72, 0, 1) 140ms both;
+				animation: mark-drop 560ms cubic-bezier(0.32, 0.72, 0, 1)
+					140ms both;
 			}
 
 			.hero-mark-panel i {
@@ -198,7 +214,8 @@
 			@keyframes mark-drop {
 				from {
 					opacity: 0;
-					transform: perspective(240px) rotateX(-26deg) translateY(-7px);
+					transform: perspective(240px) rotateX(-26deg)
+						translateY(-7px);
 				}
 				to {
 					opacity: 1;
@@ -422,8 +439,16 @@
 				min-width: 0;
 				padding: 2rem;
 				background:
-					radial-gradient(ellipse at 50% 130%, var(--brass-glow), transparent 60%),
-					linear-gradient(135deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0.035));
+					radial-gradient(
+						ellipse at 50% 130%,
+						var(--brass-glow),
+						transparent 60%
+					),
+					linear-gradient(
+						135deg,
+						rgba(255, 255, 255, 0.012),
+						rgba(255, 255, 255, 0.035)
+					);
 				border: 1px solid var(--border);
 				border-radius: 12px;
 			}
@@ -1004,7 +1029,10 @@
 
 			.ref-row {
 				display: grid;
-				grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 2fr);
+				grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(
+						0,
+						2fr
+					);
 				gap: 1rem;
 				padding: 0.8rem 1rem;
 				border-top: 1px solid var(--border);
@@ -1207,17 +1235,23 @@
 				<span class="hero-mark-trigger"></span>
 				<span class="hero-mark-panel"><i></i><i></i><i></i></span>
 			</div>
-			<a class="hero-badge" href="https://github.com/magic-spells/dropdown-panel"
+			<a
+				class="hero-badge"
+				href="https://github.com/magic-spells/dropdown-panel"
 				>@magic-spells/dropdown-panel</a
 			>
 			<h1>A panel that <em>drops</em>.</h1>
 			<p class="hero-tagline">
-				Three custom elements, no dependencies, and one attribute that holds the state.
+				Three custom elements, no dependencies, and one attribute that
+				holds the state.
 			</p>
 
 			<div class="install">
 				<span class="install-label" id="install-label">Install</span>
-				<code class="install-value" id="install-value" title="Click to copy"
+				<code
+					class="install-value"
+					id="install-value"
+					title="Click to copy"
 					>npm install @magic-spells/dropdown-panel</code
 				>
 				<!-- dropdown-panel.min.js plus dropdown-panel.min.css, each gzipped
@@ -1241,8 +1275,9 @@
 				</div>
 				<h2>The markup.</h2>
 				<p class="demo-desc">
-					The component wires the pair, the trigger is the button, the panel holds whatever you put
-					in it. Ids and ARIA are written on connect. Everything you can <em>see</em> below is this
+					The component wires the pair, the trigger is the button, the
+					panel holds whatever you put in it. Ids and ARIA are written
+					on connect. Everything you can <em>see</em> below is this
 					page's own CSS.
 				</p>
 				<div class="stage stage-drop">
@@ -1264,8 +1299,8 @@
 						<a class="menu-link" href="#anatomy">Changelog</a>
 					</nav>
 					<p class="stage-note">
-						Hover, tap, or press <kbd>Enter</kbd> on the trigger. All three set
-						<code>visible</code>.
+						Hover, tap, or press <kbd>Enter</kbd> on the trigger. All
+						three set <code>visible</code>.
 					</p>
 				</div>
 				<pre
@@ -1290,8 +1325,9 @@
 				</div>
 				<h2>One attribute holds the state.</h2>
 				<p class="demo-desc">
-					<code>visible</code> on the host is the truth, and it reflects.
-					<code>aria-expanded</code>, <code>aria-hidden</code> and <code>inert</code> are
+					<code>visible</code> on the host is the truth, and it
+					reflects. <code>aria-expanded</code>,
+					<code>aria-hidden</code> and <code>inert</code> are
 					<strong>derived output</strong> — never write them yourself.
 				</p>
 				<div class="stage stage-drop-sm stage-row" id="state-stage">
@@ -1311,7 +1347,9 @@
 						<button class="btn" id="state-hide">hide()</button>
 						<button class="btn" id="state-toggle">toggle()</button>
 					</div>
-					<output class="readout readout-cols" id="state-readout">reading…</output>
+					<output class="readout readout-cols" id="state-readout"
+						>reading…</output
+					>
 				</div>
 				<pre
 					class="code-block"><span class="hl-tag">const</span> menu = document.querySelector(<span class="hl-val">'#account-menu'</span>);
@@ -1338,9 +1376,11 @@ menu.hide({ restoreFocus: <span class="hl-val">false</span> });
 				<h2>Opening on hover.</h2>
 				<p class="demo-desc">
 					Hover runs on <code>pointerenter</code> and ignores
-					<code>pointerType: touch</code> — no more double-tap on iOS. Touch dismisses on an
-					outside <code>pointerdown</code> instead, and a <strong>clicked</strong>-open panel
-					latches rather than closing on leave.
+					<code>pointerType: touch</code> — no more double-tap on iOS.
+					Touch dismisses on an outside
+					<code>pointerdown</code> instead, and a
+					<strong>clicked</strong>-open panel latches rather than
+					closing on leave.
 				</p>
 				<div class="stage stage-drop-sm stage-row" id="pointer-stage">
 					<dropdown-component>
@@ -1349,17 +1389,23 @@ menu.hide({ restoreFocus: <span class="hl-val">false</span> });
 							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel>
-							<a href="#pointer" class="menu-item">Switch workspace</a>
+							<a href="#pointer" class="menu-item"
+								>Switch workspace</a
+							>
 							<a href="#pointer" class="menu-item">Invite people</a>
 							<div class="menu-divider" aria-hidden="true"></div>
-							<a href="#pointer" class="menu-item">Workspace settings</a>
+							<a href="#pointer" class="menu-item"
+								>Workspace settings</a
+							>
 						</dropdown-panel>
 					</dropdown-component>
 					<output class="readout" id="pointer-readout"
-						>Nothing yet. Hover it, tap it, or click somewhere else.</output
+						>Nothing yet. Hover it, tap it, or click somewhere
+						else.</output
 					>
 				</div>
-				<pre class="code-block"><span class="hl-cm">// hover, but never from a synthetic touch pointer</span>
+				<pre
+					class="code-block"><span class="hl-cm">// hover, but never from a synthetic touch pointer</span>
 host.addEventListener(<span class="hl-val">'pointerenter'</span>, (e) =&gt; {
   <span class="hl-tag">if</span> (e.pointerType !== <span class="hl-val">'touch'</span>) host.show();
 });
@@ -1377,10 +1423,12 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>Choosing the interaction.</h2>
 				<p class="demo-desc">
-					<code>both</code> is the default: hover on a fine pointer, click everywhere.
-					<code>hover</code> drops the click toggle only where <code>(hover: hover)</code> matches;
-					<code>click</code> drops the hover path entirely. <code>open-delay</code> and
-					<code>close-delay</code> add hover intent, in milliseconds — click, keys and the API
+					<code>both</code> is the default: hover on a fine pointer,
+					click everywhere. <code>hover</code> drops the click toggle
+					only where <code>(hover: hover)</code> matches;
+					<code>click</code> drops the hover path entirely.
+					<code>open-delay</code> and <code>close-delay</code> add
+					hover intent, in milliseconds — click, keys and the API
 					never wait.
 				</p>
 				<div class="stage stage-drop" id="modes-stage">
@@ -1406,7 +1454,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<div class="menu-heading">Press only</div>
 								<a href="#modes" class="menu-item">Press to open</a>
 								<a href="#modes" class="menu-item">Press to close</a>
-								<a href="#modes" class="menu-item">Outside dismisses</a>
+								<a href="#modes" class="menu-item"
+									>Outside dismisses</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 						<dropdown-component trigger="both">
@@ -1416,27 +1466,40 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 							</dropdown-trigger>
 							<dropdown-panel>
 								<div class="menu-heading">The default</div>
-								<a href="#modes" class="menu-item">Hover on a mouse</a>
+								<a href="#modes" class="menu-item"
+									>Hover on a mouse</a
+								>
 								<a href="#modes" class="menu-item">Tap on a screen</a>
 								<a href="#modes" class="menu-item">Keys either way</a>
 							</dropdown-panel>
 						</dropdown-component>
-						<dropdown-component trigger="hover" open-delay="150" close-delay="300">
+						<dropdown-component
+							trigger="hover"
+							open-delay="150"
+							close-delay="300">
 							<dropdown-trigger>
 								delayed
 								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
 								<div class="menu-heading">Hover intent</div>
-								<a href="#modes" class="menu-item">Opens after 150ms</a>
-								<a href="#modes" class="menu-item">Closes 300ms after leaving</a>
-								<a href="#modes" class="menu-item">Re-entering cancels both</a>
+								<a href="#modes" class="menu-item"
+									>Opens after 150ms</a
+								>
+								<a href="#modes" class="menu-item"
+									>Closes 300ms after leaving</a
+								>
+								<a href="#modes" class="menu-item"
+									>Re-entering cancels both</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 					</nav>
 					<p class="stage-note">
-						This device reports <code id="modes-pointer">measuring…</code>, so
-						<code>trigger="hover"</code> <span id="modes-verdict">is being measured</span>. Only
+						This device reports
+						<code id="modes-pointer">measuring…</code>, so
+						<code>trigger="hover"</code>
+						<span id="modes-verdict">is being measured</span>. Only
 						one stays open at a time, for free.
 					</p>
 				</div>
@@ -1455,10 +1518,11 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>The invisible bridge.</h2>
 				<p class="demo-desc">
-					A 30px <code>::before</code> on the trigger, skewed into a wedge, covers the diagonal
-					trip from trigger to panel. It exists <strong>only while hovered</strong>, inside
-					<code>@media (hover: hover)</code> — one left standing after an iOS tap would sit over
-					the next nav item.
+					A 30px <code>::before</code> on the trigger, skewed into a
+					wedge, covers the diagonal trip from trigger to panel. It
+					exists <strong>only while hovered</strong>, inside
+					<code>@media (hover: hover)</code> — one left standing after
+					an iOS tap would sit over the next nav item.
 				</p>
 				<div class="stage stage-drop-lg" id="bridge-stage">
 					<div class="stage-row">
@@ -1475,7 +1539,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<dropdown-component>
 									<dropdown-trigger class="menu-item">
 										Exports
-										<span data-dropdown-arrow aria-hidden="true"></span>
+										<span
+											data-dropdown-arrow
+											aria-hidden="true"></span>
 									</dropdown-trigger>
 									<dropdown-panel opens="right">
 										<a href="#bridge" class="menu-item">CSV</a>
@@ -1487,9 +1553,10 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						</dropdown-component>
 					</div>
 					<p class="stage-note">
-						The gold fill is this page painting an invisible element — the package
-						ships no colour. Hover <em>Reports</em> for the wedge below it, then
-						<em>Exports</em> for the sideways one.
+						The gold fill is this page painting an invisible element —
+						the package ships no colour. Hover <em>Reports</em> for
+						the wedge below it, then <em>Exports</em> for the sideways
+						one.
 					</p>
 				</div>
 				<pre
@@ -1539,10 +1606,12 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>The full-width mega menu.</h2>
 				<p class="demo-desc">
-					<code>wide</code> makes the panel <code>width: 100%</code> and the host
+					<code>wide</code> makes the panel
+					<code>width: 100%</code> and the host
 					<code>position: static</code>, so it measures against
-					<strong>the nearest positioned ancestor</strong>. Give your nav bar
-					<code>position: relative</code> and the mega menu spans it. Two CSS rules, no script.
+					<strong>the nearest positioned ancestor</strong>. Give your
+					nav bar <code>position: relative</code> and the mega menu
+					spans it. Two CSS rules, no script.
 				</p>
 				<div class="stage stage-drop-lg" id="wide-stage">
 					<nav class="menubar">
@@ -1622,10 +1691,15 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>Menus inside menus.</h2>
 				<p class="demo-desc">
-					A dropdown inside a panel is just another dropdown. <code>opens="right"</code> moves it
-					to <code>top: 0; left: 100%</code> and rotates the bridge onto Y.
-					<strong>Nothing in the chain may set <code>overflow: hidden</code></strong> — that clips
-					the submenu at the parent's edge.
+					A dropdown inside a panel is just another dropdown.
+					<code>opens="right"</code> moves it to
+					<code>top: 0; left: 100%</code> and rotates the bridge onto
+					Y.
+					<strong
+						>Nothing in the chain may set
+						<code>overflow: hidden</code></strong
+					>
+					— that clips the submenu at the parent's edge.
 				</p>
 				<div class="stage stage-drop-lg" id="nesting-stage">
 					<nav class="menubar">
@@ -1640,19 +1714,31 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<dropdown-component>
 									<dropdown-trigger class="menu-item">
 										Support
-										<span data-dropdown-arrow aria-hidden="true"></span>
+										<span
+											data-dropdown-arrow
+											aria-hidden="true"></span>
 									</dropdown-trigger>
 									<dropdown-panel opens="right">
-										<a href="#nesting" class="menu-item">Help centre</a>
-										<a href="#nesting" class="menu-item">Contact us</a>
+										<a href="#nesting" class="menu-item"
+											>Help centre</a
+										>
+										<a href="#nesting" class="menu-item"
+											>Contact us</a
+										>
 										<dropdown-component>
 											<dropdown-trigger class="menu-item">
 												Escalate
-												<span data-dropdown-arrow aria-hidden="true"></span>
+												<span
+													data-dropdown-arrow
+													aria-hidden="true"></span>
 											</dropdown-trigger>
 											<dropdown-panel opens="right">
-												<a href="#nesting" class="menu-item">Priority one</a>
-												<a href="#nesting" class="menu-item">Talk to a human</a>
+												<a href="#nesting" class="menu-item"
+													>Priority one</a
+												>
+												<a href="#nesting" class="menu-item"
+													>Talk to a human</a
+												>
 											</dropdown-panel>
 										</dropdown-component>
 									</dropdown-panel>
@@ -1663,8 +1749,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<a class="menu-link" href="#nesting">Community</a>
 					</nav>
 					<p class="stage-note">
-						Three levels. <kbd>Esc</kbd> closes one at a time. Under 640px they indent instead —
-						no room to the right on a phone.
+						Three levels. <kbd>Esc</kbd> closes one at a time. Under
+						640px they indent instead — no room to the right on a
+						phone.
 					</p>
 				</div>
 				<pre
@@ -1692,31 +1779,59 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>Entrance effects.</h2>
 				<p class="demo-desc">
-					The core stylesheet fades and nothing else. Import the opt-in file and
-					<code>effect="…"</code> gives you five presets plus the trigger arrow, tuned by
-					<code>--dp-effect-duration</code> and <code>--dp-effect-easing</code>, all collapsing to
-					a fade under reduced motion.
+					The core stylesheet fades and nothing else. Import the
+					opt-in file and
+					<code>effect="…"</code> gives you five presets plus the
+					trigger arrow, tuned by
+					<code>--dp-effect-duration</code> and
+					<code>--dp-effect-easing</code>, all collapsing to a fade
+					under reduced motion.
 				</p>
 				<div class="stage stage-drop" id="effects-stage">
 					<div class="stage-row">
-						<div class="seg" role="group" aria-label="Entrance effect">
-							<button class="seg-btn is-active" type="button" aria-pressed="true" data-effect="fade">
+						<div
+							class="seg"
+							role="group"
+							aria-label="Entrance effect">
+							<button
+								class="seg-btn is-active"
+								type="button"
+								aria-pressed="true"
+								data-effect="fade">
 								fade
 							</button>
-							<button class="seg-btn" type="button" aria-pressed="false" data-effect="slide">
+							<button
+								class="seg-btn"
+								type="button"
+								aria-pressed="false"
+								data-effect="slide">
 								slide
 							</button>
-							<button class="seg-btn" type="button" aria-pressed="false" data-effect="scale">
+							<button
+								class="seg-btn"
+								type="button"
+								aria-pressed="false"
+								data-effect="scale">
 								scale
 							</button>
-							<button class="seg-btn" type="button" aria-pressed="false" data-effect="blur">
+							<button
+								class="seg-btn"
+								type="button"
+								aria-pressed="false"
+								data-effect="blur">
 								blur
 							</button>
-							<button class="seg-btn" type="button" aria-pressed="false" data-effect="swing">
+							<button
+								class="seg-btn"
+								type="button"
+								aria-pressed="false"
+								data-effect="swing">
 								swing
 							</button>
 						</div>
-						<output class="readout" id="effects-readout">effect="fade" · 200ms</output>
+						<output class="readout" id="effects-readout"
+							>effect="fade" · 200ms</output
+						>
 					</div>
 					<div class="stage-row" style="margin-top: 1.25rem">
 						<dropdown-component id="effects-dropdown">
@@ -1731,7 +1846,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<a href="#effects" class="menu-item">Divider</a>
 							</dropdown-panel>
 						</dropdown-component>
-						<label class="theme-row" style="border-top: 0; min-width: min(100%, 300px)">
+						<label
+							class="theme-row"
+							style="border-top: 0; min-width: min(100%, 300px)">
 							<span class="theme-label">Duration</span>
 							<input
 								type="range"
@@ -1754,8 +1871,12 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
-								<a href="#effects" class="menu-item">Two bars, one pivot</a>
-								<a href="#effects" class="menu-item">Flat at the midpoint</a>
+								<a href="#effects" class="menu-item"
+									>Two bars, one pivot</a
+								>
+								<a href="#effects" class="menu-item"
+									>Flat at the midpoint</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 						<dropdown-component arrow-shape="triangle">
@@ -1764,8 +1885,12 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<span data-dropdown-arrow aria-hidden="true"></span>
 							</dropdown-trigger>
 							<dropdown-panel>
-								<a href="#effects" class="menu-item">One solid glyph</a>
-								<a href="#effects" class="menu-item">Mirrors instead</a>
+								<a href="#effects" class="menu-item"
+									>One solid glyph</a
+								>
+								<a href="#effects" class="menu-item"
+									>Mirrors instead</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 						<dropdown-component arrow="static">
@@ -1785,27 +1910,40 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 							</dropdown-trigger>
 							<dropdown-panel>
 								<a href="#effects" class="menu-item">Same markup</a>
-								<a href="#effects" class="menu-item">No glyph, no gap</a>
+								<a href="#effects" class="menu-item"
+									>No glyph, no gap</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 						<dropdown-component>
 							<dropdown-trigger>
 								your SVG
-								<span class="custom-arrow" data-dropdown-arrow aria-hidden="true">
-									<svg viewBox="0 0 12 12" fill="currentColor"><path d="M6 8L2 4h8z" /></svg>
+								<span
+									class="custom-arrow"
+									data-dropdown-arrow
+									aria-hidden="true">
+									<svg viewBox="0 0 12 12" fill="currentColor">
+										<path d="M6 8L2 4h8z" />
+									</svg>
 								</span>
 							</dropdown-trigger>
 							<dropdown-panel>
-								<a href="#effects" class="menu-item">Hook is not empty</a>
-								<a href="#effects" class="menu-item">Nothing is drawn</a>
+								<a href="#effects" class="menu-item"
+									>Hook is not empty</a
+								>
+								<a href="#effects" class="menu-item"
+									>Nothing is drawn</a
+								>
 							</dropdown-panel>
 						</dropdown-component>
 					</div>
 					<p class="stage-note">
-						Leave the hook empty and the sheet draws the glyph; put your own SVG in
-						it and the sheet only flips it. Both settings sit on
-						<code>&lt;dropdown-component&gt;</code>, so a submenu can differ from its
-						parent. Drag the duration up to watch the chevron pass through flat.
+						Leave the hook empty and the sheet draws the glyph; put
+						your own SVG in it and the sheet only flips it. Both
+						settings sit on
+						<code>&lt;dropdown-component&gt;</code>, so a submenu can
+						differ from its parent. Drag the duration up to watch the
+						chevron pass through flat.
 					</p>
 				</div>
 				<pre
@@ -1837,9 +1975,11 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>Keyboard and focus.</h2>
 				<p class="demo-desc">
-					The panel carries <code>inert</code> while closed — correct on the first paint, not just
-					after a toggle. <kbd>↓</kbd> and <kbd>↑</kbd> open on the first or last item and wrap;
-					<kbd>→</kbd> and <kbd>←</kbd> step through submenus. Tab out deliberately does
+					The panel carries <code>inert</code> while closed — correct
+					on the first paint, not just after a toggle.
+					<kbd>↓</kbd> and <kbd>↑</kbd> open on the first or last item
+					and wrap; <kbd>→</kbd> and <kbd>←</kbd> step through
+					submenus. Tab out deliberately does
 					<strong>not</strong> close: you have to be able to tab in.
 				</p>
 				<div class="stage stage-drop stage-row" id="keyboard-stage">
@@ -1860,7 +2000,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								</dropdown-trigger>
 								<dropdown-panel opens="right">
 									<a href="#keyboard" class="menu-item">Copy link</a>
-									<a href="#keyboard" class="menu-item">Invite by email</a>
+									<a href="#keyboard" class="menu-item"
+										>Invite by email</a
+									>
 								</dropdown-panel>
 							</dropdown-component>
 						</dropdown-panel>
@@ -1879,7 +2021,8 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<li><kbd>Esc</kbd> close one level</li>
 					</ul>
 				</div>
-				<pre class="code-block"><span class="hl-cm">// no role="menu", no role="menuitem" — this is site navigation,</span>
+				<pre
+					class="code-block"><span class="hl-cm">// no role="menu", no role="menuitem" — this is site navigation,</span>
 <span class="hl-cm">// not an application menu, and the roles promise interactions</span>
 <span class="hl-cm">// screen-reader users would then be right to expect</span>
 
@@ -1900,10 +2043,13 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				</div>
 				<h2>The application menu, opted into.</h2>
 				<p class="demo-desc">
-					Site navigation stays a disclosure. Add <code>menu</code> and the same markup becomes an
-					APG menu button: <code>role="menu"</code>, roving <code>tabindex</code>, typeahead,
-					<kbd>Tab</kbd> closes, and every activation fires
-					<code>dropdown-panel:select</code> and closes the whole chain.
+					Site navigation stays a disclosure. Add
+					<code>menu</code> and the same markup becomes an APG menu
+					button: <code>role="menu"</code>, roving
+					<code>tabindex</code>, typeahead, <kbd>Tab</kbd> closes, and
+					every activation fires
+					<code>dropdown-panel:select</code> and closes the whole
+					chain.
 				</p>
 				<div class="stage stage-drop-lg stage-row" id="menu-stage">
 					<dropdown-component menu>
@@ -1912,17 +2058,47 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel>
-							<div class="menu-heading" role="presentation">Document</div>
-							<button type="button" class="menu-item" data-value="save">Save</button>
-							<button type="button" class="menu-item" data-value="save-as">Save as…</button>
-							<button type="button" class="menu-item" data-value="send">Send a copy</button>
+							<div class="menu-heading" role="presentation">
+								Document
+							</div>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="save">
+								Save
+							</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="save-as">
+								Save as…
+							</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="send">
+								Send a copy
+							</button>
 							<div class="menu-divider" role="separator"></div>
-							<button type="button" class="menu-item" data-value="undo">Undo</button>
-							<a class="menu-item" href="#menu" data-value="redo">Redo</a>
-							<div class="menu-item" role="menuitem" tabindex="-1" data-value="paste">
+							<button
+								type="button"
+								class="menu-item"
+								data-value="undo">
+								Undo
+							</button>
+							<a class="menu-item" href="#menu" data-value="redo"
+								>Redo</a
+							>
+							<div
+								class="menu-item"
+								role="menuitem"
+								tabindex="-1"
+								data-value="paste">
 								Paste as plain text
 							</div>
-							<span class="menu-item" aria-disabled="true">Publish (offline)</span>
+							<span class="menu-item" aria-disabled="true"
+								>Publish (offline)</span
+							>
 							<div class="menu-divider" role="separator"></div>
 							<dropdown-component menu>
 								<dropdown-trigger class="menu-item">
@@ -1930,9 +2106,24 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 									<span data-dropdown-arrow aria-hidden="true"></span>
 								</dropdown-trigger>
 								<dropdown-panel opens="right">
-									<button type="button" class="menu-item" data-value="pdf">PDF</button>
-									<button type="button" class="menu-item" data-value="markdown">Markdown</button>
-									<button type="button" class="menu-item" data-value="html">HTML</button>
+									<button
+										type="button"
+										class="menu-item"
+										data-value="pdf">
+										PDF
+									</button>
+									<button
+										type="button"
+										class="menu-item"
+										data-value="markdown">
+										Markdown
+									</button>
+									<button
+										type="button"
+										class="menu-item"
+										data-value="html">
+										HTML
+									</button>
 								</dropdown-panel>
 							</dropdown-component>
 						</dropdown-panel>
@@ -1950,7 +2141,8 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 						<li><kbd>Tab</kbd> close and move on</li>
 					</ul>
 				</div>
-				<pre class="code-block"><span class="hl-tag">&lt;dropdown-component</span> <span class="hl-attr">menu</span><span class="hl-tag">&gt;</span>
+				<pre
+					class="code-block"><span class="hl-tag">&lt;dropdown-component</span> <span class="hl-attr">menu</span><span class="hl-tag">&gt;</span>
   <span class="hl-tag">&lt;dropdown-trigger&gt;</span>Edit<span class="hl-tag">&lt;/dropdown-trigger&gt;</span>
   <span class="hl-tag">&lt;dropdown-panel&gt;</span>                <span class="hl-cm">// role="menu"</span>
     <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-value</span>=<span class="hl-val">"save"</span><span class="hl-tag">&gt;</span>Save<span class="hl-tag">&lt;/button&gt;</span>
@@ -1973,28 +2165,57 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 				</div>
 				<h2>Right-click, anywhere in here.</h2>
 				<p class="demo-desc">
-					<code>trigger="contextmenu"</code> needs no <code>&lt;dropdown-trigger&gt;</code> at all —
-					the component <em>is</em> the surface. The panel goes <code>position: fixed</code> at the
-					pointer, flips and clamps to an 8 px margin, dismisses on scroll, and returns focus to
-					wherever it came from. On touch, a 500 ms press does the same.
+					<code>trigger="contextmenu"</code> needs no
+					<code>&lt;dropdown-trigger&gt;</code> at all — the component
+					<em>is</em> the surface. The panel goes
+					<code>position: fixed</code> at the pointer, flips and
+					clamps to an 8 px margin, dismisses on scroll, and returns
+					focus to wherever it came from. On touch, a 500 ms press
+					does the same.
 				</p>
 				<div class="stage stage-drop-lg" id="context-stage">
-					<dropdown-component menu trigger="contextmenu" class="context-host">
+					<dropdown-component
+						menu
+						trigger="contextmenu"
+						class="context-host">
 						<div class="context-surface">
 							Right-click (or long-press) anywhere inside this box.<br />
 							Try a corner.
 						</div>
 						<dropdown-panel>
-							<button type="button" class="menu-item" data-value="cut">Cut</button>
-							<button type="button" class="menu-item" data-value="copy">Copy</button>
-							<button type="button" class="menu-item" data-value="paste">Paste</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="cut">
+								Cut
+							</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="copy">
+								Copy
+							</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="paste">
+								Paste
+							</button>
 							<div class="menu-divider" role="separator"></div>
-							<button type="button" class="menu-item" data-value="inspect">Inspect</button>
+							<button
+								type="button"
+								class="menu-item"
+								data-value="inspect">
+								Inspect
+							</button>
 						</dropdown-panel>
 					</dropdown-component>
-					<output class="readout" id="context-readout">No menu yet.</output>
+					<output class="readout" id="context-readout"
+						>No menu yet.</output
+					>
 					<p class="stage-note">
-						<code>showAt(x, y)</code> is public, so any element can be the surface — bind your own
+						<code>showAt(x, y)</code> is public, so any element can be
+						the surface — bind your own
 						<code>contextmenu</code> listener and call it.
 					</p>
 				</div>
@@ -2007,10 +2228,12 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 				</div>
 				<h2>Which way it opens.</h2>
 				<p class="demo-desc">
-					<code>align="start|end"</code> on the panel is pure CSS — the right-hand menu edges to the
-					right of its trigger. <code>flip</code> is opt-in JavaScript, measured once per open: near
-					the bottom of the viewport the panel opens upward instead, and reverts as soon as there is
-					room again. Scroll this section to the fold and reopen it.
+					<code>align="start|end"</code> on the panel is pure CSS —
+					the right-hand menu edges to the right of its trigger.
+					<code>flip</code> is opt-in JavaScript, measured once per
+					open: near the bottom of the viewport the panel opens upward
+					instead, and reverts as soon as there is room again. Scroll
+					this section to the fold and reopen it.
 				</p>
 				<div class="stage stage-drop stage-row" id="align-stage">
 					<dropdown-component>
@@ -2019,7 +2242,9 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel align="start">
-							<a href="#align" class="menu-item">Left edge to left edge</a>
+							<a href="#align" class="menu-item"
+								>Left edge to left edge</a
+							>
 							<a href="#align" class="menu-item">The default</a>
 						</dropdown-panel>
 					</dropdown-component>
@@ -2029,8 +2254,12 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel align="end">
-							<a href="#align" class="menu-item">Right edge to right edge</a>
-							<a href="#align" class="menu-item">For a menu near the margin</a>
+							<a href="#align" class="menu-item"
+								>Right edge to right edge</a
+							>
+							<a href="#align" class="menu-item"
+								>For a menu near the margin</a
+							>
 						</dropdown-panel>
 					</dropdown-component>
 					<dropdown-component>
@@ -2039,12 +2268,20 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 							<span data-dropdown-arrow aria-hidden="true"></span>
 						</dropdown-trigger>
 						<dropdown-panel flip id="flip-panel">
-							<a href="#align" class="menu-item">Opens down when there is room</a>
-							<a href="#align" class="menu-item">Upward when there is not</a>
-							<a href="#align" class="menu-item">Measured once, per open</a>
+							<a href="#align" class="menu-item"
+								>Opens down when there is room</a
+							>
+							<a href="#align" class="menu-item"
+								>Upward when there is not</a
+							>
+							<a href="#align" class="menu-item"
+								>Measured once, per open</a
+							>
 						</dropdown-panel>
 					</dropdown-component>
-					<output class="readout" id="flip-readout">flip panel: closed</output>
+					<output class="readout" id="flip-readout"
+						>flip panel: closed</output
+					>
 				</div>
 			</section>
 
@@ -2055,32 +2292,56 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 				</div>
 				<h2>Styling it yourself.</h2>
 				<p class="demo-desc">
-					There is no theming API, because there is nothing to override. The package sets
-					<code>position</code>, <code>opacity</code> and <code>pointer-events</code>, and stops.
-					Every control below writes a property this page invented — only
-					<strong>duration</strong> and <strong>easing</strong> belong to the component.
+					There is no theming API, because there is nothing to
+					override. The package sets
+					<code>position</code>, <code>opacity</code> and
+					<code>pointer-events</code>, and stops. Every control below
+					writes a property this page invented — only
+					<strong>duration</strong> and <strong>easing</strong> belong
+					to the component.
 				</p>
 				<div class="theme-grid">
 					<label class="theme-row">
 						<span class="theme-label">Panel background</span>
-						<input type="color" data-prop="--menu-bg" value="#171b26" />
+						<input
+							type="color"
+							data-prop="--menu-bg"
+							value="#171b26" />
 					</label>
 					<label class="theme-row">
 						<span class="theme-label">Border</span>
-						<input type="color" data-prop="--menu-border" value="#2c3444" />
+						<input
+							type="color"
+							data-prop="--menu-border"
+							value="#2c3444" />
 					</label>
 					<label class="theme-row">
 						<span class="theme-label">Item hover</span>
-						<input type="color" data-prop="--menu-item-hover" value="#212838" />
+						<input
+							type="color"
+							data-prop="--menu-item-hover"
+							value="#212838" />
 					</label>
 					<label class="theme-row">
 						<span class="theme-label">Corner radius</span>
-						<input type="range" data-prop="--menu-radius" data-unit="px" min="0" max="26" value="10" />
+						<input
+							type="range"
+							data-prop="--menu-radius"
+							data-unit="px"
+							min="0"
+							max="26"
+							value="10" />
 						<span class="theme-value">10px</span>
 					</label>
 					<label class="theme-row">
 						<span class="theme-label">Panel padding</span>
-						<input type="range" data-prop="--menu-pad" data-unit="px" min="0" max="24" value="6" />
+						<input
+							type="range"
+							data-prop="--menu-pad"
+							data-unit="px"
+							min="0"
+							max="24"
+							value="6" />
 						<span class="theme-value">6px</span>
 					</label>
 					<label class="theme-row">
@@ -2097,7 +2358,13 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 					</label>
 					<label class="theme-row">
 						<span class="theme-label">Offset from trigger</span>
-						<input type="range" data-prop="--menu-offset" data-unit="px" min="0" max="30" value="8" />
+						<input
+							type="range"
+							data-prop="--menu-offset"
+							data-unit="px"
+							min="0"
+							max="30"
+							value="8" />
 						<span class="theme-value">8px</span>
 					</label>
 					<label class="theme-row">
@@ -2144,7 +2411,9 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 								<div class="menu-heading">Sort by</div>
 								<a href="#theme" class="menu-item">Newest first</a>
 								<a href="#theme" class="menu-item">Most relevant</a>
-								<a href="#theme" class="menu-item">Price, low to high</a>
+								<a href="#theme" class="menu-item"
+									>Price, low to high</a
+								>
 								<div class="menu-divider" aria-hidden="true"></div>
 								<a href="#theme" class="menu-item">Clear filters</a>
 							</dropdown-panel>
@@ -2152,7 +2421,8 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 						<button class="btn" id="theme-reset">Reset</button>
 					</div>
 					<p class="stage-note">
-						The last two rows set attributes on the element rather than properties.
+						The last two rows set attributes on the element rather
+						than properties.
 						<em>Reset</em> restores all ten.
 					</p>
 				</div>
@@ -2187,9 +2457,11 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 				</div>
 				<h2>Lifecycle events.</h2>
 				<p class="demo-desc">
-					Four bubbling events on the host, each carrying <code>{ trigger, panel }</code>. The two
-					<code>before-</code> ones are cancelable — <code>preventDefault()</code> and nothing
-					happens. Flip the switch to refuse.
+					Four bubbling events on the host, each carrying
+					<code>{ trigger, panel }</code>. The two
+					<code>before-</code> ones are cancelable —
+					<code>preventDefault()</code> and nothing happens. Flip the
+					switch to refuse.
 				</p>
 				<div class="stage stage-drop-sm" id="lifecycle-stage">
 					<div class="stage-row">
@@ -2204,12 +2476,19 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 								<a href="#lifecycle" class="menu-item">Archive</a>
 							</dropdown-panel>
 						</dropdown-component>
-						<label class="theme-row" style="border-top: 0; min-width: min(100%, 300px)">
+						<label
+							class="theme-row"
+							style="border-top: 0; min-width: min(100%, 300px)">
 							<span class="theme-label">Refuse to open</span>
-							<input type="checkbox" id="lifecycle-block" role="switch" />
+							<input
+								type="checkbox"
+								id="lifecycle-block"
+								role="switch" />
 							<span class="theme-value">off</span>
 						</label>
-						<button class="btn" id="lifecycle-clear">Clear log</button>
+						<button class="btn" id="lifecycle-clear">
+							Clear log
+						</button>
 					</div>
 					<pre
 						class="event-log"
@@ -2217,7 +2496,8 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 						role="log"
 						aria-live="polite"
 						aria-label="Event log">
-No events yet.</pre>
+No events yet.</pre
+					>
 				</div>
 				<pre
 					class="code-block"><span class="hl-tag">const</span> menu = document.querySelector(<span class="hl-val">'dropdown-component'</span>);
@@ -2242,7 +2522,8 @@ nav.addEventListener(<span class="hl-val">'dropdown-panel:show'</span>, (e) =&gt
 				</div>
 				<h2>The full reference.</h2>
 				<p class="demo-desc">
-					Three elements, seven attributes, three methods, four events.
+					Three elements, seven attributes, three methods, four
+					events.
 				</p>
 				<pre
 					class="code-block"><span class="hl-tag">import</span> <span class="hl-val">'@magic-spells/dropdown-panel'</span>;
@@ -2265,24 +2546,30 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>&lt;dropdown-component&gt;</code></div>
 						<div>Yes</div>
-						<div>The host. State, listeners, public API. Both children must be <em>direct</em> children.</div>
+						<div>
+							The host. State, listeners, public API. Both children
+							must be <em>direct</em> children.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>&lt;dropdown-trigger&gt;</code></div>
 						<div>Yes</div>
 						<div>
-							The button. Gets <code>role="button"</code>, <code>tabindex</code>,
-							<code>aria-haspopup</code>, <code>aria-controls</code>, <code>aria-expanded</code>.
-							Draws the bridge with its <code>::before</code> — leave that one alone. A
-							pseudo-element on the arrow hook inside it is a different box, and fine.
+							The button. Gets <code>role="button"</code>,
+							<code>tabindex</code>, <code>aria-haspopup</code>,
+							<code>aria-controls</code>, <code>aria-expanded</code>.
+							Draws the bridge with its <code>::before</code> — leave
+							that one alone. A pseudo-element on the arrow hook
+							inside it is a different box, and fine.
 						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>&lt;dropdown-panel&gt;</code></div>
 						<div>Yes</div>
 						<div>
-							The content. Gets <code>role="group"</code>, <code>aria-hidden</code>,
-							<code>aria-labelledby</code>, <code>inert</code>. Holds anything.
+							The content. Gets <code>role="group"</code>,
+							<code>aria-hidden</code>, <code>aria-labelledby</code>,
+							<code>inert</code>. Holds anything.
 						</div>
 					</div>
 				</div>
@@ -2298,7 +2585,8 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div><code>visible</code></div>
 						<div>absent</div>
 						<div>
-							On the host. Source of truth, observed and reflected. Mirrors the
+							On the host. Source of truth, observed and reflected.
+							Mirrors the
 							<code>visible</code> property.
 						</div>
 					</div>
@@ -2306,8 +2594,9 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div><code>trigger</code></div>
 						<div><code>both</code></div>
 						<div>
-							On the host. <code>both</code> = hover on fine pointers plus click;
-							<code>hover</code> = hover only where <code>(hover: hover)</code> matches;
+							On the host. <code>both</code> = hover on fine pointers
+							plus click; <code>hover</code> = hover only where
+							<code>(hover: hover)</code> matches;
 							<code>click</code> = no hover path.
 						</div>
 					</div>
@@ -2315,7 +2604,8 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div><code>open-delay</code></div>
 						<div><code>0</code></div>
 						<div>
-							On the host. Milliseconds <code>pointerenter</code> waits before opening. Leaving
+							On the host. Milliseconds
+							<code>pointerenter</code> waits before opening. Leaving
 							first cancels it. Hover only.
 						</div>
 					</div>
@@ -2323,7 +2613,8 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div><code>close-delay</code></div>
 						<div><code>0</code></div>
 						<div>
-							On the host. Milliseconds <code>pointerleave</code> waits before closing a
+							On the host. Milliseconds
+							<code>pointerleave</code> waits before closing a
 							hover-opened panel. Re-entering cancels it.
 						</div>
 					</div>
@@ -2331,40 +2622,47 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div><code>wide</code></div>
 						<div>absent</div>
 						<div>
-							On the panel. <code>width: 100%</code>, host goes <code>position: static</code> — the
-							panel spans the nearest positioned ancestor.
+							On the panel. <code>width: 100%</code>, host goes
+							<code>position: static</code> — the panel spans the
+							nearest positioned ancestor.
 						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>opens</code></div>
 						<div><code>down</code></div>
 						<div>
-							On the panel. <code>right</code> moves it to <code>top: 0; left: 100%</code> and
-							rotates the bridge onto Y. The submenu case.
+							On the panel. <code>right</code> moves it to
+							<code>top: 0; left: 100%</code> and rotates the bridge
+							onto Y. The submenu case.
 						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>effect</code></div>
 						<div>none</div>
 						<div>
-							On the panel. <code>fade</code>, <code>slide</code>, <code>scale</code>,
-							<code>blur</code> or <code>swing</code>. No-op without the effects stylesheet.
+							On the panel. <code>fade</code>, <code>slide</code>,
+							<code>scale</code>, <code>blur</code> or
+							<code>swing</code>. No-op without the effects
+							stylesheet.
 						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>arrow</code></div>
 						<div><code>flip</code></div>
 						<div>
-							On the host. <code>flip</code> mirrors the arrow on open, <code>static</code>
-							leaves it, <code>none</code> hides it. Effects stylesheet only.
+							On the host. <code>flip</code> mirrors the arrow on
+							open, <code>static</code> leaves it,
+							<code>none</code> hides it. Effects stylesheet only.
 						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>arrow-shape</code></div>
 						<div><code>chevron</code></div>
 						<div>
-							On the host. <code>chevron</code> or <code>triangle</code>, drawn only when the
-							<code>[data-dropdown-arrow]</code> hook is empty. Effects stylesheet only.
+							On the host. <code>chevron</code> or
+							<code>triangle</code>, drawn only when the
+							<code>[data-dropdown-arrow]</code> hook is empty.
+							Effects stylesheet only.
 						</div>
 					</div>
 				</div>
@@ -2384,7 +2682,10 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>--dp-effect-easing</code></div>
 						<div><code>cubic-bezier(0.32, 0.72, 0, 1)</code></div>
-						<div>Effect timing function. Decelerate-only. Also times the arrow.</div>
+						<div>
+							Effect timing function. Decelerate-only. Also times the
+							arrow.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>--dp-arrow-size</code></div>
@@ -2398,9 +2699,11 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					</div>
 				</div>
 				<p class="ref-note">
-					That is the whole list. Colours, shadows, radii and z-index are yours —
-					<code>dropdown-panel { … }</code> matches like any other tag. Never
-					<code>overflow: hidden</code> on a panel or above one.
+					That is the whole list. Colours, shadows, radii and z-index
+					are yours —
+					<code>dropdown-panel { … }</code> matches like any other
+					tag. Never <code>overflow: hidden</code> on a panel or above
+					one.
 				</p>
 
 				<h3 class="ref-heading">Methods &amp; Properties</h3>
@@ -2413,12 +2716,18 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>show()</code></div>
 						<div>method</div>
-						<div>Opens. Idempotent, and safe on an unconnected or incomplete element.</div>
+						<div>
+							Opens. Idempotent, and safe on an unconnected or
+							incomplete element.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>hide({ restoreFocus })</code></div>
 						<div>method</div>
-						<div>Closes. Restores focus only when focus was inside the panel.</div>
+						<div>
+							Closes. Restores focus only when focus was inside the
+							panel.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>toggle()</code></div>
@@ -2428,7 +2737,10 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>visible</code></div>
 						<div>boolean</div>
-						<div>Get and set. Reflects the <code>visible</code> attribute both ways.</div>
+						<div>
+							Get and set. Reflects the <code>visible</code> attribute
+							both ways.
+						</div>
 					</div>
 				</div>
 
@@ -2442,7 +2754,9 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>dropdown-panel:before-show</code></div>
 						<div>Yes</div>
-						<div>Before opening. <code>preventDefault()</code> aborts.</div>
+						<div>
+							Before opening. <code>preventDefault()</code> aborts.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>dropdown-panel:show</code></div>
@@ -2452,7 +2766,9 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					<div class="ref-row">
 						<div><code>dropdown-panel:before-hide</code></div>
 						<div>Yes</div>
-						<div>Before closing. <code>preventDefault()</code> aborts.</div>
+						<div>
+							Before closing. <code>preventDefault()</code> aborts.
+						</div>
 					</div>
 					<div class="ref-row">
 						<div><code>dropdown-panel:hide</code></div>
@@ -2461,37 +2777,48 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					</div>
 				</div>
 				<p class="ref-note">
-					All four fire on the host and bubble — one listener on the nav hears every menu. You do
-					not need them to keep a single menu open; the component already does that.
+					All four fire on the host and bubble — one listener on the
+					nav hears every menu. You do not need them to keep a single
+					menu open; the component already does that.
 				</p>
 
 				<h3 class="ref-heading">Accessibility</h3>
 				<p class="ref-note">
-					A disclosure pattern, not a menu one — no <code>role="menu"</code> or
-					<code>menuitem</code> anywhere, because those promise a keyboard model site navigation
-					rarely delivers. Write your items as real links or buttons and the rest follows.
+					A disclosure pattern, not a menu one — no
+					<code>role="menu"</code> or <code>menuitem</code> anywhere,
+					because those promise a keyboard model site navigation
+					rarely delivers. Write your items as real links or buttons
+					and the rest follows.
 				</p>
 
 				<h3 class="ref-heading">Browser support</h3>
 				<p class="ref-note">
-					Chrome 105+, Edge 105+, Safari 15.4+, Firefox 121+ — custom elements, Pointer Events,
-					<code>inert</code>, <code>:has()</code>. <code>:has()</code> is load-bearing: it switches
-					the host between <code>relative</code> and <code>static</code> for <code>wide</code>.
+					Chrome 105+, Edge 105+, Safari 15.4+, Firefox 121+ — custom
+					elements, Pointer Events,
+					<code>inert</code>, <code>:has()</code>.
+					<code>:has()</code> is load-bearing: it switches the host
+					between <code>relative</code> and <code>static</code> for
+					<code>wide</code>.
 				</p>
 			</section>
 		</main>
 
 		<footer class="site-foot">
 			Built for the layer just below ·
-			<a href="https://github.com/magic-spells/dropdown-panel">@magic-spells/dropdown-panel</a> · MIT
-			License
+			<a href="https://github.com/magic-spells/dropdown-panel"
+				>@magic-spells/dropdown-panel</a
+			>
+			· MIT License
 		</footer>
 
 		<script type="module">
 			import './dist/dropdown-panel.esm.js';
 
-			const $ = (selector, root = document) => root.querySelector(selector);
-			const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+			const $ = (selector, root = document) =>
+				root.querySelector(selector);
+			const $$ = (selector, root = document) => [
+				...root.querySelectorAll(selector),
+			];
 
 			// ---- Click to copy the install command ----
 			// The <code> is also user-select: all, so a failed or blocked clipboard
@@ -2503,7 +2830,9 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 
 			installValue.addEventListener('click', async () => {
 				try {
-					await navigator.clipboard.writeText(installValue.textContent.trim());
+					await navigator.clipboard.writeText(
+						installValue.textContent.trim()
+					);
 					install.classList.add('copied');
 					installLabel.textContent = 'Copied';
 					clearTimeout(copiedTimer);
@@ -2519,9 +2848,11 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			// ---- Shared helpers ----
 			// The demo never reads aria-* to decide anything; `visible` on the host
 			// is the state and everything else is output.
-			const isOpen = (host) => host.hasAttribute('visible') || host.visible === true;
+			const isOpen = (host) =>
+				host.hasAttribute('visible') || host.visible === true;
 
-			const label = (element) => (element?.firstChild?.textContent ?? '').trim() || '—';
+			const label = (element) =>
+				(element?.firstChild?.textContent ?? '').trim() || '—';
 
 			// ---- State: show / hide / toggle, and the derived attributes ----
 			const stateHost = $('#state-dropdown');
@@ -2529,14 +2860,24 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			const statePanel = $('dropdown-panel', stateHost);
 			const stateReadout = $('#state-readout');
 
-			const present = (element, name) => (element.hasAttribute(name) ? 'present' : 'absent');
+			const present = (element, name) =>
+				element.hasAttribute(name) ? 'present' : 'absent';
 
 			const renderState = () => {
-				const row = (owner, name, value) => `${owner.padEnd(9)}${name.padEnd(15)}${value}`;
+				const row = (owner, name, value) =>
+					`${owner.padEnd(9)}${name.padEnd(15)}${value}`;
 				stateReadout.textContent = [
 					row('host', 'visible', present(stateHost, 'visible')),
-					row('trigger', 'aria-expanded', stateTrigger.getAttribute('aria-expanded') ?? '—'),
-					row('panel', 'aria-hidden', statePanel.getAttribute('aria-hidden') ?? '—'),
+					row(
+						'trigger',
+						'aria-expanded',
+						stateTrigger.getAttribute('aria-expanded') ?? '—'
+					),
+					row(
+						'panel',
+						'aria-hidden',
+						statePanel.getAttribute('aria-hidden') ?? '—'
+					),
 					row('panel', 'inert', present(statePanel, 'inert')),
 				].join('\n');
 			};
@@ -2549,9 +2890,15 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			}
 			renderState();
 
-			$('#state-show').addEventListener('click', () => stateHost.show());
-			$('#state-hide').addEventListener('click', () => stateHost.hide());
-			$('#state-toggle').addEventListener('click', () => stateHost.toggle());
+			$('#state-show').addEventListener('click', () =>
+				stateHost.show()
+			);
+			$('#state-hide').addEventListener('click', () =>
+				stateHost.hide()
+			);
+			$('#state-toggle').addEventListener('click', () =>
+				stateHost.toggle()
+			);
 
 			// ---- Pointer: name the input that actually moved the state ----
 			const pointerStage = $('#pointer-stage');
@@ -2587,18 +2934,28 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			});
 
 			pointerHost.addEventListener('click', () => {
-				requestAnimationFrame(() => sayPointer('click on the trigger'));
+				requestAnimationFrame(() =>
+					sayPointer('click on the trigger')
+				);
 			});
 
 			document.addEventListener('pointerdown', (event) => {
-				if (pointerStage.contains(event.target) || !isOpen(pointerHost)) return;
-				requestAnimationFrame(() => sayPointer('pointerdown outside · hide()'));
+				if (
+					pointerStage.contains(event.target) ||
+					!isOpen(pointerHost)
+				)
+					return;
+				requestAnimationFrame(() =>
+					sayPointer('pointerdown outside · hide()')
+				);
 			});
 
 			// ---- Modes: report what this device's pointer can actually do ----
 			const fine = matchMedia('(hover: hover) and (pointer: fine)');
 			const renderPointerCapability = () => {
-				$('#modes-pointer').textContent = fine.matches ? 'hover: hover' : 'hover: none';
+				$('#modes-pointer').textContent = fine.matches
+					? 'hover: hover'
+					: 'hover: none';
 				$('#modes-verdict').textContent = fine.matches
 					? 'opens on hover here'
 					: 'does nothing here';
@@ -2643,9 +3000,13 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			const effectsSection = $('#effects');
 
 			effectsDuration.addEventListener('input', () => {
-				effectsSection.style.setProperty('--dp-effect-duration', `${effectsDuration.value}ms`);
-				effectsDuration.parentElement.querySelector('.theme-value').textContent =
-					`${effectsDuration.value}ms`;
+				effectsSection.style.setProperty(
+					'--dp-effect-duration',
+					`${effectsDuration.value}ms`
+				);
+				effectsDuration.parentElement.querySelector(
+					'.theme-value'
+				).textContent = `${effectsDuration.value}ms`;
 				renderEffect();
 			});
 
@@ -2665,9 +3026,12 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			};
 
 			const describeFocus = (element) => {
-				if (!element || !keyboardStage.contains(element)) return 'outside the stage';
-				if (element.tagName === 'DROPDOWN-TRIGGER') return `trigger “${label(element)}”`;
-				if (element.classList.contains('menu-item')) return `item “${label(element)}”`;
+				if (!element || !keyboardStage.contains(element))
+					return 'outside the stage';
+				if (element.tagName === 'DROPDOWN-TRIGGER')
+					return `trigger “${label(element)}”`;
+				if (element.classList.contains('menu-item'))
+					return `item “${label(element)}”`;
 				return element.tagName.toLowerCase();
 			};
 
@@ -2679,7 +3043,10 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 				(event) => {
 					const name = KEY_NAMES[event.key] ?? event.key;
 					requestAnimationFrame(() => {
-						const open = $$('dropdown-component', keyboardStage).filter(isOpen).length;
+						const open = $$(
+							'dropdown-component',
+							keyboardStage
+						).filter(isOpen).length;
 						keyboardReadout.textContent = [
 							`key    ${name}`,
 							`focus  ${describeFocus(document.activeElement)}`,
@@ -2704,18 +3071,23 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			const applyProp = (input) => {
 				const value = `${input.value}${input.dataset.unit ?? ''}`;
 				themeStage.style.setProperty(input.dataset.prop, value);
-				const readout = input.parentElement.querySelector('.theme-value');
+				const readout =
+					input.parentElement.querySelector('.theme-value');
 				if (readout) readout.textContent = value;
 			};
 
 			const applyEffect = () => {
 				themePanel.setAttribute('effect', themeEffect.value);
-				themeEffect.parentElement.querySelector('.theme-value').textContent = themeEffect.value;
+				themeEffect.parentElement.querySelector(
+					'.theme-value'
+				).textContent = themeEffect.value;
 			};
 
 			const applyTriggerMode = () => {
 				themeHost.setAttribute('trigger', themeTrigger.value);
-				themeTrigger.parentElement.querySelector('.theme-value').textContent = themeTrigger.value;
+				themeTrigger.parentElement.querySelector(
+					'.theme-value'
+				).textContent = themeTrigger.value;
 			};
 
 			for (const input of themeInputs) {
@@ -2728,8 +3100,10 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 				themeStage.removeAttribute('style');
 				for (const input of themeInputs) {
 					input.value = input.defaultValue;
-					const readout = input.parentElement.querySelector('.theme-value');
-					if (readout) readout.textContent = `${input.value}${input.dataset.unit ?? ''}`;
+					const readout =
+						input.parentElement.querySelector('.theme-value');
+					if (readout)
+						readout.textContent = `${input.value}${input.dataset.unit ?? ''}`;
 				}
 				themeEffect.value = 'blur';
 				applyEffect();
@@ -2744,27 +3118,38 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			const EMPTY_LOG = 'No events yet.';
 
 			const write = (line) => {
-				if (eventLog.textContent === EMPTY_LOG) eventLog.textContent = '';
+				if (eventLog.textContent === EMPTY_LOG)
+					eventLog.textContent = '';
 				eventLog.textContent += `${line}\n`;
 				eventLog.scrollTop = eventLog.scrollHeight;
 			};
 
 			// The names are namespaced; the log drops the prefix so the four line up
 			// in one column — 'before-show' is exactly 11 characters.
-			for (const name of ['before-show', 'show', 'before-hide', 'hide']) {
-				lifecycleHost.addEventListener(`dropdown-panel:${name}`, (event) => {
-					const blocked = name === 'before-show' && lifecycleBlock.checked;
-					if (blocked) event.preventDefault();
-					write(
-						`${name.padEnd(11)} trigger “${label(event.detail?.trigger ?? lifecycleHost)}”` +
-							(blocked ? '  · prevented' : '')
-					);
-				});
+			for (const name of [
+				'before-show',
+				'show',
+				'before-hide',
+				'hide',
+			]) {
+				lifecycleHost.addEventListener(
+					`dropdown-panel:${name}`,
+					(event) => {
+						const blocked =
+							name === 'before-show' && lifecycleBlock.checked;
+						if (blocked) event.preventDefault();
+						write(
+							`${name.padEnd(11)} trigger “${label(event.detail?.trigger ?? lifecycleHost)}”` +
+								(blocked ? '  · prevented' : '')
+						);
+					}
+				);
 			}
 
 			lifecycleBlock.addEventListener('change', () => {
-				lifecycleBlock.parentElement.querySelector('.theme-value').textContent =
-					lifecycleBlock.checked ? 'on' : 'off';
+				lifecycleBlock.parentElement.querySelector(
+					'.theme-value'
+				).textContent = lifecycleBlock.checked ? 'on' : 'off';
 			});
 
 			$('#lifecycle-clear').addEventListener('click', () => {
@@ -2805,14 +3190,18 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 					`top      ${panel.style.top}`;
 			});
 
-			contextHost.addEventListener('dropdown-panel:select', (event) => {
-				contextReadout.textContent = `chose “${event.detail.item.textContent.trim()}”`;
-			});
+			contextHost.addEventListener(
+				'dropdown-panel:select',
+				(event) => {
+					contextReadout.textContent = `chose “${event.detail.item.textContent.trim()}”`;
+				}
+			);
 
 			contextHost.addEventListener('dropdown-panel:hide', () => {
 				requestAnimationFrame(() => {
 					if (contextReadout.textContent.startsWith('chose')) return;
-					contextReadout.textContent = 'closed · inline styles cleared';
+					contextReadout.textContent =
+						'closed · inline styles cleared';
 				});
 			});
 
@@ -2821,7 +3210,8 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			const flipReadout = $('#flip-readout');
 
 			new MutationObserver(() => {
-				const open = flipPanel.getAttribute('aria-hidden') === 'false';
+				const open =
+					flipPanel.getAttribute('aria-hidden') === 'false';
 				flipReadout.textContent = open
 					? `flip panel: opens ${flipPanel.hasAttribute('flipped') ? 'upward' : 'downward'}`
 					: 'flip panel: closed';

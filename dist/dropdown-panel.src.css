@@ -88,6 +88,26 @@ dropdown-panel {
 	transition-timing-function: ease-out;
 }
 
+/* Horizontal alignment of a downward panel against its trigger.
+   `start` is the existing default, written out only so the attribute
+   reads symmetrically. opens="right" ignores it - its rule follows. */
+dropdown-panel[align='start'] {
+	left: 0;
+	right: auto;
+}
+
+dropdown-panel[align='end'] {
+	left: auto;
+	right: 0;
+}
+
+/* Set by the component on an opt-in `flip` panel that would otherwise
+   run past the bottom of the viewport. Measured once per open. */
+dropdown-panel[flipped] {
+	top: auto;
+	bottom: 100%;
+}
+
 /* Right-opening panel positioning (for nested menus) */
 dropdown-panel[opens='right'] {
 	top: 0;

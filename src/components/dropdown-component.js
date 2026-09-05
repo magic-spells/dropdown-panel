@@ -56,7 +56,11 @@ const TEXT_ENTRY_SELECTOR =
  * @fires DropdownComponent#dropdown-panel:hide
  */
 export class DropdownComponent extends HTMLElement {
-	static observedAttributes = ['visible', 'open-delay', 'close-delay'];
+	static observedAttributes = [
+		'visible',
+		'open-delay',
+		'close-delay',
+	];
 
 	// every currently shown dropdown on the page — used to close siblings
 	static #shown = new Set();
@@ -695,9 +699,13 @@ export class DropdownComponent extends HTMLElement {
 		// context menu — are released by the next press instead. Capture
 		// phase, so it lands before the bubble-phase documentPointerDown
 		// that may record a fresh dismissal for the same press.
-		document.addEventListener('pointerdown', _.handlers.endDismissal, {
-			capture: true,
-		});
+		document.addEventListener(
+			'pointerdown',
+			_.handlers.endDismissal,
+			{
+				capture: true,
+			}
+		);
 	}
 
 	/**
@@ -711,9 +719,13 @@ export class DropdownComponent extends HTMLElement {
 		_.#pointerDismissed = false;
 
 		window.removeEventListener('click', _.handlers.endDismissal);
-		document.removeEventListener('pointerdown', _.handlers.endDismissal, {
-			capture: true,
-		});
+		document.removeEventListener(
+			'pointerdown',
+			_.handlers.endDismissal,
+			{
+				capture: true,
+			}
+		);
 	}
 
 	/**
@@ -819,9 +831,13 @@ export class DropdownComponent extends HTMLElement {
 			'keydown',
 			_.handlers.documentKeydown
 		);
-		document.removeEventListener('scroll', _.handlers.documentScroll, {
-			capture: true,
-		});
+		document.removeEventListener(
+			'scroll',
+			_.handlers.documentScroll,
+			{
+				capture: true,
+			}
+		);
 	}
 
 	/**
@@ -985,7 +1001,10 @@ export class DropdownComponent extends HTMLElement {
 		// a submenu opener is not a choice
 		if (item.matches('dropdown-trigger')) return;
 
-		if (item.disabled || item.getAttribute('aria-disabled') === 'true') {
+		if (
+			item.disabled ||
+			item.getAttribute('aria-disabled') === 'true'
+		) {
 			event.preventDefault();
 			return;
 		}
@@ -1021,7 +1040,8 @@ export class DropdownComponent extends HTMLElement {
 		// checkable items stay put: the menu is the place the consumer
 		// keeps toggling things
 		const role = item.getAttribute('role');
-		if (role === 'menuitemcheckbox' || role === 'menuitemradio') return;
+		if (role === 'menuitemcheckbox' || role === 'menuitemradio')
+			return;
 
 		// a choice in a submenu closes the whole chain, not just its level
 		let root = _;
@@ -1060,12 +1080,23 @@ export class DropdownComponent extends HTMLElement {
 
 		// the same character repeated cycles first letters instead of
 		// looking for a literal run of it
-		if (query.length > 1 && !query.split('').some((c) => c !== query[0])) {
+		if (
+			query.length > 1 &&
+			!query.split('').some((c) => c !== query[0])
+		) {
 			query = query[0];
 		}
 
 		const count = items.length;
-		const start = currentIndex === -1 ? 0 : currentIndex + 1;
+		// a single character steps to the NEXT match, so repeating it
+		// cycles; a longer buffer re-searches from the item it already
+		// landed on, so "s" then "sa" refines instead of skipping past
+		const start =
+			query.length > 1
+				? Math.max(currentIndex, 0)
+				: currentIndex === -1
+					? 0
+					: currentIndex + 1;
 
 		for (let offset = 0; offset < count; offset++) {
 			const index = (start + offset) % count;
@@ -1197,13 +1228,29 @@ export class DropdownComponent extends HTMLElement {
 		if (key === 'Enter' || key === ' ') {
 			event.preventDefault();
 			event.stopPropagation();
-			if (_.#visible) _.hide();
-			else _.#open('keyboard');
+			if (_.#visible) {
+				_.hide();
+			} else {
+				_.#open('keyboard');
+				// the menu-button pattern lands on the first item; a
+				// disclosure leaves focus on the trigger
+				if (_.#isMenu()) _.#focusItem(0);
+			}
 			return;
 		}
 
 		// while shown, the document handler owns navigation
 		if (_.#visible) return;
+
+		// inside a menu, up and down belong to the parent menu's item
+		// list — a submenu opens on ArrowRight (or Enter/Space), never on
+		// a vertical step through its own opener
+		if (
+			(key === 'ArrowDown' || key === 'ArrowUp') &&
+			_.parentElement?.closest('dropdown-component[menu]')
+		) {
+			return;
+		}
 
 		if (
 			key === 'ArrowDown' ||
@@ -1299,7 +1346,8 @@ export class DropdownComponent extends HTMLElement {
 			}
 
 			default:
-				if (_.#isMenu()) _.#handleMenuKeydown(event, items, currentIndex);
+				if (_.#isMenu())
+					_.#handleMenuKeydown(event, items, currentIndex);
 		}
 	}
 
