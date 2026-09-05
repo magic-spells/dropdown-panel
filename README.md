@@ -6,7 +6,7 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 
 ## Features
 
-- 🪶 Dependency-free - 4.8 kB min + gzip (4.3 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
+- 🪶 Dependency-free - 4.9 kB min + gzip (4.4 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
 - 🎨 Minimal styling - the package sets positioning and open/closed state, and stops
 - 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`, with optional hover intent delays
 - 🔗 Nested submenus with `opens="right"`
@@ -287,7 +287,8 @@ menu.addEventListener('dropdown-panel:select', (event) => event.preventDefault()
 
 Uncancelled, a selection closes the **whole chain**: the outermost `dropdown-component[menu]`
 above the item is hidden, which cascades into every panel below it, and focus returns to that
-root trigger. A link is the exception — it keeps focus, because it is about to navigate.
+root trigger. A link is the exception — focus is left wherever the navigation puts it, rather
+than being pulled back to the trigger.
 
 Opening a submenu is not a selection, so its `<dropdown-trigger>` never fires `select`.
 
@@ -453,7 +454,7 @@ Under `prefers-reduced-motion: reduce` the arrow still flips - it is a state rea
 
 ## Styling
 
-The core stylesheet is 1,019 bytes minified. It sets `position`, `opacity`, `pointer-events`, `z-index` and an opacity transition, plus the hover bridge. Everything visual is yours.
+The core stylesheet is 1,211 bytes minified. It sets `position`, `opacity`, `pointer-events`, `z-index` and an opacity transition, plus the hover bridge. Everything visual is yours.
 
 ```css
 dropdown-panel {
@@ -519,6 +520,10 @@ The component measures the panel once, right after it opens, and sets a `flipped
 when the panel would run past the bottom of the viewport *and* there is room above the
 trigger. `flipped` is cleared on close, so the next open re-measures — scroll back up and it
 opens downward again. One measurement per open: no `ResizeObserver`, no scroll handler.
+
+Like `align`, `flip` applies to downward panels only. An `opens="right"` panel is anchored by
+`top: 0; left: 100%`, so a competing `bottom: 100%` or `right: 0` would constrain both edges
+and deform it — both attributes are ignored there.
 
 ### The hover bridge
 

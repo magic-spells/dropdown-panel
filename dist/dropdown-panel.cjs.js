@@ -382,6 +382,8 @@ class DropdownComponent extends HTMLElement {
 		// a right-click surface has no hover path: the press is the whole
 		// interaction
 		_.handlers.contextMenu = (event) => {
+			// a text field keeps its native menu — cut/copy/paste/spellcheck
+			if (event.target?.closest?.(TEXT_ENTRY_SELECTOR)) return;
 			event.preventDefault();
 			_.#clearLongPress();
 			_.showAt(event.clientX, event.clientY);
@@ -957,6 +959,9 @@ class DropdownComponent extends HTMLElement {
 		const panel = _.panel;
 
 		if (!panel?.hasAttribute('flip')) return;
+		// a sideways panel is anchored by `top: 0`, so a `bottom: 100%`
+		// would constrain both edges and collapse it
+		if (_.#opensRight()) return;
 
 		// measure un-flipped, so a reopen higher up returns to downward
 		panel.removeAttribute('flipped');
@@ -1021,9 +1026,19 @@ class DropdownComponent extends HTMLElement {
 
 		if (!_.#isMenu()) return;
 
-		const items = _.#focusableItems();
+		// disabled items are stamped too — inside role="menu" a role-less
+		// child is invalid, and a tabbable one would be a second tab stop
+		// — but they never rove and never carry the tab stop
+		const active = _.#focusableItems();
+		const items = Array.from(
+			_.panel.querySelectorAll(
+				MENU_ITEM_SELECTOR + ',button[disabled]'
+			)
+		).filter(
+			(element) => element.closest('dropdown-panel') === _.panel
+		);
 
-		items.forEach((element, index) => {
+		items.forEach((element) => {
 			if (element.matches('dropdown-trigger')) {
 				// <dropdown-trigger> assigns itself role="button"; inside a
 				// menu the meaningful role is menuitem
@@ -1039,9 +1054,10 @@ class DropdownComponent extends HTMLElement {
 				element.setAttribute('role', 'menuitem');
 			}
 
+			const index = active.indexOf(element);
 			element.setAttribute(
 				'tabindex',
-				index === activeIndex ? '0' : '-1'
+				index !== -1 && index === activeIndex ? '0' : '-1'
 			);
 		});
 	}
@@ -1111,12 +1127,13 @@ class DropdownComponent extends HTMLElement {
 			next = next.parentElement?.closest('dropdown-component[menu]');
 		}
 
-		root.hide();
+		// a link takes focus with it when it navigates, so the chain closes
+		// without restoring focus to the trigger
+		const isLink = item.matches('a[href]');
 
-		// a link takes focus with it when it navigates
-		if (!item.matches('a[href]')) {
-			root.trigger?.focus({ preventScroll: true });
-		}
+		root.hide({ restoreFocus: !isLink });
+
+		if (!isLink) root.trigger?.focus({ preventScroll: true });
 	}
 
 	/**

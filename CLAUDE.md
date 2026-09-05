@@ -10,12 +10,12 @@ The core stylesheet contains only the CSS required for functionality. This makes
 
 - Easy to integrate into any project
 - No opinionated styles to override
-- Lightweight - 1,154 bytes minified, 504 bytes gzipped
+- Lightweight - 1,211 bytes minified, 510 bytes gzipped
 - Works with Tailwind, Bootstrap, CSS-in-JS, or plain CSS
 
 Users add their own styling (colors, shadows, spacing, typography). Entrance animation is available but opt-in, in a second stylesheet.
 
-Shipping size, min + gzip: 4,346 bytes JS, 504 bytes core CSS, 952 bytes effects CSS.
+Shipping size, min + gzip: 4,400 bytes JS, 510 bytes core CSS, 952 bytes effects CSS.
 
 ## Architecture
 
@@ -239,6 +239,13 @@ touch long-press is 500 ms with a 10 px slop, and `hide()` clears the inline
 placement. It measures once, sets `flipped`, and `#applyState()`'s hidden branch clears it so
 the next open re-measures. **`align`** is pure CSS, physical (not logical) - `end` is the
 right edge in RTL too.
+
+**Both exclude `opens="right"`, on both axes and in both layers.** A sideways panel is
+anchored by `top: 0; left: 100%`; adding `bottom: 100%` or `right: 0` constrains the opposite
+edge as well, collapsing the panel to a sliver or stretching it across the viewport. So the
+CSS selectors are `dropdown-panel:not([opens='right'])[flipped]` / `[align='…']`, AND
+`#applyFlip()` refuses to set the attribute there. Belt and braces on purpose: the CSS guard
+covers a `flipped` a consumer writes by hand, the JS guard keeps the attribute honest.
 
 ### 4. Direct Child Selectors in CSS
 
