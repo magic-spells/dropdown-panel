@@ -282,6 +282,10 @@ class DropdownComponent extends HTMLElement {
 			// never swallow activation of a real control inside the trigger
 			if (_.#isInteractiveDescendant(event.target)) return;
 
+			// a click never waits, and never leaves a pending close to
+			// strand the panel shut under the cursor
+			_.#clearHoverTimer();
+
 			if (!_.#visible) {
 				_.#open('click');
 				return;
@@ -357,8 +361,9 @@ class DropdownComponent extends HTMLElement {
 			_.#reflect(false);
 			return;
 		}
-		if (!_.#visible) return;
+		// before the guard: a pending hover open must not survive a hide
 		_.#clearHoverTimer();
+		if (!_.#visible) return;
 		if (!_.#emit('before-hide', true)) {
 			_.#reflect(true);
 			return;
@@ -499,9 +504,10 @@ class DropdownComponent extends HTMLElement {
 			_.#reflect(true);
 			return;
 		}
-		if (_.#visible) return;
-		// click, keyboard and api act now, cancelling any pending hover timer
+		// click, keyboard and api act now, cancelling any pending hover
+		// timer — including a pending close on an already-open panel
 		_.#clearHoverTimer();
+		if (_.#visible) return;
 		if (!_.#emit('before-show', true)) {
 			_.#reflect(false);
 			return;

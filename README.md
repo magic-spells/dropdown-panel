@@ -6,7 +6,7 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 
 ## Features
 
-- 🪶 Dependency-free - 3.3 kB min + gzip (2.8 kB JS, 0.5 kB CSS)
+- 🪶 Dependency-free - 3.3 kB min + gzip (2.8 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
 - 🎨 Minimal styling - the package sets positioning and open/closed state, and stops
 - 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`, with optional hover intent delays
 - 🔗 Nested submenus with `opens="right"`
