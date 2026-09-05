@@ -6,9 +6,9 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 
 ## Features
 
-- 🪶 Dependency-free - 3.0 kB min + gzip (2.5 kB JS, 0.5 kB CSS)
+- 🪶 Dependency-free - 3.3 kB min + gzip (2.8 kB JS, 0.5 kB CSS)
 - 🎨 Minimal styling - the package sets positioning and open/closed state, and stops
-- 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`
+- 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`, with optional hover intent delays
 - 🔗 Nested submenus with `opens="right"`
 - 📐 Full-width mega menus with `wide`
 - ⌨️ Keyboard navigation - arrows, `Home`/`End`, and `Escape` one level at a time
@@ -141,6 +141,8 @@ dropdown-trigger.dropdown-item {
 | --------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `visible` | `<dropdown-component>`| absent   | Open state. Reflected and observed - add or remove it and the panel follows.                                             |
 | `trigger` | `<dropdown-component>`| `both`   | `hover`, `click` or `both`.                                                                                             |
+| `open-delay` | `<dropdown-component>`| `0`   | Milliseconds `pointerenter` waits before opening. Leaving first cancels it. Hover only.                              |
+| `close-delay` | `<dropdown-component>`| `0`  | Milliseconds `pointerleave` waits before closing a hover-opened panel. Re-entering cancels it.                       |
 | `wide`    | `<dropdown-panel>`    | absent   | Full-width mega menu. `width: 100%`, host goes `position: static`.                                                       |
 | `opens`   | `<dropdown-panel>`    | `down`   | `right` opens the panel beside the trigger instead of below it. For submenus.                                            |
 | `effect`  | `<dropdown-panel>`    | none     | `fade`, `slide`, `scale`, `blur` or `swing`. Requires the effects stylesheet; a no-op without it.                        |
@@ -173,6 +175,22 @@ dropdown-component[visible] > dropdown-trigger {
 
 Hover never fires for `pointerType: 'touch'`, so a tap on iOS toggles once instead of needing two.
 
+#### Hover intent delays
+
+`open-delay` and `close-delay`, in milliseconds, both default to `0` - the panel opens and closes the moment the pointer arrives and leaves.
+
+```html
+<dropdown-component trigger="hover" open-delay="150" close-delay="300">
+  <dropdown-trigger>Products</dropdown-trigger>
+  <dropdown-panel>…</dropdown-panel>
+</dropdown-component>
+```
+
+- **`open-delay`** - `pointerenter` starts a timer and the panel opens when it fires. Leaving before then cancels it, so a pointer sweeping across a nav bar does not flash every menu open.
+- **`close-delay`** - a hover-opened panel stays up for that long after `pointerleave`, and re-entering cancels the pending close. That is the forgiving version of the hover bridge: it covers a gap the bridge's geometry does not.
+
+Both apply to hover only. Click, keyboard and the API never wait - they act immediately and cancel any pending timer. A click-opened panel latches, so `close-delay` never applies to it. Non-numeric and negative values are read as `0`.
+
 A panel opened by **hover** closes when the pointer leaves. A panel opened by **click**, **keyboard** or the **API** latches: it stays until an outside pointerdown, `Escape`, or another dropdown opening. Clicking a hover-opened panel promotes it to click-open, so it latches rather than snapping shut under your cursor.
 
 Opening any dropdown closes every other open one that is not an ancestor or descendant of it.
@@ -191,6 +209,8 @@ menu.visible; // boolean, get and set - mirrors the `visible` attribute
 menu.visible = true; // identical to menu.setAttribute('visible', '')
 
 menu.triggerMode; // 'hover' | 'click' | 'both' - the `trigger` ATTRIBUTE
+menu.openDelay; // number, ms - the resolved `open-delay` attribute
+menu.closeDelay; // number, ms - the resolved `close-delay` attribute
 menu.trigger; // the <dropdown-trigger> ELEMENT
 menu.panel; // the <dropdown-panel> element
 ```

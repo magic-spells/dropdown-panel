@@ -34,6 +34,11 @@ export interface DropdownComponentEventMap {
  * **Attributes**
  * - `visible` — boolean, reflected. The source of truth for shown state.
  * - `trigger` — `hover` | `click` | `both` (default `both`).
+ * - `open-delay` — milliseconds `pointerenter` waits before opening (default
+ *   `0`). Hover only; leaving before it fires cancels the open.
+ * - `close-delay` — milliseconds `pointerleave` waits before closing a
+ *   hover-opened panel (default `0`). Re-entering cancels the close. Click-,
+ *   keyboard- and api-opened panels latch, so it never applies to them.
  * - `arrow` — `flip` | `static` | `none` (default `flip`). Behaviour of the
  *   `[data-dropdown-arrow]` element inside the trigger. Requires
  *   `@magic-spells/dropdown-panel/css/effects`.
@@ -60,6 +65,12 @@ export class DropdownComponent extends HTMLElement {
 
 	/** Resolved value of the `trigger` attribute. */
 	readonly triggerMode: DropdownTriggerMode;
+
+	/** Resolved value of the `open-delay` attribute, in milliseconds. */
+	readonly openDelay: number;
+
+	/** Resolved value of the `close-delay` attribute, in milliseconds. */
+	readonly closeDelay: number;
 
 	/** Shows the panel. Idempotent and safe on an incomplete element. */
 	show(): void;

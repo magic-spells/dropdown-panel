@@ -15,7 +15,7 @@ The core stylesheet contains only the CSS required for functionality. This makes
 
 Users add their own styling (colors, shadows, spacing, typography). Entrance animation is available but opt-in, in a second stylesheet.
 
-Shipping size, min + gzip: 2,527 bytes JS, 464 bytes core CSS, 412 bytes effects CSS.
+Shipping size, min + gzip: 2,798 bytes JS, 464 bytes core CSS, 412 bytes effects CSS.
 
 ## Architecture
 
@@ -275,6 +275,8 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 **Decision:** `trigger="hover|click|both"` on the host, default `both`.
 
 **Rationale:** A nav bar and a settings popover want different things. `hover` falls back to click where `(hover: hover)` does not match (`#clickEnabled()`), so a hover-only menu is never unopenable on a phone.
+
+**Hover intent:** `open-delay` and `close-delay` (milliseconds, both default `0`, both observed alongside `visible`) delay only the hover path. One `#hoverTimer` field holds at most one pending open or close; `#afterDelay()` runs the action synchronously when the delay is `0`, so the default is byte-for-byte the old behaviour. `pointerenter` cancels a pending close (the forgiving companion to the hover bridge) and `pointerleave` cancels a pending open. `#open()` and `hide()` clear the timer, so click, keyboard and API paths never wait; a latched panel ignores `close-delay` because it does not close on leave at all. `disconnectedCallback` clears it too. Non-numeric and negative values resolve to `0`.
 
 ## Component Communication
 
@@ -588,10 +590,9 @@ Potential features to add:
 
 1. **Alignment attribute**: `align="right"` for right-edge-aligned popovers
 2. **Offset attribute**: `<dropdown-panel offset="10px">` for custom spacing
-3. **Open/close delay**: a hover intent timeout
-4. **Collision detection**: flip a panel that would leave the viewport
-5. **Mobile drawer mode**: convert to a bottom sheet on small screens
-6. **RTL support**: `opens="right"` currently assumes LTR
+3. **Collision detection**: flip a panel that would leave the viewport
+4. **Mobile drawer mode**: convert to a bottom sheet on small screens
+5. **RTL support**: `opens="right"` currently assumes LTR
 
 ## Debugging Tips
 
@@ -629,6 +630,11 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
 3. The component is unstyled by default - you must add your own
 
 ## Version History
+
+- **v2.1.0** - Hover intent
+
+  - Added `open-delay` and `close-delay` on `<dropdown-component>`, in milliseconds, default `0`
+  - Added the `openDelay` / `closeDelay` read-only property mirrors
 
 - **v2.0.0** - Breaking: `visible` as state, trigger modes, effects, lifecycle events, real keyboard navigation
 
