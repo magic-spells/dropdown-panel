@@ -1189,7 +1189,7 @@
 				>
 				<!-- dropdown-panel.min.js plus dropdown-panel.min.css, each gzipped
 				     on its own the way a CDN serves them. The entrance effects are a
-				     second, opt-in stylesheet and add 0.4 kB when you want them. -->
+				     second, opt-in stylesheet and add 0.9 kB when you want them. -->
 				<div class="size-note">
 					<span class="size-value">3.0 kB</span>
 					<span class="size-label">min + gzip, js + css</span>
@@ -1346,7 +1346,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				<p class="demo-desc">
 					<code>both</code> is the default: hover on a fine pointer, click everywhere.
 					<code>hover</code> drops the click toggle only where <code>(hover: hover)</code> matches;
-					<code>click</code> drops the hover path entirely.
+					<code>click</code> drops the hover path entirely. <code>open-delay</code> and
+					<code>close-delay</code> add hover intent, in milliseconds — click, keys and the API
+					never wait.
 				</p>
 				<div class="stage stage-drop" id="modes-stage">
 					<nav class="menubar">
@@ -1386,6 +1388,18 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								<a href="#modes" class="menu-item">Keys either way</a>
 							</dropdown-panel>
 						</dropdown-component>
+						<dropdown-component trigger="hover" open-delay="150" close-delay="300">
+							<dropdown-trigger>
+								delayed
+								<span data-dropdown-arrow aria-hidden="true"></span>
+							</dropdown-trigger>
+							<dropdown-panel>
+								<div class="menu-heading">Hover intent</div>
+								<a href="#modes" class="menu-item">Opens after 150ms</a>
+								<a href="#modes" class="menu-item">Closes 300ms after leaving</a>
+								<a href="#modes" class="menu-item">Re-entering cancels both</a>
+							</dropdown-panel>
+						</dropdown-component>
 					</nav>
 					<p class="stage-note">
 						This device reports <code id="modes-pointer">measuring…</code>, so
@@ -1396,7 +1410,9 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				<pre
 					class="code-block">&lt;<span class="hl-tag">dropdown-component</span>&gt;                     <span class="hl-cm">&lt;!-- both, the default --&gt;</span>
 &lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"hover"</span>&gt;    <span class="hl-cm">&lt;!-- fine pointers only --&gt;</span>
-&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"click"</span>&gt;    <span class="hl-cm">&lt;!-- press to toggle --&gt;</span></pre>
+&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"click"</span>&gt;    <span class="hl-cm">&lt;!-- press to toggle --&gt;</span>
+
+&lt;<span class="hl-tag">dropdown-component</span> <span class="hl-attr">trigger</span>=<span class="hl-val">"hover"</span> <span class="hl-attr">open-delay</span>=<span class="hl-val">"150"</span> <span class="hl-attr">close-delay</span>=<span class="hl-val">"300"</span>&gt;</pre>
 			</section>
 
 			<!-- ---- Bridge ---- -->
@@ -2105,6 +2121,22 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 							On the host. <code>both</code> = hover on fine pointers plus click;
 							<code>hover</code> = hover only where <code>(hover: hover)</code> matches;
 							<code>click</code> = no hover path.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>open-delay</code></div>
+						<div><code>0</code></div>
+						<div>
+							On the host. Milliseconds <code>pointerenter</code> waits before opening. Leaving
+							first cancels it. Hover only.
+						</div>
+					</div>
+					<div class="ref-row">
+						<div><code>close-delay</code></div>
+						<div><code>0</code></div>
+						<div>
+							On the host. Milliseconds <code>pointerleave</code> waits before closing a
+							hover-opened panel. Re-entering cancels it.
 						</div>
 					</div>
 					<div class="ref-row">

@@ -97,7 +97,7 @@
 	 * @fires DropdownComponent#dropdown-panel:hide
 	 */
 	class DropdownComponent extends HTMLElement {
-		static observedAttributes = ['visible'];
+		static observedAttributes = ['visible', 'open-delay', 'close-delay'];
 
 		// every currently shown dropdown on the page — used to close siblings
 		static #shown = new Set();
@@ -110,6 +110,9 @@
 		#pointerDismissed = false;
 		#observer = null;
 		#validationTimer = null;
+		#openDelay = 0;
+		#closeDelay = 0;
+		#hoverTimer = null;
 
 		constructor() {
 			super();
@@ -131,6 +134,22 @@
 		set visible(value) {
 			if (value) this.show();
 			else this.hide();
+		}
+
+		/**
+		 * Resolved value of the `open-delay` attribute, in milliseconds.
+		 * @returns {number}
+		 */
+		get openDelay() {
+			return this.#openDelay;
+		}
+
+		/**
+		 * Resolved value of the `close-delay` attribute, in milliseconds.
+		 * @returns {number}
+		 */
+		get closeDelay() {
+			return this.#closeDelay;
 		}
 
 		/**
@@ -161,6 +180,7 @@
 
 			_.detachListeners();
 			_.#detachDocumentListeners();
+			_.#clearHoverTimer();
 			_.#clearDismissed();
 			DropdownComponent.#shown.delete(_);
 
@@ -186,6 +206,15 @@
 		 * @param {string | null} currentValue - value after the change
 		 */
 		attributeChangedCallback(name, previousValue, currentValue) {
+			if (name === 'open-delay' || name === 'close-delay') {
+				// non-numeric, negative and absent all mean "no delay"
+				const ms = Number(currentValue);
+				const delay = ms > 0 ? ms : 0;
+				if (name === 'open-delay') this.#openDelay = delay;
+				else this.#closeDelay = delay;
+				return;
+			}
+
 			if (name !== 'visible') return;
 			if (this.#reflecting) return;
 			if (previousValue === currentValue) return;
@@ -236,16 +265,21 @@
 				if (event.pointerType === 'touch') return;
 				if (_.triggerMode === 'click') return;
 				if (_.#hoverSuppressed) return;
-				_.#open('hover');
+				// also cancels a pending close, which is what lets the pointer
+				// cross a gap the hover bridge does not cover
+				_.#clearHoverTimer();
+				_.#afterDelay(_.#openDelay, () => _.#open('hover'));
 			};
 
 			_.handlers.pointerLeave = (event) => {
 				if (event.pointerType === 'touch') return;
 				_.#hoverSuppressed = false;
+				// cancels a pending open
+				_.#clearHoverTimer();
 				// click- and keyboard-opened panels stay put until they are
-				// dismissed deliberately
+				// dismissed deliberately — and so ignore close-delay
 				if (_.#openSource !== 'hover') return;
-				_.hide();
+				_.#afterDelay(_.#closeDelay, () => _.hide());
 			};
 
 			_.handlers.triggerClick = (event) => {
@@ -253,6 +287,10 @@
 				if (!_.#clickEnabled()) return;
 				// never swallow activation of a real control inside the trigger
 				if (_.#isInteractiveDescendant(event.target)) return;
+
+				// a click never waits, and never leaves a pending close to
+				// strand the panel shut under the cursor
+				_.#clearHoverTimer();
 
 				if (!_.#visible) {
 					_.#open('click');
@@ -329,6 +367,8 @@
 				_.#reflect(false);
 				return;
 			}
+			// before the guard: a pending hover open must not survive a hide
+			_.#clearHoverTimer();
 			if (!_.#visible) return;
 			if (!_.#emit('before-hide', true)) {
 				_.#reflect(true);
@@ -470,6 +510,9 @@
 				_.#reflect(true);
 				return;
 			}
+			// click, keyboard and api act now, cancelling any pending hover
+			// timer — including a pending close on an already-open panel
+			_.#clearHoverTimer();
 			if (_.#visible) return;
 			if (!_.#emit('before-show', true)) {
 				_.#reflect(false);
@@ -489,6 +532,34 @@
 			DropdownComponent.#shown.add(_);
 
 			_.#emit('show');
+		}
+
+		/**
+		 * Runs an action now when the delay is zero — today's synchronous
+		 * behaviour — or schedules it as the single pending hover timer.
+		 * @param {number} delay - milliseconds to wait
+		 * @param {Function} action - what to run
+		 * @private
+		 */
+		#afterDelay(delay, action) {
+			if (!delay) {
+				action();
+				return;
+			}
+
+			this.#hoverTimer = setTimeout(() => {
+				this.#hoverTimer = null;
+				action();
+			}, delay);
+		}
+
+		/**
+		 * Cancels a pending hover open or close.
+		 * @private
+		 */
+		#clearHoverTimer() {
+			clearTimeout(this.#hoverTimer);
+			this.#hoverTimer = null;
 		}
 
 		/**
