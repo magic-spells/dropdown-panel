@@ -6,7 +6,7 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 
 ## Features
 
-- 🪶 Dependency-free - 3.3 kB min + gzip (2.8 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
+- 🪶 Dependency-free - 4.8 kB min + gzip (4.3 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
 - 🎨 Minimal styling - the package sets positioning and open/closed state, and stops
 - 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`, with optional hover intent delays
 - 🔗 Nested submenus with `opens="right"`
@@ -14,7 +14,9 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 - ⌨️ Keyboard navigation - arrows, `Home`/`End`, and `Escape` one level at a time
 - ✨ Five optional entrance effects and a drawn trigger arrow, in a second opt-in stylesheet
 - 🔔 Four cancelable lifecycle events
-- ♿ Disclosure semantics - no ARIA menu roles
+- 🍔 Opt-in `menu` mode - full APG menu button: roles, roving `tabindex`, typeahead, `select`
+- 🖱️ Opt-in `trigger="contextmenu"` - right-click and long-press menus placed at the pointer
+- ♿ Disclosure semantics by default - no ARIA menu roles unless you ask for them
 - 🧩 TypeScript definitions included
 
 ## Installation
@@ -140,11 +142,14 @@ dropdown-trigger.dropdown-item {
 | Attribute | Element               | Default  | Description                                                                                                             |
 | --------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `visible` | `<dropdown-component>`| absent   | Open state. Reflected and observed - add or remove it and the panel follows.                                             |
-| `trigger` | `<dropdown-component>`| `both`   | `hover`, `click` or `both`.                                                                                             |
+| `menu`    | `<dropdown-component>`| absent   | Application-menu semantics: menu roles, roving `tabindex`, typeahead, `Tab` to close, `select` events. See below.        |
+| `trigger` | `<dropdown-component>`| `both`   | `hover`, `click`, `both` or `contextmenu`.                                                                              |
 | `open-delay` | `<dropdown-component>`| `0`   | Milliseconds `pointerenter` waits before opening. Leaving first cancels it. Hover only.                              |
 | `close-delay` | `<dropdown-component>`| `0`  | Milliseconds `pointerleave` waits before closing a hover-opened panel. Re-entering cancels it.                       |
 | `wide`    | `<dropdown-panel>`    | absent   | Full-width mega menu. `width: 100%`, host goes `position: static`.                                                       |
 | `opens`   | `<dropdown-panel>`    | `down`   | `right` opens the panel beside the trigger instead of below it. For submenus.                                            |
+| `align`   | `<dropdown-panel>`    | `start`  | `start` or `end`. Which edge of a downward panel lines up with the trigger. Pure CSS; `opens="right"` ignores it.        |
+| `flip`    | `<dropdown-panel>`    | absent   | Opens the panel upward when it would run past the bottom of the viewport. Measured once per open.                        |
 | `effect`  | `<dropdown-panel>`    | none     | `fade`, `slide`, `scale`, `blur` or `swing`. Requires the effects stylesheet; a no-op without it.                        |
 | `arrow`   | `<dropdown-component>`| `flip`   | `flip` mirrors the trigger arrow on open, `static` leaves it alone, `none` hides it. Requires the effects stylesheet.    |
 | `arrow-shape` | `<dropdown-component>`| `chevron` | `chevron` or `triangle`. Drawn only when the arrow hook is empty. Requires the effects stylesheet.                   |
@@ -167,11 +172,13 @@ dropdown-component[visible] > dropdown-trigger {
 <dropdown-component>                  <!-- both, the default -->
 <dropdown-component trigger="hover">  <!-- fine pointers only -->
 <dropdown-component trigger="click">  <!-- press to toggle -->
+<dropdown-component trigger="contextmenu"> <!-- right-click the component -->
 ```
 
 - **`both`** - hover opens it where the pointer can hover, and click always toggles it.
 - **`hover`** - hover only. Where `(hover: hover)` does not match, click takes over, so the menu is never unopenable on a phone.
 - **`click`** - no hover path at all.
+- **`contextmenu`** - no hover and no trigger click. A right-click (or a 500 ms touch long-press) anywhere in the component opens the panel at the pointer. See [Context menus](#context-menus).
 
 Hover never fires for `pointerType: 'touch'`, so a tap on iOS toggles once instead of needing two.
 
@@ -195,6 +202,137 @@ A panel opened by **hover** closes when the pointer leaves. A panel opened by **
 
 Opening any dropdown closes every other open one that is not an ancestor or descendant of it.
 
+## Application menus
+
+Everything above is a **disclosure**: a button that shows and hides a region. That is the
+right pattern for site navigation, and it is what you get by default.
+
+An application menu — File/Edit in a desktop app, a right-click menu, an actions menu on a
+row — is a different pattern with a different keyboard contract. Add `menu` to the host and
+the same markup becomes one:
+
+```html
+<dropdown-component menu>
+  <dropdown-trigger>Edit</dropdown-trigger>
+  <dropdown-panel>
+    <div class="group-label">Document</div>
+    <button type="button" data-value="save">Save</button>
+    <button type="button" data-value="save-as">Save as…</button>
+    <div role="separator"></div>
+    <a href="/history" data-value="history">Version history</a>
+    <span aria-disabled="true">Publish (offline)</span>
+
+    <dropdown-component menu>
+      <dropdown-trigger>Export</dropdown-trigger>
+      <dropdown-panel opens="right">
+        <button type="button" data-value="pdf">PDF</button>
+        <button type="button" data-value="md">Markdown</button>
+      </dropdown-panel>
+    </dropdown-component>
+  </dropdown-panel>
+</dropdown-component>
+```
+
+**What changes.** `aria-haspopup="menu"` on the trigger, `role="menu"` on the panel (a role
+you wrote yourself still wins), and `role="menuitem"` on every item that has no role of its
+own. The items carry a **roving `tabindex`**: exactly one is `0`, and it follows focus, so the
+whole menu is a single tab stop.
+
+**What counts as an item.** `button:not([disabled])`, `a[href]`, anything with an authored
+`menuitem` / `menuitemcheckbox` / `menuitemradio` role, and a nested submenu's
+`<dropdown-trigger>`. Items are filtered to this panel, so a submenu's items belong to the
+submenu. Anything with `disabled` or `aria-disabled="true"` is dropped: unreachable by arrow
+and by typeahead, and clicking it fires nothing. Separators, group labels and plain text
+match none of that, so they are skipped without any work on your part.
+
+### Menu keyboard
+
+| Key             | What it does                                                              |
+| --------------- | ------------------------------------------------------------------------- |
+| `Enter` `Space` | On the trigger: open and focus the first item. On an item: activate it.   |
+| `↓` `↑`         | On a closed trigger: open on the first / last item. Inside: step, wrapping. |
+| `Home` `End`    | First / last item.                                                        |
+| a–z, 0–9        | Typeahead. Jumps to the next item whose text starts with what you typed.   |
+| `→`             | On a submenu trigger: open it and focus its first item.                   |
+| `←`             | Inside an `opens="right"` submenu: close it, focus its trigger.           |
+| `Escape`        | Close this level only, and focus its trigger.                             |
+| `Tab`           | **Close the menu** and move to the next tab stop.                         |
+
+`Tab` is the one place the menu pattern parts company with disclosure — a disclosure panel
+stays open so you can tab through it, a menu does not. That divergence is gated behind
+`menu`, so nothing about a plain dropdown changes.
+
+**Typeahead** buffers for 500 ms. `s` then `a` inside 500 ms jumps to "Save as…"; the same
+character repeated (`s`, `s`, `s`) cycles the items starting with it. The buffer is dropped
+on `Escape` and on close, and typing inside an `<input>` or `<textarea>` in the panel is left
+alone.
+
+**`Space` on a link.** A native `<a href>` does nothing on `Space`. In a menu it activates,
+which is what the pattern promises.
+
+### The `select` event
+
+Every activation in a menu — click, `Enter` or `Space` — fires one
+`dropdown-panel:select` on the component. It bubbles, is composed, and is cancelable.
+
+```javascript
+menu.addEventListener('dropdown-panel:select', (event) => {
+  event.detail.item; // the activated element
+  event.detail.value; // data-value, then the `value` attribute, then href, then null
+});
+
+// keep the menu open — a checkbox menu, a multi-select, an async confirm
+menu.addEventListener('dropdown-panel:select', (event) => event.preventDefault());
+```
+
+Uncancelled, a selection closes the **whole chain**: the outermost `dropdown-component[menu]`
+above the item is hidden, which cascades into every panel below it, and focus returns to that
+root trigger. A link is the exception — it keeps focus, because it is about to navigate.
+
+Opening a submenu is not a selection, so its `<dropdown-trigger>` never fires `select`.
+
+**Checkbox and radio items.** An item with `role="menuitemcheckbox"` or `role="menuitemradio"`
+fires `select` like any other, but does **not** close the menu. That is the whole policy: the
+component writes no `aria-checked`, enforces no radio-group exclusivity, and keeps no value
+set. Checked state is yours, which is what a controlled component wants anyway.
+
+## Context menus
+
+`trigger="contextmenu"` turns the component itself into a right-click surface. There is no
+`<dropdown-trigger>` — the slotted content is the target area, and the panel is placed at the
+pointer:
+
+```html
+<dropdown-component menu trigger="contextmenu">
+  <div class="canvas">Right-click anywhere in here</div>
+  <dropdown-panel>
+    <button type="button" data-value="cut">Cut</button>
+    <button type="button" data-value="copy">Copy</button>
+  </dropdown-panel>
+</dropdown-component>
+```
+
+- The panel goes `position: fixed` at the pointer, **flips** left and up when it would
+  overflow, then **clamps** to an 8 px viewport margin. A panel taller than the viewport pins
+  to that margin instead of hanging off the top. Those inline styles are cleared on close.
+- **Touch:** a 500 ms long-press opens it at the touch point. Moving more than 10 px, lifting,
+  or scrolling cancels the press.
+- **Scrolling while it is open dismisses it** — a panel pinned to a point drifts away from
+  what it was pointing at.
+- A second right-click elsewhere **relocates** the open panel instead of opening a second one.
+- Focus returns to whatever was focused before it opened, not to a trigger.
+- `menu` and `trigger="contextmenu"` are independent. Together you get a menu at the pointer,
+  which is usually what you want.
+
+**`showAt(x, y)` is public**, so any element can be the surface:
+
+```javascript
+canvas.addEventListener('contextmenu', (event) => {
+  event.preventDefault();
+  menu.showAt(event.clientX, event.clientY);
+});
+```
+
 ## API
 
 ```javascript
@@ -205,10 +343,13 @@ menu.hide(); // returns focus to the trigger if focus was inside
 menu.hide({ restoreFocus: false });
 menu.toggle();
 
+menu.showAt(event.clientX, event.clientY); // open pinned to a point
+menu.focusItem(0); // focus a panel item by index; negative and out-of-range wrap
+
 menu.visible; // boolean, get and set - mirrors the `visible` attribute
 menu.visible = true; // identical to menu.setAttribute('visible', '')
 
-menu.triggerMode; // 'hover' | 'click' | 'both' - the `trigger` ATTRIBUTE
+menu.triggerMode; // 'hover' | 'click' | 'both' | 'contextmenu' - the `trigger` ATTRIBUTE
 menu.openDelay; // number, ms - the resolved `open-delay` attribute
 menu.closeDelay; // number, ms - the resolved `close-delay` attribute
 menu.trigger; // the <dropdown-trigger> ELEMENT
@@ -229,6 +370,8 @@ Four events fire on `<dropdown-component>` and bubble, each carrying `detail: { 
 | `dropdown-panel:show`        | No         | After the state turns open.               |
 | `dropdown-panel:before-hide` | Yes        | Before closing. `preventDefault()` aborts. |
 | `dropdown-panel:hide`        | No         | After the state turns closed.             |
+
+A fifth event, `dropdown-panel:select`, fires only in [`menu` mode](#application-menus).
 
 ```javascript
 for (const name of ['before-show', 'show', 'before-hide', 'hide']) {
@@ -352,14 +495,30 @@ dropdown-panel[aria-hidden='false'] {
 
 **Use transition longhands.** The package declares `transition-property`, `transition-duration` and `transition-timing-function` separately on purpose. Writing the `transition:` shorthand resets every longhand you did not name, including the package's own - so either restate all of them, or override one longhand at a time.
 
-**Right-aligned popovers:**
+**Right-aligned popovers** are an attribute, not a rule:
 
-```css
-dropdown-panel {
-  left: auto;
-  right: 0;
-}
+```html
+<dropdown-panel align="end">…</dropdown-panel>
 ```
+
+`align="start"` (the default) puts the panel's left edge on the trigger's left edge;
+`align="end"` puts its right edge on the trigger's right. Both are pure CSS, both apply to
+downward panels only — `opens="right"` positions sideways and ignores them.
+
+> ⚠️ `align` is **physical**, not logical: `end` is the right edge in every writing mode. In a
+> `dir="rtl"` container that reads as the *start* edge. Use `align="start"` there, or set
+> `left`/`right` yourself.
+
+**Panels near the fold** can flip upward:
+
+```html
+<dropdown-panel flip>…</dropdown-panel>
+```
+
+The component measures the panel once, right after it opens, and sets a `flipped` attribute
+when the panel would run past the bottom of the viewport *and* there is room above the
+trigger. `flipped` is cleared on close, so the next open re-measures — scroll back up and it
+opens downward again. One measurement per open: no `ResizeObserver`, no scroll handler.
 
 ### The hover bridge
 
@@ -422,6 +581,10 @@ Only the innermost open dropdown answers a key, so a nested menu never takes its
 
 Focus leaving a panel does not close it - you need to be able to tab through the links inside.
 
+In [`menu` mode](#application-menus) the contract is different: the panel is one tab stop with
+a roving `tabindex`, typeahead is live, `Enter`/`Space` on the trigger lands on the first item,
+and `Tab` closes the menu. See [Menu keyboard](#menu-keyboard).
+
 ## Accessibility
 
 - `role="button"`, `tabindex="0"`, `aria-haspopup="true"`, `aria-expanded` and `aria-controls` on the trigger.
@@ -429,7 +592,17 @@ Focus leaving a panel does not close it - you need to be able to tab through the
 - `aria-hidden` and `inert` on the panel track the open state. `inert` keeps a closed panel out of the tab order and out of find-in-page.
 - Closing returns focus to the trigger, before `inert` lands - otherwise `inert` would blur the focused item to `<body>` and lose the user's place.
 
-This component intentionally does not use ARIA `menu`, `menubar` or `menuitem` roles, following [best practices for site navigation](https://adrianroselli.com/2017/10/dont-use-aria-menu-roles-for-site-nav.html). Those roles are for application menus (File/Edit in desktop software) and promise a keyboard model site navigation rarely delivers. Write your items as real links or buttons and the rest follows.
+**No ARIA menu roles, by default.** Out of the box this component uses none of `menu`,
+`menubar` or `menuitem`, following [best practices for site navigation](https://adrianroselli.com/2017/10/dont-use-aria-menu-roles-for-site-nav.html).
+Those roles are for application menus (File/Edit in desktop software) and promise a keyboard
+model site navigation rarely delivers. Write your items as real links or buttons and the rest
+follows.
+
+**`menu` is the deliberate opt-in** for the case those roles were actually made for — an
+application menu or a context menu — and it comes with the keyboard model the roles promise:
+roving `tabindex`, arrow navigation with wrap, `Home`/`End`, typeahead, `Enter`/`Space`
+activation, submenus on `→`/`←`, and `Tab` to close. If your dropdown is site navigation, the
+same article is the reason to leave `menu` off.
 
 ## Browser Support
 
