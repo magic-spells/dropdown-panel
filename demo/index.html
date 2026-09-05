@@ -689,6 +689,39 @@
 				background: var(--menu-border);
 			}
 
+			/* A menu item the component skips: unreachable by arrow, by
+			   typeahead and by click, and it says so visually. */
+			.menu-item[aria-disabled='true'] {
+				color: var(--text-dim);
+				opacity: 0.55;
+				cursor: default;
+			}
+
+			.menu-item[aria-disabled='true']:hover,
+			.menu-item[aria-disabled='true']:focus-visible {
+				color: var(--text-dim);
+				background: none;
+			}
+
+			/* The right-click surface. The component itself is the target
+			   area, so it is sized here rather than wrapped. */
+			dropdown-component.context-host {
+				display: block;
+				width: 100%;
+			}
+
+			.context-surface {
+				display: grid;
+				place-items: center;
+				min-height: 9rem;
+				border: 1px dashed var(--menu-border);
+				border-radius: 10px;
+				color: var(--text-dim);
+				font-size: 0.9rem;
+				text-align: center;
+				user-select: none;
+			}
+
 			.menu-heading {
 				padding: 0.2rem 0.85rem 0.55rem;
 				color: var(--brass-text);
@@ -1860,6 +1893,161 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 <span class="hl-tag">if</span> (host.querySelector(<span class="hl-val">'dropdown-component[visible]'</span>)) <span class="hl-tag">return</span>;</pre>
 			</section>
 
+			<!-- ---- Menu mode ---- -->
+			<section class="demo-section" id="menu">
+				<div class="spec">
+					<span class="spec-key">Menu mode</span>
+				</div>
+				<h2>The application menu, opted into.</h2>
+				<p class="demo-desc">
+					Site navigation stays a disclosure. Add <code>menu</code> and the same markup becomes an
+					APG menu button: <code>role="menu"</code>, roving <code>tabindex</code>, typeahead,
+					<kbd>Tab</kbd> closes, and every activation fires
+					<code>dropdown-panel:select</code> and closes the whole chain.
+				</p>
+				<div class="stage stage-drop-lg stage-row" id="menu-stage">
+					<dropdown-component menu>
+						<dropdown-trigger>
+							Edit
+							<span data-dropdown-arrow aria-hidden="true"></span>
+						</dropdown-trigger>
+						<dropdown-panel>
+							<div class="menu-heading" role="presentation">Document</div>
+							<button type="button" class="menu-item" data-value="save">Save</button>
+							<button type="button" class="menu-item" data-value="save-as">Save as…</button>
+							<button type="button" class="menu-item" data-value="send">Send a copy</button>
+							<div class="menu-divider" role="separator"></div>
+							<button type="button" class="menu-item" data-value="undo">Undo</button>
+							<a class="menu-item" href="#menu" data-value="redo">Redo</a>
+							<div class="menu-item" role="menuitem" tabindex="-1" data-value="paste">
+								Paste as plain text
+							</div>
+							<span class="menu-item" aria-disabled="true">Publish (offline)</span>
+							<div class="menu-divider" role="separator"></div>
+							<dropdown-component menu>
+								<dropdown-trigger class="menu-item">
+									Export
+									<span data-dropdown-arrow aria-hidden="true"></span>
+								</dropdown-trigger>
+								<dropdown-panel opens="right">
+									<button type="button" class="menu-item" data-value="pdf">PDF</button>
+									<button type="button" class="menu-item" data-value="markdown">Markdown</button>
+									<button type="button" class="menu-item" data-value="html">HTML</button>
+								</dropdown-panel>
+							</dropdown-component>
+						</dropdown-panel>
+					</dropdown-component>
+					<output class="readout readout-cols" id="menu-readout"
+						>Open it and pick something.</output
+					>
+					<ul class="key-list">
+						<li><kbd>↓</kbd> <kbd>↑</kbd> item, wrapping</li>
+						<li><kbd>Home</kbd> <kbd>End</kbd> first, last</li>
+						<li><kbd>s</kbd> <kbd>s</kbd> cycle the s items</li>
+						<li><kbd>s</kbd><kbd>a</kbd> jump to “Save as…”</li>
+						<li><kbd>→</kbd> open the submenu</li>
+						<li><kbd>←</kbd> <kbd>Esc</kbd> back one level</li>
+						<li><kbd>Tab</kbd> close and move on</li>
+					</ul>
+				</div>
+				<pre class="code-block"><span class="hl-tag">&lt;dropdown-component</span> <span class="hl-attr">menu</span><span class="hl-tag">&gt;</span>
+  <span class="hl-tag">&lt;dropdown-trigger&gt;</span>Edit<span class="hl-tag">&lt;/dropdown-trigger&gt;</span>
+  <span class="hl-tag">&lt;dropdown-panel&gt;</span>                <span class="hl-cm">// role="menu"</span>
+    <span class="hl-tag">&lt;button</span> <span class="hl-attr">data-value</span>=<span class="hl-val">"save"</span><span class="hl-tag">&gt;</span>Save<span class="hl-tag">&lt;/button&gt;</span>
+    <span class="hl-tag">&lt;div</span> <span class="hl-attr">role</span>=<span class="hl-val">"separator"</span><span class="hl-tag">&gt;&lt;/div&gt;</span>
+    <span class="hl-tag">&lt;span</span> <span class="hl-attr">aria-disabled</span>=<span class="hl-val">"true"</span><span class="hl-tag">&gt;</span>Publish<span class="hl-tag">&lt;/span&gt;</span>
+  <span class="hl-tag">&lt;/dropdown-panel&gt;</span>
+<span class="hl-tag">&lt;/dropdown-component&gt;</span>
+
+menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =&gt; {
+  e.detail.item;   <span class="hl-cm">// the activated element</span>
+  e.detail.value;  <span class="hl-cm">// data-value &gt; value &gt; href &gt; null</span>
+  <span class="hl-cm">// e.preventDefault() keeps the whole chain open</span>
+});</pre>
+			</section>
+
+			<!-- ---- Context menu ---- -->
+			<section class="demo-section" id="contextmenu">
+				<div class="spec">
+					<span class="spec-key">Context menu</span>
+				</div>
+				<h2>Right-click, anywhere in here.</h2>
+				<p class="demo-desc">
+					<code>trigger="contextmenu"</code> needs no <code>&lt;dropdown-trigger&gt;</code> at all —
+					the component <em>is</em> the surface. The panel goes <code>position: fixed</code> at the
+					pointer, flips and clamps to an 8 px margin, dismisses on scroll, and returns focus to
+					wherever it came from. On touch, a 500 ms press does the same.
+				</p>
+				<div class="stage stage-drop-lg" id="context-stage">
+					<dropdown-component menu trigger="contextmenu" class="context-host">
+						<div class="context-surface">
+							Right-click (or long-press) anywhere inside this box.<br />
+							Try a corner.
+						</div>
+						<dropdown-panel>
+							<button type="button" class="menu-item" data-value="cut">Cut</button>
+							<button type="button" class="menu-item" data-value="copy">Copy</button>
+							<button type="button" class="menu-item" data-value="paste">Paste</button>
+							<div class="menu-divider" role="separator"></div>
+							<button type="button" class="menu-item" data-value="inspect">Inspect</button>
+						</dropdown-panel>
+					</dropdown-component>
+					<output class="readout" id="context-readout">No menu yet.</output>
+					<p class="stage-note">
+						<code>showAt(x, y)</code> is public, so any element can be the surface — bind your own
+						<code>contextmenu</code> listener and call it.
+					</p>
+				</div>
+			</section>
+
+			<!-- ---- Align and flip ---- -->
+			<section class="demo-section" id="align">
+				<div class="spec">
+					<span class="spec-key">align · flip</span>
+				</div>
+				<h2>Which way it opens.</h2>
+				<p class="demo-desc">
+					<code>align="start|end"</code> on the panel is pure CSS — the right-hand menu edges to the
+					right of its trigger. <code>flip</code> is opt-in JavaScript, measured once per open: near
+					the bottom of the viewport the panel opens upward instead, and reverts as soon as there is
+					room again. Scroll this section to the fold and reopen it.
+				</p>
+				<div class="stage stage-drop stage-row" id="align-stage">
+					<dropdown-component>
+						<dropdown-trigger>
+							align="start"
+							<span data-dropdown-arrow aria-hidden="true"></span>
+						</dropdown-trigger>
+						<dropdown-panel align="start">
+							<a href="#align" class="menu-item">Left edge to left edge</a>
+							<a href="#align" class="menu-item">The default</a>
+						</dropdown-panel>
+					</dropdown-component>
+					<dropdown-component>
+						<dropdown-trigger>
+							align="end"
+							<span data-dropdown-arrow aria-hidden="true"></span>
+						</dropdown-trigger>
+						<dropdown-panel align="end">
+							<a href="#align" class="menu-item">Right edge to right edge</a>
+							<a href="#align" class="menu-item">For a menu near the margin</a>
+						</dropdown-panel>
+					</dropdown-component>
+					<dropdown-component>
+						<dropdown-trigger>
+							flip
+							<span data-dropdown-arrow aria-hidden="true"></span>
+						</dropdown-trigger>
+						<dropdown-panel flip id="flip-panel">
+							<a href="#align" class="menu-item">Opens down when there is room</a>
+							<a href="#align" class="menu-item">Upward when there is not</a>
+							<a href="#align" class="menu-item">Measured once, per open</a>
+						</dropdown-panel>
+					</dropdown-component>
+					<output class="readout" id="flip-readout">flip panel: closed</output>
+				</div>
+			</section>
+
 			<!-- ---- Theme ---- -->
 			<section class="demo-section" id="theme">
 				<div class="spec">
@@ -2582,6 +2770,62 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 			$('#lifecycle-clear').addEventListener('click', () => {
 				eventLog.textContent = EMPTY_LOG;
 			});
+
+			// ---- Menu mode: the select event, and the roving tabindex ----
+			const menuStage = $('#menu-stage');
+			const menuHost = $('dropdown-component[menu]', menuStage);
+			const menuReadout = $('#menu-readout');
+
+			// One listener on the outer menu hears the submenu too — select
+			// bubbles like the other four events.
+			menuHost.addEventListener('dropdown-panel:select', (event) => {
+				const { item, value } = event.detail;
+				menuReadout.textContent = [
+					`item     <${item.tagName.toLowerCase()}> “${item.textContent.trim()}”`,
+					`value    ${value ?? 'null'}`,
+					`role     ${item.getAttribute('role') ?? '—'}`,
+				].join('\n');
+			});
+
+			// A link in a menu would navigate away from the demo; the readout is
+			// the point here, not the href.
+			menuHost.addEventListener('click', (event) => {
+				if (event.target.closest('a[href]')) event.preventDefault();
+			});
+
+			// ---- Context menu ----
+			const contextHost = $('#context-stage dropdown-component');
+			const contextReadout = $('#context-readout');
+
+			contextHost.addEventListener('dropdown-panel:show', () => {
+				const panel = contextHost.panel;
+				contextReadout.textContent =
+					`position ${panel.style.position}\n` +
+					`left     ${panel.style.left}\n` +
+					`top      ${panel.style.top}`;
+			});
+
+			contextHost.addEventListener('dropdown-panel:select', (event) => {
+				contextReadout.textContent = `chose “${event.detail.item.textContent.trim()}”`;
+			});
+
+			contextHost.addEventListener('dropdown-panel:hide', () => {
+				requestAnimationFrame(() => {
+					if (contextReadout.textContent.startsWith('chose')) return;
+					contextReadout.textContent = 'closed · inline styles cleared';
+				});
+			});
+
+			// ---- flip: say which way it went ----
+			const flipPanel = $('#flip-panel');
+			const flipReadout = $('#flip-readout');
+
+			new MutationObserver(() => {
+				const open = flipPanel.getAttribute('aria-hidden') === 'false';
+				flipReadout.textContent = open
+					? `flip panel: opens ${flipPanel.hasAttribute('flipped') ? 'upward' : 'downward'}`
+					: 'flip panel: closed';
+			}).observe(flipPanel, { attributes: true });
 		</script>
 	</body>
 </html>
