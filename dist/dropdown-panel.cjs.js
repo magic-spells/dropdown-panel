@@ -73,6 +73,29 @@ const FOCUSABLE_SELECTOR = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
+// what counts as an item in `menu` mode. Separators, group labels and
+// plain text never match the selector, so they are skipped for free.
+const MENU_ITEM_SELECTOR = [
+	'button:not([disabled])',
+	'a[href]',
+	'[role="menuitem"]',
+	'[role="menuitemcheckbox"]',
+	'[role="menuitemradio"]',
+	'dropdown-trigger', // a nested submenu's trigger is a menuitem
+].join(',');
+
+// how long a typeahead buffer survives without another keystroke
+const TYPEAHEAD_TIMEOUT = 500;
+
+// how long a touch has to rest before it counts as a long press
+const LONG_PRESS_DELAY = 500;
+
+// how far a touch may travel before it stops being a long press
+const LONG_PRESS_SLOP = 10;
+
+// gap kept between a pointer-placed panel and the viewport edge
+const VIEWPORT_MARGIN = 8;
+
 // arrow keys belong to these elements, not to the menu
 const TEXT_ENTRY_SELECTOR =
 	'input, textarea, select, [contenteditable=""], [contenteditable="true"]';
@@ -93,7 +116,11 @@ const TEXT_ENTRY_SELECTOR =
  * @fires DropdownComponent#dropdown-panel:hide
  */
 class DropdownComponent extends HTMLElement {
-	static observedAttributes = ['visible'];
+	static observedAttributes = [
+		'visible',
+		'open-delay',
+		'close-delay',
+	];
 
 	// every currently shown dropdown on the page — used to close siblings
 	static #shown = new Set();
@@ -106,6 +133,15 @@ class DropdownComponent extends HTMLElement {
 	#pointerDismissed = false;
 	#observer = null;
 	#validationTimer = null;
+	#openDelay = 0;
+	#closeDelay = 0;
+	#hoverTimer = null;
+	#typeBuffer = '';
+	#typeTimer = null;
+	#pointerPos = null;
+	#returnTarget = null;
+	#pressTimer = null;
+	#pressOrigin = null;
 
 	constructor() {
 		super();
@@ -130,12 +166,41 @@ class DropdownComponent extends HTMLElement {
 	}
 
 	/**
+	 * Resolved value of the `open-delay` attribute, in milliseconds.
+	 * @returns {number}
+	 */
+	get openDelay() {
+		return this.#openDelay;
+	}
+
+	/**
+	 * Resolved value of the `close-delay` attribute, in milliseconds.
+	 * @returns {number}
+	 */
+	get closeDelay() {
+		return this.#closeDelay;
+	}
+
+	/**
 	 * Resolved value of the `trigger` attribute.
-	 * @returns {'hover' | 'click' | 'both'}
+	 * @returns {'hover' | 'click' | 'both' | 'contextmenu'}
 	 */
 	get triggerMode() {
 		const mode = this.getAttribute('trigger');
-		return mode === 'hover' || mode === 'click' ? mode : 'both';
+		return mode === 'hover' ||
+			mode === 'click' ||
+			mode === 'contextmenu'
+			? mode
+			: 'both';
+	}
+
+	/**
+	 * Whether the component is in application-menu mode.
+	 * @returns {boolean}
+	 * @private
+	 */
+	#isMenu() {
+		return this.hasAttribute('menu');
 	}
 
 	/**
@@ -157,6 +222,9 @@ class DropdownComponent extends HTMLElement {
 
 		_.detachListeners();
 		_.#detachDocumentListeners();
+		_.#clearHoverTimer();
+		_.#clearLongPress();
+		_.#clearTypeahead();
 		_.#clearDismissed();
 		DropdownComponent.#shown.delete(_);
 
@@ -182,6 +250,15 @@ class DropdownComponent extends HTMLElement {
 	 * @param {string | null} currentValue - value after the change
 	 */
 	attributeChangedCallback(name, previousValue, currentValue) {
+		if (name === 'open-delay' || name === 'close-delay') {
+			// non-numeric, negative and absent all mean "no delay"
+			const ms = Number(currentValue);
+			const delay = ms > 0 ? ms : 0;
+			if (name === 'open-delay') this.#openDelay = delay;
+			else this.#closeDelay = delay;
+			return;
+		}
+
 		if (name !== 'visible') return;
 		if (this.#reflecting) return;
 		if (previousValue === currentValue) return;
@@ -200,7 +277,12 @@ class DropdownComponent extends HTMLElement {
 		_.trigger = _.querySelector(':scope > dropdown-trigger');
 		_.panel = _.querySelector(':scope > dropdown-panel');
 
-		return Boolean(_.trigger && _.panel);
+		// a context menu is opened by a press anywhere in the component,
+		// so it needs no <dropdown-trigger> at all
+		return (
+			Boolean(_.panel) &&
+			(Boolean(_.trigger) || _.triggerMode === 'contextmenu')
+		);
 	}
 
 	/**
@@ -208,17 +290,23 @@ class DropdownComponent extends HTMLElement {
 	 */
 	setupAria() {
 		const _ = this;
+		const menu = _.#isMenu();
 		const panelId = ensureId(_.panel, 'dropdown-panel');
+
+		// role="group" so the panel can carry an accessible name — a
+		// role-less custom element cannot. Deliberately not a menu role
+		// unless the consumer opted into `menu`.
+		if (!_.panel.hasAttribute('role')) {
+			_.panel.setAttribute('role', menu ? 'menu' : 'group');
+		}
+
+		// a context menu may have no trigger to label the panel with
+		if (!_.trigger) return;
+
 		const triggerId = ensureId(_.trigger, 'dropdown-trigger');
 
 		_.trigger.setAttribute('aria-controls', panelId);
-		_.trigger.setAttribute('aria-haspopup', 'true');
-
-		// role="group" so the panel can carry an accessible name — a
-		// role-less custom element cannot. Deliberately not a menu role.
-		if (!_.panel.hasAttribute('role')) {
-			_.panel.setAttribute('role', 'group');
-		}
+		_.trigger.setAttribute('aria-haspopup', menu ? 'menu' : 'true');
 		_.panel.setAttribute('aria-labelledby', triggerId);
 	}
 
@@ -232,16 +320,21 @@ class DropdownComponent extends HTMLElement {
 			if (event.pointerType === 'touch') return;
 			if (_.triggerMode === 'click') return;
 			if (_.#hoverSuppressed) return;
-			_.#open('hover');
+			// also cancels a pending close, which is what lets the pointer
+			// cross a gap the hover bridge does not cover
+			_.#clearHoverTimer();
+			_.#afterDelay(_.#openDelay, () => _.#open('hover'));
 		};
 
 		_.handlers.pointerLeave = (event) => {
 			if (event.pointerType === 'touch') return;
 			_.#hoverSuppressed = false;
+			// cancels a pending open
+			_.#clearHoverTimer();
 			// click- and keyboard-opened panels stay put until they are
-			// dismissed deliberately
+			// dismissed deliberately — and so ignore close-delay
 			if (_.#openSource !== 'hover') return;
-			_.hide();
+			_.#afterDelay(_.#closeDelay, () => _.hide());
 		};
 
 		_.handlers.triggerClick = (event) => {
@@ -249,6 +342,10 @@ class DropdownComponent extends HTMLElement {
 			if (!_.#clickEnabled()) return;
 			// never swallow activation of a real control inside the trigger
 			if (_.#isInteractiveDescendant(event.target)) return;
+
+			// a click never waits, and never leaves a pending close to
+			// strand the panel shut under the cursor
+			_.#clearHoverTimer();
 
 			if (!_.#visible) {
 				_.#open('click');
@@ -282,10 +379,51 @@ class DropdownComponent extends HTMLElement {
 		// new interaction without one
 		_.handlers.endDismissal = () => _.#clearDismissed();
 
-		_.addEventListener('pointerenter', _.handlers.pointerEnter);
-		_.addEventListener('pointerleave', _.handlers.pointerLeave);
-		_.trigger.addEventListener('click', _.handlers.triggerClick);
-		_.trigger.addEventListener('keydown', _.handlers.triggerKeydown);
+		// a right-click surface has no hover path: the press is the whole
+		// interaction
+		_.handlers.contextMenu = (event) => {
+			// a text field keeps its native menu — cut/copy/paste/spellcheck
+			if (event.target?.closest?.(TEXT_ENTRY_SELECTOR)) return;
+			event.preventDefault();
+			_.#clearLongPress();
+			_.showAt(event.clientX, event.clientY);
+		};
+
+		_.handlers.pressStart = (event) => {
+			if (event.pointerType !== 'touch') return;
+			_.#startLongPress(event);
+		};
+
+		_.handlers.pressMove = (event) => {
+			if (!_.#pressOrigin) return;
+			const dx = event.clientX - _.#pressOrigin.x;
+			const dy = event.clientY - _.#pressOrigin.y;
+			if (Math.hypot(dx, dy) > LONG_PRESS_SLOP) _.#clearLongPress();
+		};
+
+		_.handlers.pressEnd = () => _.#clearLongPress();
+
+		// one delegated listener turns any activation inside the panel
+		// into a `select`, menu mode only
+		_.handlers.panelClick = (event) => _.#handlePanelClick(event);
+
+		if (_.triggerMode === 'contextmenu') {
+			_.addEventListener('contextmenu', _.handlers.contextMenu);
+			_.addEventListener('pointerdown', _.handlers.pressStart);
+			_.addEventListener('pointermove', _.handlers.pressMove);
+			_.addEventListener('pointerup', _.handlers.pressEnd);
+			_.addEventListener('pointercancel', _.handlers.pressEnd);
+		} else {
+			_.addEventListener('pointerenter', _.handlers.pointerEnter);
+			_.addEventListener('pointerleave', _.handlers.pointerLeave);
+		}
+
+		if (_.#isMenu()) {
+			_.panel.addEventListener('click', _.handlers.panelClick);
+		}
+
+		_.trigger?.addEventListener('click', _.handlers.triggerClick);
+		_.trigger?.addEventListener('keydown', _.handlers.triggerKeydown);
 	}
 
 	/**
@@ -296,6 +434,12 @@ class DropdownComponent extends HTMLElement {
 
 		_.removeEventListener('pointerenter', _.handlers.pointerEnter);
 		_.removeEventListener('pointerleave', _.handlers.pointerLeave);
+		_.removeEventListener('contextmenu', _.handlers.contextMenu);
+		_.removeEventListener('pointerdown', _.handlers.pressStart);
+		_.removeEventListener('pointermove', _.handlers.pressMove);
+		_.removeEventListener('pointerup', _.handlers.pressEnd);
+		_.removeEventListener('pointercancel', _.handlers.pressEnd);
+		_.panel?.removeEventListener('click', _.handlers.panelClick);
 		_.trigger?.removeEventListener('click', _.handlers.triggerClick);
 		_.trigger?.removeEventListener(
 			'keydown',
@@ -312,6 +456,39 @@ class DropdownComponent extends HTMLElement {
 	}
 
 	/**
+	 * Shows the panel pinned to a point in viewport coordinates, flipped
+	 * and clamped so it stays on screen. Used by `trigger="contextmenu"`,
+	 * and callable directly for a custom right-click surface.
+	 * @param {number} x - clientX to place the panel at
+	 * @param {number} y - clientY to place the panel at
+	 */
+	showAt(x, y) {
+		const _ = this;
+
+		_.#pointerPos = { x, y };
+
+		// a second press elsewhere relocates the open panel rather than
+		// opening a second one
+		if (_.#visible) {
+			_.#placeAtPointer();
+			if (_.#isMenu()) _.#focusItem(0);
+			return;
+		}
+
+		_.#returnTarget = document.activeElement;
+		_.#open('pointer');
+	}
+
+	/**
+	 * Focuses a panel item by index. Negative and out-of-range indexes
+	 * wrap around.
+	 * @param {number} index - item index
+	 */
+	focusItem(index) {
+		this.#focusItem(index);
+	}
+
+	/**
 	 * Hides the panel. Idempotent, and safe to call on an unconnected or
 	 * incomplete element.
 	 * @param {Object} [options] - hide options
@@ -325,7 +502,11 @@ class DropdownComponent extends HTMLElement {
 			_.#reflect(false);
 			return;
 		}
+		// before the guard: a pending hover open must not survive a hide
+		_.#clearHoverTimer();
+		_.#clearLongPress();
 		if (!_.#visible) return;
+		_.#clearTypeahead();
 		if (!_.#emit('before-hide', true)) {
 			_.#reflect(true);
 			return;
@@ -347,11 +528,15 @@ class DropdownComponent extends HTMLElement {
 		// any focused descendant to <body>, silently losing the user's
 		// place in the tab order
 		if (restoreFocus && focusWasInside) {
-			_.trigger.focus({ preventScroll: true });
+			// a pointer-opened panel returns focus where it found it
+			(_.#returnTarget ?? _.trigger)?.focus({ preventScroll: true });
 		}
 
 		_.#visible = false;
 		_.#openSource = null;
+		_.#returnTarget = null;
+		_.#pointerPos = null;
+		_.#clearPlacement();
 		_.#reflect(false);
 		_.#applyState();
 		_.#detachDocumentListeners();
@@ -431,7 +616,9 @@ class DropdownComponent extends HTMLElement {
 		_.handlers.validate = () => {
 			if (_.#setup() || !_.isConnected) return;
 			console.warn(
-				'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children',
+				_.triggerMode === 'contextmenu'
+					? 'dropdown-component[trigger="contextmenu"] requires <dropdown-panel> as a direct child'
+					: 'dropdown-component requires <dropdown-trigger> and <dropdown-panel> as direct children',
 				_
 			);
 		};
@@ -454,7 +641,7 @@ class DropdownComponent extends HTMLElement {
 
 	/**
 	 * Shows the panel and records what opened it.
-	 * @param {'hover' | 'click' | 'keyboard' | 'api'} source - what opened it
+	 * @param {'hover' | 'click' | 'keyboard' | 'api' | 'pointer'} source - what opened it
 	 * @private
 	 */
 	#open(source) {
@@ -466,6 +653,9 @@ class DropdownComponent extends HTMLElement {
 			_.#reflect(true);
 			return;
 		}
+		// click, keyboard and api act now, cancelling any pending hover
+		// timer — including a pending close on an already-open panel
+		_.#clearHoverTimer();
 		if (_.#visible) return;
 		if (!_.#emit('before-show', true)) {
 			_.#reflect(false);
@@ -481,10 +671,48 @@ class DropdownComponent extends HTMLElement {
 		_.#clearDismissed();
 		_.#reflect(true);
 		_.#applyState();
+
+		// the panel is non-inert and measurable here, and opacity does not
+		// affect layout, so this is the one slot where placement can read
+		// real geometry before `show` fires
+		if (_.#pointerPos) _.#placeAtPointer();
+		else _.#applyFlip();
+
+		_.#syncMenuItems();
 		_.#attachDocumentListeners();
 		DropdownComponent.#shown.add(_);
 
+		if (source === 'pointer' && _.#isMenu()) _.#focusItem(0);
+
 		_.#emit('show');
+	}
+
+	/**
+	 * Runs an action now when the delay is zero — today's synchronous
+	 * behaviour — or schedules it as the single pending hover timer.
+	 * @param {number} delay - milliseconds to wait
+	 * @param {Function} action - what to run
+	 * @private
+	 */
+	#afterDelay(delay, action) {
+		if (!delay) {
+			action();
+			return;
+		}
+
+		this.#hoverTimer = setTimeout(() => {
+			this.#hoverTimer = null;
+			action();
+		}, delay);
+	}
+
+	/**
+	 * Cancels a pending hover open or close.
+	 * @private
+	 */
+	#clearHoverTimer() {
+		clearTimeout(this.#hoverTimer);
+		this.#hoverTimer = null;
 	}
 
 	/**
@@ -533,9 +761,13 @@ class DropdownComponent extends HTMLElement {
 		// context menu — are released by the next press instead. Capture
 		// phase, so it lands before the bubble-phase documentPointerDown
 		// that may record a fresh dismissal for the same press.
-		document.addEventListener('pointerdown', _.handlers.endDismissal, {
-			capture: true,
-		});
+		document.addEventListener(
+			'pointerdown',
+			_.handlers.endDismissal,
+			{
+				capture: true,
+			}
+		);
 	}
 
 	/**
@@ -549,9 +781,13 @@ class DropdownComponent extends HTMLElement {
 		_.#pointerDismissed = false;
 
 		window.removeEventListener('click', _.handlers.endDismissal);
-		document.removeEventListener('pointerdown', _.handlers.endDismissal, {
-			capture: true,
-		});
+		document.removeEventListener(
+			'pointerdown',
+			_.handlers.endDismissal,
+			{
+				capture: true,
+			}
+		);
 	}
 
 	/**
@@ -592,7 +828,7 @@ class DropdownComponent extends HTMLElement {
 		const _ = this;
 		const visible = _.#visible;
 
-		_.trigger.setAttribute(
+		_.trigger?.setAttribute(
 			'aria-expanded',
 			visible ? 'true' : 'false'
 		);
@@ -604,6 +840,8 @@ class DropdownComponent extends HTMLElement {
 		} else {
 			_.panel.setAttribute('inert', '');
 			_.panel.setAttribute('aria-hidden', 'true');
+			// cleared so the next open re-measures from scratch
+			_.panel.removeAttribute('flipped');
 		}
 	}
 
@@ -632,6 +870,16 @@ class DropdownComponent extends HTMLElement {
 			_.handlers.documentPointerDown
 		);
 		document.addEventListener('keydown', _.handlers.documentKeydown);
+
+		// a panel pinned to a point drifts away from it on scroll, so it
+		// dismisses instead
+		if (_.#openSource === 'pointer') {
+			_.handlers.documentScroll = () => _.hide();
+			document.addEventListener('scroll', _.handlers.documentScroll, {
+				capture: true,
+				passive: true,
+			});
+		}
 	}
 
 	#detachDocumentListeners() {
@@ -645,6 +893,308 @@ class DropdownComponent extends HTMLElement {
 			'keydown',
 			_.handlers.documentKeydown
 		);
+		document.removeEventListener(
+			'scroll',
+			_.handlers.documentScroll,
+			{
+				capture: true,
+			}
+		);
+	}
+
+	/**
+	 * Pins the panel to the recorded pointer position, flipping it left
+	 * and up when it would overflow, then clamping it to the viewport.
+	 * @private
+	 */
+	#placeAtPointer() {
+		const _ = this;
+		const panel = _.panel;
+		const pos = _.#pointerPos;
+
+		if (!panel || !pos) return;
+
+		panel.style.position = 'fixed';
+
+		const { width, height } = panel.getBoundingClientRect();
+		const vw = window.innerWidth;
+		const vh = window.innerHeight;
+		const m = VIEWPORT_MARGIN;
+
+		let left = pos.x;
+		let top = pos.y;
+
+		if (left + width > vw - m) left = pos.x - width;
+		if (top + height > vh - m) top = pos.y - height;
+
+		// a panel taller or wider than the viewport pins to the margin
+		// rather than hanging off the near edge
+		left = Math.min(Math.max(left, m), Math.max(m, vw - width - m));
+		top = Math.min(Math.max(top, m), Math.max(m, vh - height - m));
+
+		panel.style.left = `${left}px`;
+		panel.style.top = `${top}px`;
+	}
+
+	/**
+	 * Drops the inline styles #placeAtPointer() wrote.
+	 * @private
+	 */
+	#clearPlacement() {
+		const style = this.panel?.style;
+		if (!style) return;
+
+		style.position = '';
+		style.left = '';
+		style.top = '';
+	}
+
+	/**
+	 * Opt-in collision handling: measures once per open and flips a panel
+	 * that would run past the bottom of the viewport.
+	 * @private
+	 */
+	#applyFlip() {
+		const _ = this;
+		const panel = _.panel;
+
+		if (!panel?.hasAttribute('flip')) return;
+		// a sideways panel is anchored by `top: 0`, so a `bottom: 100%`
+		// would constrain both edges and collapse it
+		if (_.#opensRight()) return;
+
+		// measure un-flipped, so a reopen higher up returns to downward
+		panel.removeAttribute('flipped');
+
+		const rect = panel.getBoundingClientRect();
+		const anchor = (_.trigger ?? _).getBoundingClientRect();
+
+		if (
+			rect.bottom > window.innerHeight - VIEWPORT_MARGIN &&
+			anchor.top - rect.height >= VIEWPORT_MARGIN
+		) {
+			panel.setAttribute('flipped', '');
+		}
+	}
+
+	/**
+	 * Starts the touch long-press that stands in for a right-click.
+	 * @param {PointerEvent} event - the pointerdown that began the press
+	 * @private
+	 */
+	#startLongPress(event) {
+		const _ = this;
+
+		_.#clearLongPress();
+		_.#pressOrigin = { x: event.clientX, y: event.clientY };
+		_.#pressTimer = setTimeout(() => {
+			_.#pressTimer = null;
+			const origin = _.#pressOrigin;
+			_.#clearLongPress();
+			if (origin) _.showAt(origin.x, origin.y);
+		}, LONG_PRESS_DELAY);
+
+		document.addEventListener('scroll', _.handlers.pressEnd, {
+			capture: true,
+			passive: true,
+		});
+	}
+
+	/**
+	 * Cancels a pending long press.
+	 * @private
+	 */
+	#clearLongPress() {
+		const _ = this;
+
+		clearTimeout(_.#pressTimer);
+		_.#pressTimer = null;
+		_.#pressOrigin = null;
+		document.removeEventListener('scroll', _.handlers.pressEnd, {
+			capture: true,
+		});
+	}
+
+	/**
+	 * Stamps menu roles and rewrites the roving tabindex so exactly one
+	 * item is a tab stop. No-op outside menu mode.
+	 * @param {number} [activeIndex=0] - the item that carries tabindex="0"
+	 * @private
+	 */
+	#syncMenuItems(activeIndex = 0) {
+		const _ = this;
+
+		if (!_.#isMenu()) return;
+
+		// disabled items are stamped too — inside role="menu" a role-less
+		// child is invalid, and a tabbable one would be a second tab stop
+		// — but they never rove and never carry the tab stop
+		const active = _.#focusableItems();
+		const items = Array.from(
+			_.panel.querySelectorAll(
+				MENU_ITEM_SELECTOR + ',button[disabled]'
+			)
+		).filter(
+			(element) => element.closest('dropdown-panel') === _.panel
+		);
+
+		items.forEach((element) => {
+			if (element.matches('dropdown-trigger')) {
+				// <dropdown-trigger> assigns itself role="button"; inside a
+				// menu the meaningful role is menuitem
+				if (element.getAttribute('role') === 'button') {
+					element.setAttribute('role', 'menuitem');
+				}
+				if (element.parentElement?.hasAttribute('menu')) {
+					element.setAttribute('aria-haspopup', 'menu');
+				}
+			}
+
+			if (!element.hasAttribute('role')) {
+				element.setAttribute('role', 'menuitem');
+			}
+
+			const index = active.indexOf(element);
+			element.setAttribute(
+				'tabindex',
+				index !== -1 && index === activeIndex ? '0' : '-1'
+			);
+		});
+	}
+
+	/**
+	 * Turns a click on a menu item into a `dropdown-panel:select`.
+	 * @param {MouseEvent} event - the delegated click
+	 * @private
+	 */
+	#handlePanelClick(event) {
+		const _ = this;
+		const item = event.target?.closest?.(MENU_ITEM_SELECTOR);
+
+		if (!item) return;
+		// items belonging to a nested panel are that panel's business
+		if (item.closest('dropdown-panel') !== _.panel) return;
+		// a submenu opener is not a choice
+		if (item.matches('dropdown-trigger')) return;
+
+		if (
+			item.disabled ||
+			item.getAttribute('aria-disabled') === 'true'
+		) {
+			event.preventDefault();
+			return;
+		}
+
+		_.#select(item);
+	}
+
+	/**
+	 * Dispatches `dropdown-panel:select` and, unless it is canceled or the
+	 * item is a checkbox/radio, closes the whole menu chain.
+	 * @param {HTMLElement} item - the activated menu item
+	 * @private
+	 */
+	#select(item) {
+		const _ = this;
+		const value =
+			item.dataset.value ??
+			item.getAttribute('value') ??
+			item.getAttribute('href') ??
+			null;
+
+		const proceed = _.dispatchEvent(
+			new CustomEvent('dropdown-panel:select', {
+				bubbles: true,
+				composed: true,
+				cancelable: true,
+				detail: { item, value },
+			})
+		);
+
+		if (!proceed) return;
+
+		// checkable items stay put: the menu is the place the consumer
+		// keeps toggling things
+		const role = item.getAttribute('role');
+		if (role === 'menuitemcheckbox' || role === 'menuitemradio')
+			return;
+
+		// a choice in a submenu closes the whole chain, not just its level
+		let root = _;
+		let next = _.parentElement?.closest('dropdown-component[menu]');
+		while (next) {
+			root = next;
+			next = next.parentElement?.closest('dropdown-component[menu]');
+		}
+
+		// a link takes focus with it when it navigates, so the chain closes
+		// without restoring focus to the trigger
+		const isLink = item.matches('a[href]');
+
+		root.hide({ restoreFocus: !isLink });
+
+		if (!isLink) root.trigger?.focus({ preventScroll: true });
+	}
+
+	/**
+	 * Moves focus to the first item matching the accumulated typeahead
+	 * buffer, searching forward from the current item and wrapping.
+	 * @param {string} char - the character just typed
+	 * @param {HTMLElement[]} items - the panel's items
+	 * @param {number} currentIndex - index of the focused item, or -1
+	 * @private
+	 */
+	#typeahead(char, items, currentIndex) {
+		const _ = this;
+
+		clearTimeout(_.#typeTimer);
+		_.#typeBuffer += char.toLowerCase();
+		_.#typeTimer = setTimeout(() => {
+			_.#typeBuffer = '';
+		}, TYPEAHEAD_TIMEOUT);
+
+		let query = _.#typeBuffer;
+
+		// the same character repeated cycles first letters instead of
+		// looking for a literal run of it
+		if (
+			query.length > 1 &&
+			!query.split('').some((c) => c !== query[0])
+		) {
+			query = query[0];
+		}
+
+		const count = items.length;
+		// a single character steps to the NEXT match, so repeating it
+		// cycles; a longer buffer re-searches from the item it already
+		// landed on, so "s" then "sa" refines instead of skipping past
+		const start =
+			query.length > 1
+				? Math.max(currentIndex, 0)
+				: currentIndex === -1
+					? 0
+					: currentIndex + 1;
+
+		for (let offset = 0; offset < count; offset++) {
+			const index = (start + offset) % count;
+			const text = (items[index].textContent || '')
+				.trim()
+				.toLowerCase();
+			if (text.startsWith(query)) {
+				_.#focusItem(index);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Drops a partially typed typeahead buffer.
+	 * @private
+	 */
+	#clearTypeahead() {
+		clearTimeout(this.#typeTimer);
+		this.#typeTimer = null;
+		this.#typeBuffer = '';
 	}
 
 	/**
@@ -702,10 +1252,20 @@ class DropdownComponent extends HTMLElement {
 
 		if (!_.panel) return [];
 
-		return Array.from(
-			_.panel.querySelectorAll(FOCUSABLE_SELECTOR)
-		).filter(
-			(element) => element.closest('dropdown-panel') === _.panel
+		const menu = _.#isMenu();
+		const selector = menu ? MENU_ITEM_SELECTOR : FOCUSABLE_SELECTOR;
+
+		return Array.from(_.panel.querySelectorAll(selector)).filter(
+			(element) => {
+				if (element.closest('dropdown-panel') !== _.panel) {
+					return false;
+				}
+				if (!menu) return true;
+				return (
+					!element.disabled &&
+					element.getAttribute('aria-disabled') !== 'true'
+				);
+			}
 		);
 	}
 
@@ -721,6 +1281,9 @@ class DropdownComponent extends HTMLElement {
 
 		const count = items.length;
 		const target = ((index % count) + count) % count;
+
+		// roving tabindex follows focus, so the menu is one tab stop
+		this.#syncMenuItems(target);
 		items[target].focus({ preventScroll: true });
 	}
 
@@ -742,13 +1305,29 @@ class DropdownComponent extends HTMLElement {
 		if (key === 'Enter' || key === ' ') {
 			event.preventDefault();
 			event.stopPropagation();
-			if (_.#visible) _.hide();
-			else _.#open('keyboard');
+			if (_.#visible) {
+				_.hide();
+			} else {
+				_.#open('keyboard');
+				// the menu-button pattern lands on the first item; a
+				// disclosure leaves focus on the trigger
+				if (_.#isMenu()) _.#focusItem(0);
+			}
 			return;
 		}
 
 		// while shown, the document handler owns navigation
 		if (_.#visible) return;
+
+		// inside a menu, up and down belong to the parent menu's item
+		// list — a submenu opens on ArrowRight (or Enter/Space), never on
+		// a vertical step through its own opener
+		if (
+			(key === 'ArrowDown' || key === 'ArrowUp') &&
+			_.parentElement?.closest('dropdown-component[menu]')
+		) {
+			return;
+		}
 
 		if (
 			key === 'ArrowDown' ||
@@ -788,12 +1367,21 @@ class DropdownComponent extends HTMLElement {
 				_.contains(activeElement) ||
 				!activeElement ||
 				activeElement === document.body;
+			// captured before hide() clears it
+			const returnTo = _.#returnTarget ?? _.trigger;
 
 			event.preventDefault();
 			_.hide();
 			if (shouldFocusTrigger) {
-				_.trigger.focus({ preventScroll: true });
+				returnTo?.focus({ preventScroll: true });
 			}
+			return;
+		}
+
+		// the menu pattern parts company with disclosure here: Tab closes
+		// the menu, and does not preventDefault, so focus moves on
+		if (_.#isMenu() && event.key === 'Tab') {
+			_.hide({ restoreFocus: false });
 			return;
 		}
 
@@ -825,12 +1413,76 @@ class DropdownComponent extends HTMLElement {
 				_.#focusItem(-1);
 				break;
 
-			case 'ArrowLeft':
+			case 'ArrowLeft': {
 				if (!_.#opensRight()) break;
+				const returnTo = _.#returnTarget ?? _.trigger;
 				event.preventDefault();
 				_.hide();
-				_.trigger.focus({ preventScroll: true });
+				returnTo?.focus({ preventScroll: true });
 				break;
+			}
+
+			default:
+				if (_.#isMenu())
+					_.#handleMenuKeydown(event, items, currentIndex);
+		}
+	}
+
+	/**
+	 * The keys that only exist in menu mode: activation, submenu opening
+	 * and typeahead.
+	 * @param {KeyboardEvent} event - the keydown event
+	 * @param {HTMLElement[]} items - the panel's items
+	 * @param {number} currentIndex - index of the focused item, or -1
+	 * @private
+	 */
+	#handleMenuKeydown(event, items, currentIndex) {
+		const _ = this;
+		const key = event.key;
+		const item = currentIndex === -1 ? null : items[currentIndex];
+
+		if (key === 'ArrowRight') {
+			// a submenu trigger's own keydown handler owns Enter/Space, but
+			// not this
+			const nested = item?.matches('dropdown-trigger')
+				? item.parentElement
+				: null;
+			if (!nested?.hasAttribute('menu')) return;
+			event.preventDefault();
+			nested.show();
+			nested.focusItem(0);
+			return;
+		}
+
+		if (key === 'Enter') {
+			// real buttons and links activate natively; an authored
+			// role="menuitem" has nothing to activate, so synthesize it
+			if (!item || item.matches('button, a[href]')) return;
+			event.preventDefault();
+			item.click();
+			return;
+		}
+
+		if (key === ' ') {
+			if (!item) return;
+			// a native button already clicks on Space, and preventing the
+			// default here would cancel that activation
+			if (item.matches('button')) return;
+			// everything else: kill the page scroll and click it — a link
+			// included, which Space alone would not follow
+			event.preventDefault();
+			item.click();
+			return;
+		}
+
+		if (
+			key.length === 1 &&
+			!event.ctrlKey &&
+			!event.metaKey &&
+			!event.altKey
+		) {
+			event.preventDefault();
+			_.#typeahead(key, items, currentIndex);
 		}
 	}
 }
