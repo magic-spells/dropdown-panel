@@ -10,12 +10,12 @@ The core stylesheet contains only the CSS required for functionality. This makes
 
 - Easy to integrate into any project
 - No opinionated styles to override
-- Lightweight - 1,019 bytes minified, 464 bytes gzipped
+- Lightweight - 1,211 bytes minified, 510 bytes gzipped
 - Works with Tailwind, Bootstrap, CSS-in-JS, or plain CSS
 
 Users add their own styling (colors, shadows, spacing, typography). Entrance animation is available but opt-in, in a second stylesheet.
 
-Shipping size, min + gzip: 2,527 bytes JS, 464 bytes core CSS, 412 bytes effects CSS.
+Shipping size, min + gzip: 4,400 bytes JS, 510 bytes core CSS, 952 bytes effects CSS.
 
 ## Architecture
 
@@ -179,9 +179,11 @@ dropdown-component:has(> dropdown-panel[wide]) {
 
 This is why `:has()` is the real browser floor: without it the host never becomes `position: relative` and every popover mispositions.
 
-### 3. No ARIA Menu Roles
+### 3. No ARIA Menu Roles - Unless You Ask For Them
 
-**Decision:** Do NOT use `role="menu"`, `role="menubar"`, or `role="menuitem"`.
+**Decision:** By DEFAULT, do NOT use `role="menu"`, `role="menubar"`, or `role="menuitem"`.
+The `menu` attribute on the host is the deliberate opt-in that turns them on, along with the
+keyboard model they promise. See decision 10.
 
 **Rationale:**
 Following [Adrian Roselli's accessibility guidance](https://adrianroselli.com/2017/10/dont-use-aria-menu-roles-for-site-nav.html):
@@ -196,6 +198,54 @@ Following [Adrian Roselli's accessibility guidance](https://adrianroselli.com/20
 - `aria-haspopup="true"`, `aria-expanded` and `aria-controls` on the trigger
 - `role="group"` on the panel, **only when it has no role of its own** - a role-less custom element cannot carry an accessible name, so `aria-labelledby` would be inert without it
 - `aria-hidden` and `inert` on the panel
+
+### 10. `menu`, `trigger="contextmenu"`, `align` and `flip` (2.2.0)
+
+**Decision:** Four opt-in attributes, all in the core entry, no `/menu` subpath.
+
+**Rationale for one entry:** the hooks are interleaved with existing private methods
+(`setupAria`, `queryDOM`, `#focusableItems`, `#focusItem`, `#handleKeydown`, `#open`,
+`#applyState`, `hide`). An augmenting entry would have to reach private fields, which costs
+more public surface than the ~1.5 kB it would save. `src/index.js` also defines the elements
+at import time, so a second entry could only patch an already-upgraded class - a load-order
+trap for a wrapper whose import happens in `mounted()`.
+
+**`menu`** - read once, at setup, never observed. Swaps `FOCUSABLE_SELECTOR` for
+`MENU_ITEM_SELECTOR`, filters out `disabled` / `aria-disabled="true"`, stamps
+`role="menuitem"` where absent, and rewrites a roving `tabindex` from `#syncMenuItems()`,
+called at the end of `#open()` and from `#focusItem()`. Adds `Tab` to close (no
+`preventDefault`), `Enter`/`Space` activation, typeahead (500 ms buffer; a single character
+steps to the next match so repeats cycle, a longer buffer re-searches from the current item
+so `s` then `sa` refines), `→` into a nested `[menu]` submenu, and a delegated panel click
+that fires `dropdown-panel:select`.
+
+Two menu-only divergences from the disclosure path that are easy to miss:
+`Enter`/`Space` on the trigger lands focus on the first item, and `↓`/`↑` on a **submenu
+trigger inside a menu panel** step through the parent's items rather than opening the
+submenu (only `→` and `Enter`/`Space` open it). Both are gated on `menu`.
+
+`select` closes the whole chain by walking `parentElement.closest('dropdown-component[menu]')`
+to the root and calling `root.hide()`. `menuitemcheckbox` / `menuitemradio` are exempt.
+No `aria-checked` is ever written - checked state is the consumer's.
+
+**`trigger="contextmenu"`** - the component itself is the surface, so `queryDOM()` no longer
+requires a `<dropdown-trigger>` and every trigger write is optional-chained. `showAt(x, y)` is
+public; placement runs in `#open()` right after `#applyState()`, where the panel is
+non-`inert` and measurable. Scroll dismisses (bound only when `#openSource === 'pointer'`),
+touch long-press is 500 ms with a 10 px slop, and `hide()` clears the inline
+`position`/`left`/`top` and returns focus to `#returnTarget`.
+
+**`flip`** occupies the same slot in `#open()` and is mutually exclusive with pointer
+placement. It measures once, sets `flipped`, and `#applyState()`'s hidden branch clears it so
+the next open re-measures. **`align`** is pure CSS, physical (not logical) - `end` is the
+right edge in RTL too.
+
+**Both exclude `opens="right"`, on both axes and in both layers.** A sideways panel is
+anchored by `top: 0; left: 100%`; adding `bottom: 100%` or `right: 0` constrains the opposite
+edge as well, collapsing the panel to a sliver or stretching it across the viewport. So the
+CSS selectors are `dropdown-panel:not([opens='right'])[flipped]` / `[align='…']`, AND
+`#applyFlip()` refuses to set the attribute there. Belt and braces on purpose: the CSS guard
+covers a `flipped` a consumer writes by hand, the JS guard keeps the attribute honest.
 
 ### 4. Direct Child Selectors in CSS
 
@@ -275,6 +325,8 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 **Decision:** `trigger="hover|click|both"` on the host, default `both`.
 
 **Rationale:** A nav bar and a settings popover want different things. `hover` falls back to click where `(hover: hover)` does not match (`#clickEnabled()`), so a hover-only menu is never unopenable on a phone.
+
+**Hover intent:** `open-delay` and `close-delay` (milliseconds, both default `0`, both observed alongside `visible`) delay only the hover path. One `#hoverTimer` field holds at most one pending open or close; `#afterDelay()` runs the action synchronously when the delay is `0`, so the default is byte-for-byte the old behaviour. `pointerenter` cancels a pending close (the forgiving companion to the hover bridge) and `pointerleave` cancels a pending open. `#open()` and `hide()` clear the timer, so click, keyboard and API paths never wait; a latched panel ignores `close-delay` because it does not close on leave at all. `disconnectedCallback` clears it too. Non-numeric and negative values resolve to `0`.
 
 ## Component Communication
 
@@ -586,12 +638,12 @@ The dev server serves `dist/` and `demo/` together, and opens a browser. The dem
 
 Potential features to add:
 
-1. **Alignment attribute**: `align="right"` for right-edge-aligned popovers
-2. **Offset attribute**: `<dropdown-panel offset="10px">` for custom spacing
-3. **Open/close delay**: a hover intent timeout
-4. **Collision detection**: flip a panel that would leave the viewport
-5. **Mobile drawer mode**: convert to a bottom sheet on small screens
-6. **RTL support**: `opens="right"` currently assumes LTR
+1. **Offset attribute**: `<dropdown-panel offset="10px">` for custom spacing
+2. **Horizontal collision detection**: `flip` handles the vertical axis only
+3. **Mobile drawer mode**: convert to a bottom sheet on small screens
+4. **RTL support**: `opens="right"` and `align` are both physical, and assume LTR
+5. **`target` for `trigger="contextmenu"`**: a CSS selector escape hatch, so the surface can
+   be narrower than the component
 
 ## Debugging Tips
 
@@ -629,6 +681,11 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
 3. The component is unstyled by default - you must add your own
 
 ## Version History
+
+- **v2.1.0** - Hover intent
+
+  - Added `open-delay` and `close-delay` on `<dropdown-component>`, in milliseconds, default `0`
+  - Added the `openDelay` / `closeDelay` read-only property mirrors
 
 - **v2.0.0** - Breaking: `visible` as state, trigger modes, effects, lifecycle events, real keyboard navigation
 
