@@ -663,6 +663,11 @@ class DropdownComponent extends HTMLElement {
 		// timer — including a pending close on an already-open panel
 		_.#clearHoverTimer();
 		if (_.#visible) return;
+		// a hide still fading out has a clear pending. Every open path has
+		// to drop it, not just the pointer one: the deferred handler cannot
+		// tell a fade-out from a fade-in, so left armed it would yank the
+		// re-opened panel to its default position mid-fade
+		_.#cancelClearPlacement();
 		if (!_.#emit('before-show', true)) {
 			_.#reflect(false);
 			return;
@@ -681,8 +686,15 @@ class DropdownComponent extends HTMLElement {
 		// the panel is non-inert and measurable here, and opacity does not
 		// affect layout, so this is the one slot where placement can read
 		// real geometry before `show` fires
-		if (_.#pointerPos) _.#placeAtPointer();
-		else _.#applyFlip();
+		if (_.#pointerPos) {
+			_.#placeAtPointer();
+		} else {
+			// re-opened anchored while an earlier pointer placement was
+			// still fading out: drop it now, before #applyFlip() measures,
+			// so the panel does not fade back in at the old pointer point
+			_.#clearPlacement();
+			_.#applyFlip();
+		}
 
 		_.#syncMenuItems();
 		_.#attachDocumentListeners();
@@ -986,7 +998,10 @@ class DropdownComponent extends HTMLElement {
 		}
 
 		_.#placementClearHandler = (event) => {
-			if (event.propertyName !== 'opacity' || event.target !== panel) {
+			if (
+				event.propertyName !== 'opacity' ||
+				event.target !== panel
+			) {
 				return;
 			}
 			_.#cancelClearPlacement();
@@ -1038,7 +1053,8 @@ class DropdownComponent extends HTMLElement {
 		const delays = toMs(style.transitionDelay);
 
 		return durations.reduce(
-			(max, d, i) => Math.max(max, d + (delays[i % delays.length] || 0)),
+			(max, d, i) =>
+				Math.max(max, d + (delays[i % delays.length] || 0)),
 			0
 		);
 	}
