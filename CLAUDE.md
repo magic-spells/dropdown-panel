@@ -15,7 +15,7 @@ The core stylesheet contains only the CSS required for functionality. This makes
 
 Users add their own styling (colors, shadows, spacing, typography). Entrance animation is available but opt-in, in a second stylesheet.
 
-Shipping size, min + gzip: 4,400 bytes JS, 510 bytes core CSS, 966 bytes effects CSS.
+Shipping size, min + gzip: 4,645 bytes JS, 510 bytes core CSS, 966 bytes effects CSS.
 
 ## Architecture
 
