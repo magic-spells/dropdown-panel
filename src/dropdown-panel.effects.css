@@ -56,6 +56,23 @@ dropdown-panel[effect='blur'][opens='right'] {
 	transform-origin: left top;
 }
 
+/* bloom - scale, blur and fade at once; the panel resolves into focus.
+   Gentler scale than `scale` so the size change does not compete with
+   the focus pull, a touch more blur than `blur` so the pull reads. */
+dropdown-panel[effect='bloom'] {
+	transform: scale(0.97);
+	filter: blur(5px);
+	transform-origin: top left;
+}
+
+dropdown-panel[effect='bloom'][wide] {
+	transform-origin: top center;
+}
+
+dropdown-panel[effect='bloom'][opens='right'] {
+	transform-origin: left top;
+}
+
 /* swing - hinges down from the top edge */
 dropdown-panel[effect='swing'] {
 	transform: perspective(800px) rotateX(-8deg);

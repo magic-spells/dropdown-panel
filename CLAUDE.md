@@ -15,7 +15,7 @@ The core stylesheet contains only the CSS required for functionality. This makes
 
 Users add their own styling (colors, shadows, spacing, typography). Entrance animation is available but opt-in, in a second stylesheet.
 
-Shipping size, min + gzip: 4,400 bytes JS, 510 bytes core CSS, 952 bytes effects CSS.
+Shipping size, min + gzip: 4,400 bytes JS, 510 bytes core CSS, 966 bytes effects CSS.
 
 ## Architecture
 
@@ -300,7 +300,7 @@ dropdown-component:has(> dropdown-panel[opens='right']):hover
 
 ### 7. Effects Live in a Second Stylesheet
 
-**Decision:** `effect="fade|slide|scale|blur|swing"` and the whole trigger-arrow feature are no-ops unless `@magic-spells/dropdown-panel/css/effects` is loaded.
+**Decision:** `effect="fade|slide|scale|blur|bloom|swing"` and the whole trigger-arrow feature are no-ops unless `@magic-spells/dropdown-panel/css/effects` is loaded.
 
 **Rationale:** Nobody pays for animation they did not ask for, and the core stays under a kilobyte. Effects are tunable with `--dp-effect-duration` and `--dp-effect-easing`, adapt to `wide` and `opens="right"`, and all collapse to a plain opacity fade under `prefers-reduced-motion: reduce`.
 
@@ -687,6 +687,12 @@ Look for a `transition:` shorthand in the consumer's CSS. It resets every longha
 3. The component is unstyled by default - you must add your own
 
 ## Version History
+
+- **v2.1.1** - Bloom effect, context-menu fade-out, build split
+
+  - Added `effect="bloom"`: scale, blur and fade at once, adapting to `wide` and `opens="right"`
+  - Fixed context-menu (`trigger="contextmenu"` / `showAt()`) panels jumping back to their default position before fading out; the inline placement now clears after the fade
+  - Split `npm run build` (writes `dist/` only, no sourcemaps) from `npm run dev` (writes `demo/dist/` only, with sourcemaps)
 
 - **v2.1.0** - Hover intent
 
