@@ -5,21 +5,27 @@ import postcss from 'rollup-plugin-postcss';
 import copy from 'rollup-plugin-copy';
 import serve from 'rollup-plugin-serve';
 
-const production = !process.env.ROLLUP_WATCH;
+/*
+ * Two builds that never touch each other's files:
+ *
+ *   npm run build  (rollup -c)          → dist/ only, no sourcemaps
+ *   npm run dev    (rollup -c --watch)  → demo/dist/ only, with sourcemaps
+ *
+ * so switching between them leaves no churn in git.
+ */
+const dev = Boolean(process.env.ROLLUP_WATCH);
 const name = 'dropdown-panel';
-const demoDir = 'demo/dist';
 
 let distCleaned = false;
 
 /**
- * Wipes dist once per production build. Sourcemaps written by an earlier
- * `npm run dev` otherwise survive into a published package, pointing at
- * code that no longer exists.
+ * Wipes dist once per production build, so nothing left over from an
+ * older config can end up in the published tarball.
  */
 const cleanDist = () => ({
 	name: 'clean-dist',
 	buildStart() {
-		if (distCleaned || !production) return;
+		if (distCleaned) return;
 		distCleaned = true;
 		rmSync('dist', { recursive: true, force: true });
 	},
@@ -28,7 +34,7 @@ const cleanDist = () => ({
 /**
  * A css-only build still needs a javascript entry chunk. postcss
  * extracts the real stylesheet and leaves an empty stub behind; delete
- * it so it never ends up in the published tarball.
+ * it so it never ends up in the published tarball or the demo.
  * @param {string} file - path of the stub chunk
  */
 const removeStub = (file) => ({
@@ -40,27 +46,38 @@ const removeStub = (file) => ({
 });
 
 /**
- * Copies build output into the demo folder. Every copy is attached to
- * the config that writes the file it copies, so a failed build can never
- * silently republish stale demo assets.
- * @param {string[]} sources - glob patterns relative to the repo root
+ * cssnano 5 keeps the line break and indent of a descendant combinator
+ * in a selector that prettier wrapped over several lines, so a .min.css
+ * comes out multi-line. Fold those breaks into a single space first.
+ * A raw newline cannot sit inside a quoted CSS string, so this is safe.
  */
-const copyToDemo = (sources) =>
-	copy({
-		targets: sources.map((src) => ({ src, dest: demoDir })),
-		hook: 'writeBundle',
-	});
+const foldSelectorBreaks = () => ({
+	postcssPlugin: 'fold-selector-breaks',
+	Rule(rule) {
+		rule.selector = rule.selector.replace(/\s*\n\s*/g, ' ');
+	},
+});
+foldSelectorBreaks.postcss = true;
 
 /**
  * One stylesheet build.
  * @param {Object} options - build options
  * @param {string} options.input - source css file
- * @param {string} options.file - output file name inside dist
- * @param {boolean} options.minimize - whether to minify
+ * @param {string} options.dir - output directory
+ * @param {string} options.file - output file name inside dir
+ * @param {boolean} [options.minimize] - whether to minify
+ * @param {boolean} [options.sourceMap] - whether to emit a sourcemap
  * @param {Array} [options.extraPlugins] - plugins appended to the build
  */
-const cssBuild = ({ input, file, minimize, extraPlugins = [] }) => {
-	const stub = `dist/_stub-${file}.js`;
+const cssBuild = ({
+	input,
+	dir,
+	file,
+	minimize = false,
+	sourceMap = false,
+	extraPlugins = [],
+}) => {
+	const stub = `${dir}/_stub-${file}.js`;
 
 	return {
 		input,
@@ -72,7 +89,8 @@ const cssBuild = ({ input, file, minimize, extraPlugins = [] }) => {
 			postcss({
 				extract: file,
 				minimize,
-				sourceMap: !production,
+				sourceMap,
+				plugins: minimize ? [foldSelectorBreaks()] : [],
 			}),
 			removeStub(stub),
 			...extraPlugins,
@@ -80,28 +98,50 @@ const cssBuild = ({ input, file, minimize, extraPlugins = [] }) => {
 	};
 };
 
-// rollup configuration
-export default [
-	// esm version (JavaScript only)
+// npm run dev - only what demo/index.html loads, into demo/dist.
+// A function, because serve() starts its server the moment it is called.
+const devConfig = () => [
+	{
+		input: 'src/index.js',
+		output: {
+			file: `demo/dist/${name}.esm.js`,
+			format: 'es',
+			sourcemap: true,
+		},
+		plugins: [
+			resolve(),
+			serve({
+				open: true,
+				contentBase: 'demo',
+				host: 'localhost',
+				port: 3000,
+			}),
+		],
+	},
+	cssBuild({
+		input: `src/${name}.css`,
+		dir: 'demo/dist',
+		file: `${name}.css`,
+		sourceMap: true,
+	}),
+	cssBuild({
+		input: `src/${name}.effects.css`,
+		dir: 'demo/dist',
+		file: `${name}.effects.css`,
+		sourceMap: true,
+	}),
+];
+
+// npm run build - the published files, into dist
+const buildConfig = () => [
+	// esm version
 	{
 		input: 'src/index.js',
 		output: {
 			file: `dist/${name}.esm.js`,
 			format: 'es',
-			sourcemap: !production,
 		},
-		plugins: [
-			cleanDist(),
-			resolve(),
-			copyToDemo([`dist/${name}.esm.js*`]),
-			!production &&
-				serve({
-					open: true,
-					contentBase: ['dist', 'demo'],
-					host: 'localhost',
-					port: 3000,
-				}),
-		],
+		plugins: [cleanDist(), resolve()],
 	},
 	// cjs version
 	{
@@ -109,7 +149,6 @@ export default [
 		output: {
 			file: `dist/${name}.cjs.js`,
 			format: 'cjs',
-			sourcemap: !production,
 		},
 		plugins: [resolve()],
 	},
@@ -120,18 +159,16 @@ export default [
 			file: `dist/${name}.js`,
 			format: 'umd',
 			name: 'DropdownPanel',
-			sourcemap: !production,
 		},
 		plugins: [resolve()],
 	},
-	// minified umd version (JavaScript only)
+	// minified umd version
 	{
 		input: 'src/index.js',
 		output: {
 			file: `dist/${name}.min.js`,
 			format: 'umd',
 			name: 'DropdownPanel',
-			sourcemap: !production,
 		},
 		plugins: [
 			resolve(),
@@ -142,11 +179,11 @@ export default [
 			}),
 		],
 	},
-	// core css (unminified)
+	// core css (unminified), plus an untouched source copy
 	cssBuild({
 		input: `src/${name}.css`,
+		dir: 'dist',
 		file: `${name}.css`,
-		minimize: false,
 		extraPlugins: [
 			copy({
 				targets: [
@@ -158,28 +195,28 @@ export default [
 				],
 				hook: 'writeBundle',
 			}),
-			copyToDemo([`dist/${name}.css*`]),
 		],
 	}),
 	// core css (minified)
 	cssBuild({
 		input: `src/${name}.css`,
+		dir: 'dist',
 		file: `${name}.min.css`,
 		minimize: true,
-		extraPlugins: [copyToDemo([`dist/${name}.min.css*`])],
 	}),
 	// effects css (unminified)
 	cssBuild({
 		input: `src/${name}.effects.css`,
+		dir: 'dist',
 		file: `${name}.effects.css`,
-		minimize: false,
-		extraPlugins: [copyToDemo([`dist/${name}.effects.css*`])],
 	}),
 	// effects css (minified)
 	cssBuild({
 		input: `src/${name}.effects.css`,
+		dir: 'dist',
 		file: `${name}.effects.min.css`,
 		minimize: true,
-		extraPlugins: [copyToDemo([`dist/${name}.effects.min.css*`])],
 	}),
 ];
+
+export default dev ? devConfig() : buildConfig();

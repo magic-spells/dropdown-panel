@@ -1659,3 +1659,4 @@ if (!customElements.get('dropdown-panel')) {
 }
 
 export { DropdownComponent, DropdownPanel, DropdownTrigger };
+//# sourceMappingURL=dropdown-panel.esm.js.map
