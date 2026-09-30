@@ -140,6 +140,8 @@ class DropdownComponent extends HTMLElement {
 	#returnTarget = null;
 	#pressTimer = null;
 	#pressOrigin = null;
+	#placementClearTimer = null;
+	#placementClearHandler = null;
 
 	constructor() {
 		super();
@@ -224,6 +226,7 @@ class DropdownComponent extends HTMLElement {
 		_.#clearLongPress();
 		_.#clearTypeahead();
 		_.#clearDismissed();
+		_.#cancelClearPlacement();
 		DropdownComponent.#shown.delete(_);
 
 		_.#observer?.disconnect();
@@ -534,7 +537,10 @@ class DropdownComponent extends HTMLElement {
 		_.#openSource = null;
 		_.#returnTarget = null;
 		_.#pointerPos = null;
-		_.#clearPlacement();
+		// not #clearPlacement(): the panel fades out over the stylesheet's
+		// opacity transition, and dropping the inline placement now would
+		// snap it back to its default position for the whole fade
+		_.#deferClearPlacement();
 		_.#reflect(false);
 		_.#applyState();
 		_.#detachDocumentListeners();
@@ -655,6 +661,11 @@ class DropdownComponent extends HTMLElement {
 		// timer — including a pending close on an already-open panel
 		_.#clearHoverTimer();
 		if (_.#visible) return;
+		// a hide still fading out has a clear pending. Every open path has
+		// to drop it, not just the pointer one: the deferred handler cannot
+		// tell a fade-out from a fade-in, so left armed it would yank the
+		// re-opened panel to its default position mid-fade
+		_.#cancelClearPlacement();
 		if (!_.#emit('before-show', true)) {
 			_.#reflect(false);
 			return;
@@ -673,8 +684,15 @@ class DropdownComponent extends HTMLElement {
 		// the panel is non-inert and measurable here, and opacity does not
 		// affect layout, so this is the one slot where placement can read
 		// real geometry before `show` fires
-		if (_.#pointerPos) _.#placeAtPointer();
-		else _.#applyFlip();
+		if (_.#pointerPos) {
+			_.#placeAtPointer();
+		} else {
+			// re-opened anchored while an earlier pointer placement was
+			// still fading out: drop it now, before #applyFlip() measures,
+			// so the panel does not fade back in at the old pointer point
+			_.#clearPlacement();
+			_.#applyFlip();
+		}
 
 		_.#syncMenuItems();
 		_.#attachDocumentListeners();
@@ -912,6 +930,10 @@ class DropdownComponent extends HTMLElement {
 
 		if (!panel || !pos) return;
 
+		// a hide still fading out has a clear pending — it would wipe the
+		// placement written just below, out from under the re-opened panel
+		_.#cancelClearPlacement();
+
 		panel.style.position = 'fixed';
 
 		const { width, height } = panel.getBoundingClientRect();
@@ -945,6 +967,94 @@ class DropdownComponent extends HTMLElement {
 		style.position = '';
 		style.left = '';
 		style.top = '';
+	}
+
+	/**
+	 * Clears the pointer placement once the panel has finished fading out,
+	 * so it fades in the spot it was shown instead of snapping back to the
+	 * default position mid-fade.
+	 *
+	 * The transition may never fire — `prefers-reduced-motion`, a consumer
+	 * who dropped the transition, a panel that was already hidden — so a
+	 * timer derived from the panel's own computed duration races it and
+	 * whichever lands first wins.
+	 * @private
+	 */
+	#deferClearPlacement() {
+		const _ = this;
+		const panel = _.panel;
+
+		_.#cancelClearPlacement();
+
+		if (!panel || !panel.style.position) return;
+
+		const ms = _.#fadeOutDuration(panel);
+
+		if (ms <= 0) {
+			_.#clearPlacement();
+			return;
+		}
+
+		_.#placementClearHandler = (event) => {
+			if (
+				event.propertyName !== 'opacity' ||
+				event.target !== panel
+			) {
+				return;
+			}
+			_.#cancelClearPlacement();
+			_.#clearPlacement();
+		};
+
+		panel.addEventListener('transitionend', _.#placementClearHandler);
+
+		// a little slack so the event wins the race when it does fire
+		_.#placementClearTimer = setTimeout(() => {
+			_.#cancelClearPlacement();
+			_.#clearPlacement();
+		}, ms + 50);
+	}
+
+	/**
+	 * Drops a pending deferred clear, leaving the inline placement alone.
+	 * @private
+	 */
+	#cancelClearPlacement() {
+		const _ = this;
+
+		if (_.#placementClearHandler) {
+			_.panel?.removeEventListener(
+				'transitionend',
+				_.#placementClearHandler
+			);
+			_.#placementClearHandler = null;
+		}
+
+		clearTimeout(_.#placementClearTimer);
+		_.#placementClearTimer = null;
+	}
+
+	/**
+	 * Longest opacity transition-duration + delay on the panel, in ms.
+	 * Both properties are lists, so the values are read pairwise.
+	 * @param {HTMLElement} panel - the panel element
+	 * @returns {number} milliseconds, 0 when there is no transition
+	 * @private
+	 */
+	#fadeOutDuration(panel) {
+		const style = getComputedStyle(panel);
+		const toMs = (list) =>
+			String(list || '')
+				.split(',')
+				.map((v) => (parseFloat(v) || 0) * 1000);
+		const durations = toMs(style.transitionDuration);
+		const delays = toMs(style.transitionDelay);
+
+		return durations.reduce(
+			(max, d, i) =>
+				Math.max(max, d + (delays[i % delays.length] || 0)),
+			0
+		);
 	}
 
 	/**
