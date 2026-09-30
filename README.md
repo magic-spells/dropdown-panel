@@ -6,7 +6,7 @@ A lightweight, accessible dropdown, popover and mega menu web component.
 
 ## Features
 
-- 🪶 Dependency-free - 4.9 kB min + gzip (4.4 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 0.9 kB)
+- 🪶 Dependency-free - 5.2 kB min + gzip (4.6 kB JS, 0.5 kB core CSS; the opt-in effects sheet adds 1.0 kB)
 - 🎨 Minimal styling - the package sets positioning and open/closed state, and stops
 - 🖱️ Hover, click, or both, per dropdown - `trigger="hover|click|both"`, with optional hover intent delays
 - 🔗 Nested submenus with `opens="right"`
@@ -150,7 +150,7 @@ dropdown-trigger.dropdown-item {
 | `opens`   | `<dropdown-panel>`    | `down`   | `right` opens the panel beside the trigger instead of below it. For submenus.                                            |
 | `align`   | `<dropdown-panel>`    | `start`  | `start` or `end`. Which edge of a downward panel lines up with the trigger. Pure CSS; `opens="right"` ignores it.        |
 | `flip`    | `<dropdown-panel>`    | absent   | Opens the panel upward when it would run past the bottom of the viewport. Measured once per open.                        |
-| `effect`  | `<dropdown-panel>`    | none     | `fade`, `slide`, `scale`, `blur` or `swing`. Requires the effects stylesheet; a no-op without it.                        |
+| `effect`  | `<dropdown-panel>`    | none     | `fade`, `slide`, `scale`, `blur`, `bloom` or `swing`. Requires the effects stylesheet; a no-op without it.              |
 | `arrow`   | `<dropdown-component>`| `flip`   | `flip` mirrors the trigger arrow on open, `static` leaves it alone, `none` hides it. Requires the effects stylesheet.    |
 | `arrow-shape` | `<dropdown-component>`| `chevron` | `chevron` or `triangle`. Drawn only when the arrow hook is empty. Requires the effects stylesheet.                   |
 
@@ -402,7 +402,7 @@ import '@magic-spells/dropdown-panel/css/effects';
 <dropdown-panel effect="blur">…</dropdown-panel>
 ```
 
-`fade`, `slide`, `scale`, `blur`, `swing`. Each one adapts to `wide` and `opens="right"`. Tune them with two custom properties, globally or per panel:
+`fade`, `slide`, `scale`, `blur`, `bloom`, `swing`. Each one adapts to `wide` and `opens="right"`. Tune them with two custom properties, globally or per panel:
 
 ```css
 dropdown-panel {

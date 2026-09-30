@@ -8,7 +8,7 @@
 		<title>Dropdown Panel — @magic-spells</title>
 		<meta
 			name="description"
-			content="An accessible dropdown and mega-menu web component. Hover, click or both, nested submenus, five entrance effects, 3 kB and no dependencies." />
+			content="An accessible dropdown and mega-menu web component. Hover, click or both, nested submenus, six entrance effects, 3 kB and no dependencies." />
 		<link
 			rel="canonical"
 			href="https://magic-spells.github.io/dropdown-panel/demo/" />
@@ -18,7 +18,7 @@
 			content="@magic-spells/dropdown-panel" />
 		<meta
 			property="og:description"
-			content="A panel that drops. Three custom elements, one attribute for state, five entrance effects. 3 kB min + gzip, no dependencies." />
+			content="A panel that drops. Three custom elements, one attribute for state, six entrance effects. 3 kB min + gzip, no dependencies." />
 		<meta
 			property="og:url"
 			content="https://magic-spells.github.io/dropdown-panel/demo/" />
@@ -1781,7 +1781,7 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 				<p class="demo-desc">
 					The core stylesheet fades and nothing else. Import the
 					opt-in file and
-					<code>effect="…"</code> gives you five presets plus the
+					<code>effect="…"</code> gives you six presets plus the
 					trigger arrow, tuned by
 					<code>--dp-effect-duration</code> and
 					<code>--dp-effect-easing</code>, all collapsing to a fade
@@ -1820,6 +1820,13 @@ document.addEventListener(<span class="hl-val">'pointerdown'</span>, (e) =&gt; {
 								aria-pressed="false"
 								data-effect="blur">
 								blur
+							</button>
+							<button
+								class="seg-btn"
+								type="button"
+								aria-pressed="false"
+								data-effect="bloom">
+								bloom
 							</button>
 							<button
 								class="seg-btn"
@@ -2386,6 +2393,7 @@ menu.addEventListener(<span class="hl-val">'dropdown-panel:select'</span>, (e) =
 							<option value="slide">slide</option>
 							<option value="scale">scale</option>
 							<option value="blur" selected>blur</option>
+							<option value="bloom">bloom</option>
 							<option value="swing">swing</option>
 						</select>
 						<span class="theme-value">blur</span>
@@ -2641,9 +2649,9 @@ menu.visible;  <span class="hl-cm">// true | false, reflects the attribute</span
 						<div>none</div>
 						<div>
 							On the panel. <code>fade</code>, <code>slide</code>,
-							<code>scale</code>, <code>blur</code> or
-							<code>swing</code>. No-op without the effects
-							stylesheet.
+							<code>scale</code>, <code>blur</code>,
+							<code>bloom</code> or <code>swing</code>. No-op
+							without the effects stylesheet.
 						</div>
 					</div>
 					<div class="ref-row">

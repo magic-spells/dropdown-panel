@@ -160,7 +160,8 @@ export class DropdownTrigger extends HTMLElement {}
  * - `flip` — boolean, opt-in. Opens the panel upward when it would run past
  *   the bottom of the viewport and there is room above. Measured once per
  *   open; sets the `flipped` attribute, which the core stylesheet styles.
- * - `effect` — `fade` | `slide` | `scale` | `blur` | `swing`. Requires
+ * - `effect` — `fade` | `slide` | `scale` | `blur` | `bloom` | `swing`.
+ *   Requires
  *   `@magic-spells/dropdown-panel/css/effects`.
  */
 export class DropdownPanel extends HTMLElement {}

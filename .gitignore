@@ -38,3 +38,11 @@ Thumbs.db
 test-results/
 playwright-report/
 .playwright-mcp/
+
+# Sourcemaps - only `npm run dev` writes them, and only into demo/dist.
+# dist/ never gets any; the dist rule is a guard.
+dist/*.map
+demo/dist/*.map
+
+# Claude Code local settings and agent worktrees
+.claude/
