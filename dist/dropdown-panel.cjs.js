@@ -1663,3 +1663,4 @@ if (!customElements.get('dropdown-panel')) {
 exports.DropdownComponent = DropdownComponent;
 exports.DropdownPanel = DropdownPanel;
 exports.DropdownTrigger = DropdownTrigger;
+//# sourceMappingURL=dropdown-panel.cjs.js.map

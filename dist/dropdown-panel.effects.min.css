@@ -10,3 +10,4 @@ dropdown-panel[effect]{--_dp-easing:var(--dp-effect-easing,cubic-bezier(0.32,0.7
 	[data-dropdown-arrow]{transform:none}dropdown-component[arrow=static][visible]>dropdown-trigger
 	[data-dropdown-arrow]:empty{--_dp-arrow-ang:40deg}dropdown-component[arrow=none]>dropdown-trigger
 	[data-dropdown-arrow]{display:none}@media (prefers-reduced-motion:reduce){dropdown-panel[effect]{filter:none;transform:none;transition-property:opacity}[data-dropdown-arrow],[data-dropdown-arrow]:empty:after,[data-dropdown-arrow]:empty:before{transition-property:none}}
+/*# sourceMappingURL=dropdown-panel.effects.min.css.map */
