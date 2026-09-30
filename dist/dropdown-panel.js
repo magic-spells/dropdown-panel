@@ -1669,4 +1669,3 @@
 	exports.DropdownTrigger = DropdownTrigger;
 
 }));
-//# sourceMappingURL=dropdown-panel.js.map
