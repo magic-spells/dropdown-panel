@@ -43,3 +43,6 @@ playwright-report/
 # dist/ never gets any; the dist rule is a guard.
 dist/*.map
 demo/dist/*.map
+
+# Claude Code local settings and agent worktrees
+.claude/
